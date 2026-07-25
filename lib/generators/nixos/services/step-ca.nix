@@ -1,7 +1,8 @@
-{lib,...}:
+{lib, inputs, ...}:
 
 let 
   STEPPATH="/var/lib/step-ca";
+  secretLib = import ./secrets.nix {inherit lib inputs;};
   secrets = {
     "ca.json" = {
         path = "${STEPPATH}/config";
@@ -12,11 +13,11 @@ let
     "intermediate_ca_key" = {
         path = "${STEPPATH}/secrets/intermediate_ca_key";
     };
-    "intermediate_ca" = {
+    "intermediate_ca.crt" = {
         path = "${STEPPATH}/certs/intermediate_ca.crt";
         mode = "0444";
     };
-    "root_ca" = {
+    "root_ca.crt" = {
         path = "${STEPPATH}/certs/root_ca.crt";
         mode = "0444";
     };
@@ -37,7 +38,9 @@ generator = infra: vmName:
                   openFirewall = lib.mkdefault true;
                 }
                 (service.settings or {})
-              ];
+                ];
+
+              sops.secrets = secretLib.generateSecrets vmName "step-ca" ["step-ca.service"] secrets;
             };
 
 }

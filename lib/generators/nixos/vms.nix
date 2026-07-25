@@ -49,6 +49,8 @@ let
           services.openssh.enable = true;
           users.users.root.openssh.authorizedKeys.keys = infra.root_ssh_pubkeys;
 
+          sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
           networking.firewall = { #TODO
             allowedTCPPorts = [22]; # ++ generateTCPPorts vmConf.services 
             allowedUDPPorts = []; # ++ generateUDPPorts vmConf.services

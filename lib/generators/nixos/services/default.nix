@@ -1,9 +1,9 @@
-{lib,...}:
+{lib, inputs, ...}:
 
 let generators = {
       step-ca = 
         infra: vmName: vmConf: 
-          (import ./step-ca.nix {inherit lib;}).generator infra vmName;
+          (import ./step-ca.nix {inherit lib inputs;}).generator infra vmName;
     };
 
 in {

@@ -1,32 +1,24 @@
-{lib, config, inputs, ...}:
+{lib, inputs, ...}:
 
 /* Overlay of the SOPS secrets management tool */
 
 let 
     generateSecret = 
-      vmName: secretName: secret:
-        generateOwnedSecret vmName secret.owner secretName secret;
-    generateOwnedSecret  = 
-      vmName: owner: secretName: secret:
+      vmName: owner: reload: secretName: secret:
         let secretFile = "${inputs.self.outPath}/secrets/encrypted/${vmName}-${secretName}.enc";
         in {
-            sops.secrets."${secretName}" = {
               sopsFile = secretFile;
               path = secret.path;
               format = "binary";
               owner = owner;
-              restartUnits = secret.restartUnits;
-              mode = secret.mode;
-            };
-        }
+              restartUnits = reload;
+              mode = secret.mode or "400";
+           };
 
 in {
 
-  # Generate the sops options for an attrset of secrets
-  generateSecrets = vmName: secrets: lib.mkMerge (lib.mapAttrsToList (generateSecret vmName) secrets);
-
   
-  # Generate the sops options for an attrset of secrets
-  generateOwnedSecrets = vmName: owner: secrets: lib.mkMerge (lib.mapAttrsToList (generateOwnedSecret vmName owner) secrets);
+  # Generate the sops options for an attrset of secrets (same owner, same reloadUnit
+  generateSecrets = vmName: owner: reload: secrets: lib.mapAttrs (generateSecret vmName owner reload) secrets;
 
 }
