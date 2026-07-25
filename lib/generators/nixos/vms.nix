@@ -1,7 +1,7 @@
-{lib,...}:
+{inputs, lib,...}:
 
 let
-  utils = import ../utils.nix {inherit lib;};
+  utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
   generateConf = infra: vmName: vmConf: 
     {inputs, config, lib, pkgs,...}:
         {

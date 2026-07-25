@@ -33,11 +33,28 @@
 						};
 					};
       lib = nixpkgs.lib;
+      nixos-generator = (import ./lib/generators/nixos {inherit lib inputs;}).generator;
+      terranix-generator = (import ./lib/generators/terranix {inherit lib inputs;}).generator;
+
+      test-inventory = (lib.evalModules 
+                          {modules = [
+                              "${nixpkgs}/nixos/modules/misc/assertions.nix"
+                              ./modules/infra
+                              ./example.nix];}).config.infra;
     in {
       generators = {
-        nixos = (import ./lib/generators/nixos {inherit lib;}).generator;
-        terranix = (import ./lib/generators/terranix {inherit lib;}).generator;
+        nixos = nixos-generator; 
+        terranix = terranix-generator; 
       };
+      nixosConfigurations = 
+        lib.mapAttrs 
+          (vmName: vmConf: 
+            mkSystem [(nixos-generator test-inventory vmName vmConf)])
+          test-inventory.vms;
+
+      terranixConfigurations =
+        terranix-generator test-inventory;
+
     };
 
 

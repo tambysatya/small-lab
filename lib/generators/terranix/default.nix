@@ -2,9 +2,8 @@
 
 let hostlib = import ./hosts.nix {inherit lib;};
     vmlib = import ./vms.nix {inherit lib;};
-    utils = import ../utils.nix {inherit lib;};
     generateConfig = infra:
-      lib.foldl' utils.merge {} [
+      lib.mkMerge [
         {
           terraform.required_providers.libvirt = {
             source = "dmacvicar/libvirt";
