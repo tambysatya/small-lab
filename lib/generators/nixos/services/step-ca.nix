@@ -1,4 +1,4 @@
-{lib,config,...}:
+{lib,...}:
 
 let 
   STEPPATH="/var/lib/step-ca";
@@ -24,7 +24,7 @@ let
 in {
 
 generator = infra: vmName:
-            let service =  infra.vmServices.step-ca;
+            let service =  infra.services.step-ca or {};
                 ssl = service.sslIdentity;
             in {
               services.step-ca = lib.mkMerge 
@@ -36,7 +36,7 @@ generator = infra: vmName:
                   intermediatePasswordFile = "/var/lib/step-ca/ca-password";
                   openFirewall = lib.mkdefault true;
                 }
-                service.settings
+                (service.settings or {})
               ];
             };
 

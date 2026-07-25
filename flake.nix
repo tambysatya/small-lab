@@ -41,19 +41,22 @@
                               "${nixpkgs}/nixos/modules/misc/assertions.nix"
                               ./modules/infra
                               ./example.nix];}).config.infra;
+      configs = lib.mapAttrs 
+                  (vmName: vmConf: 
+                    mkSystem [(nixos-generator test-inventory vmName vmConf)])
+                  test-inventory.vms;
+
     in {
       generators = {
         nixos = nixos-generator; 
         terranix = terranix-generator; 
       };
-      nixosConfigurations = 
-        lib.mapAttrs 
-          (vmName: vmConf: 
-            mkSystem [(nixos-generator test-inventory vmName vmConf)])
-          test-inventory.vms;
+      nixosConfigurations = configs;
 
       terranixConfigurations =
         terranix-generator test-inventory;
+
+      debugModule = configs;
 
     };
 

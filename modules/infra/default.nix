@@ -1,7 +1,7 @@
 {lib, config,...}:
 
 {
-  imports = [./vms.nix];
+  imports = [./infra.nix];
 
   
   config.assertions = lib.mapAttrsToList

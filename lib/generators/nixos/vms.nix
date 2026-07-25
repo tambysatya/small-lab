@@ -2,9 +2,13 @@
 
 let
   utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+
+  services = import ./services {inherit inputs lib;};
+  serviceGenerator = services.generator;
+
   generateConf = infra: vmName: vmConf: 
     {inputs, config, lib, pkgs,...}:
-        {
+        ({
 
           imports = let path = inputs.self.outPath;
                     in ["${path}/modules/disko-vm.nix"
@@ -49,7 +53,7 @@ let
             allowedTCPPorts = [22]; # ++ generateTCPPorts vmConf.services 
             allowedUDPPorts = []; # ++ generateUDPPorts vmConf.services
           };
-  };
+      } //  (services.generator infra vmName vmConf "step-ca")); #(lib.mkMerge (lib.map (serviceName: serviceConf: serviceGenerator infra vmName vmConf serviceName) vmConf.services)));
 in {
 
   generateConf = generateConf;
