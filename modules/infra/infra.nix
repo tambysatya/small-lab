@@ -47,7 +47,7 @@ in
   /* Module configuration */
   config.infra = {
     ca = {
-      url = lib.mkDefault "ca.${config.infra.domain}";
+      url = lib.mkDefault "ca.${config.infra.domain}:8443";
     };
   };
 }

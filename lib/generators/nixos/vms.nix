@@ -1,6 +1,7 @@
 {inputs, lib,...}:
 
 let
+  path = "${inputs.self.outPath}";
   utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
 
   services = import ./services {inherit inputs lib;};
@@ -13,6 +14,7 @@ let
           imports = let path = inputs.self.outPath;
                     in ["${path}/modules/disko-vm.nix"
                         "${path}/profiles/vm.nix"
+                        "${path}/modules/step-renew"
                     ];
 
           boot.loader.systemd-boot.enable = true;
@@ -49,6 +51,10 @@ let
           services.openssh.enable = true;
           users.users.root.openssh.authorizedKeys.keys = infra.root_ssh_pubkeys;
 
+          services.step-renew  = {
+              enable = true;
+              caURL = infra.ca.url;
+          };
           sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
           networking.firewall = { #TODO

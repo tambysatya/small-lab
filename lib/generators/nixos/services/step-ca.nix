@@ -32,7 +32,7 @@ generator = infra: vmName:
               [
                 {
                   enable = true;
-                  settings = lib.mkDefault (builtins.fromJSON (builtins.readFile ../../../secrets/plain/CA/confi/ca.json));
+                  settings = lib.mkDefault (builtins.fromJSON (builtins.readFile "${inputs.self.outPath}/secrets/plain/CA/config/ca.json"));
                   address = lib.mkDefault "${vmName}.${infra.domain}";
                   intermediatePasswordFile = "/var/lib/step-ca/ca-password";
                   openFirewall = lib.mkdefault true;

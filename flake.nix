@@ -57,6 +57,13 @@
         terranix-generator test-inventory;
 
       debugModule = configs;
+			devShells.${system}.default = let pkgs = nixpkgs.legacyPackages.${system};
+							in pkgs.mkShell {
+								packages = [pkgs.sops pkgs.age pkgs.opentofu pkgs.terranix pkgs.boxes
+									    inputs.secret-provisioner.packages.${system}.default];
+
+							};
+
 
     };
 
