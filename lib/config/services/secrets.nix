@@ -5,8 +5,7 @@
 let 
     generateSecret = 
       vmName: secretName: secret:
-        generateOwnedSecret vmName secret.owner secretName secret
-  ;
+        generateOwnedSecret vmName secret.owner secretName secret;
     generateOwnedSecret  = 
       vmName: owner: secretName: secret:
         let secretFile = "${inputs.self.outPath}/secrets/encrypted/${vmName}-${secretName}.enc";
@@ -23,7 +22,11 @@ let
 
 in {
 
+  # Generate the sops options for an attrset of secrets
   generateSecrets = vmName: secrets: lib.mkMerge (lib.mapAttrsToList (generateSecret vmName) secrets);
+
+  
+  # Generate the sops options for an attrset of secrets
   generateOwnedSecrets = vmName: owner: secrets: lib.mkMerge (lib.mapAttrsToList (generateOwnedSecret vmName owner) secrets);
 
 }
