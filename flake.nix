@@ -34,9 +34,9 @@
 					};
       lib = nixpkgs.lib;
     in {
-      lib = {
-        generateNixOS = import ./lib/generators/nixos {inherit lib;}.generator;
-        generateTerranix = import ./lib/generators/terranix {inherit lib;}.generator;
+      generators = {
+        nixos = import ./lib/generators/nixos {inherit lib;}.generator;
+        terranix = import ./lib/generators/terranix {inherit lib;}.generator;
       };
     };
 
