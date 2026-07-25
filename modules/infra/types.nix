@@ -123,13 +123,26 @@ types // rec {
         };
       };
     };
-    serviceConfig = lib.types.submodule ({config,...}:{
+    serviceConfig = lib.types.submodule ({
       options = {
         settings = lib.mkOption {
             type = types.attrSet;
             description = "Service configuration (same type as the service configuration)";
         };
         
+      };
+    });
+
+    caConfig = lib.types.submodule ({
+      options = {
+        url = lib.mkOption {
+          type = types.str;
+          description = "URL of the CA authority";
+        };
+        fingerprint = lib.mkOption {
+          type = types.str;
+          description = "fingerprint of the root certificate";
+        };
       };
     });
 }

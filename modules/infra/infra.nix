@@ -1,13 +1,18 @@
-{ lib, ... }:
+{ lib, config, ... }:
 
 let
   types = import ./types.nix { inherit lib; };
 in
 {
+  /* Options definitions */
   options.infra = {
     domain = lib.mkOption {
       type = types.str;
       example = "infra.local";
+    };
+    ca = lib.mkOption {
+      type = types.caConfig;
+      description = "CA authority configuration";
     };
     dns = lib.mkOption {
       type = types.listOf types.str;
@@ -36,6 +41,13 @@ in
 
     services = lib.mkOption {
       type = types.attrsOf types.serviceConfig;
+    };
+  };
+
+  /* Module configuration */
+  config.infra = {
+    ca = {
+      url = lib.mkDefault "ca.${config.infra.domain}";
     };
   };
 }

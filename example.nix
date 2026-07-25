@@ -1,4 +1,7 @@
-{lib, ...}:
+#{lib, ...}:
+
+let lib = import <nixpks.lib>{};
+in
 {
   imports = [./modules/infra];
 
