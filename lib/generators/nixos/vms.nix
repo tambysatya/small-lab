@@ -53,6 +53,6 @@ let
 in {
 
   generateConf = generateConf;
-  #generateConfs = infra: utils.mergeAll (lib.mapAttrsToList (generateConf infra) (infra.vms));
+  generateVMs = infra: utils.mergeAll (lib.mapAttrsToList (generateConf infra) (infra.vms));
 
 }

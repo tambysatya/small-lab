@@ -17,5 +17,8 @@ let hostlib = import ./hosts.nix {inherit lib;};
 
 
 in {
-  generateConfig = generateConfig;
+
+  # generates a terranix config based on an infrastructure
+  # generator :: Infra -> Terranix
+  generator = generateConfig;
 }
