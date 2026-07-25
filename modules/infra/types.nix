@@ -123,22 +123,13 @@ types // rec {
         };
       };
     };
-    vmService = lib.types.submodule ({config,...}:{
+    serviceConfig = lib.types.submodule ({config,...}:{
       options = {
         settings = lib.mkOption {
             type = types.attrSet;
             description = "Service configuration (same type as the service configuration)";
         };
-        secrets = lib.mkOption {
-            type = types.listOf secret;
-            description = "Secrets related to this service";
-            default = [];
-        };
-        ssl = lib.mkOption {
-            type = types.listOf sslIdentity;
-            description = "List of TLS certificates handled by the service. Step will be configured to refresh them automatically.";
-            default = [];
-        };
+        
       };
     });
 }

@@ -35,7 +35,7 @@ in
     };
 
     services = lib.mkOption {
-      type = types.attrsOf types.vmService;
+      type = types.attrsOf types.serviceConfig;
     };
   };
 }
