@@ -13,25 +13,25 @@ in {
   */
      
   registerCertificate =
-    vmName: owner: serviceName:
+    infra: vmName: owner: serviceName:
       let sslCert = "/var/lib/${owner}/${serviceName}.crt";
           sslCertKey = "/var/lib/${owner}/${serviceName}.key";
-          unit = "${serviceName}.service"
+          unit = "${serviceName}.service";
           secrets = {
-                      "${serviceName}.crt" = {
+                      "${serviceName}.${infra.domain}.crt" = {
                           path = sslCert;
                       };
-                      "${serviceName}.key" = {
+                      "${serviceName}.${infra.domain}.key" = {
                           path = sslCertKey;
                       };
                     };
       in{
         sops.secrets = secretLib.generateSecrets vmName owner [unit] secrets;
-        services.step-renew.serviceName = {
+        services.step-renew.certs."${serviceName}" = {
           cert = sslCert;
-          key = sslKey;
+          key = sslCertKey;
           reload = [unit];
         };
       };
 
-};
+}

@@ -8,7 +8,7 @@ let
   serviceGenerator = services.generator;
 
   # generates the services configuration for each service deployed on the VM
-  allServicesModules = infra: vmName: vmConf: lib.map (serviceName: serviceGenerator infra vmName vmConf serviceName) vmConf.services;
+  allServicesModules = infra: vmName: vmConf: lib.map (serviceName: serviceGenerator infra vmName serviceName) vmConf.services;
 
   generateConf = infra: vmName: vmConf: 
     {inputs, config, ...}:

@@ -60,6 +60,7 @@
 			devShells.${system}.default = let pkgs = nixpkgs.legacyPackages.${system};
 							in pkgs.mkShell {
 								packages = [pkgs.sops pkgs.age pkgs.opentofu pkgs.terranix pkgs.boxes
+                            pkgs.openldap # for slappaswd
 									    inputs.secret-provisioner.packages.${system}.default];
 
 							};

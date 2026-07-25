@@ -25,8 +25,7 @@ let
 in {
 
 generator = infra: vmName:
-            let service =  infra.services.step-ca or {};
-                ssl = service.sslIdentity;
+            let settings=  infra.services.step-ca.settings or {};
             in {
               services.step-ca = lib.mkMerge 
               [
@@ -37,7 +36,7 @@ generator = infra: vmName:
                   intermediatePasswordFile = "/var/lib/step-ca/ca-password";
                   openFirewall = lib.mkdefault true;
                 }
-                (service.settings or {})
+                settings
                 ];
 
               sops.secrets = secretLib.generateSecrets vmName "step-ca" ["step-ca.service"] secrets;

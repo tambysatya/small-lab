@@ -5,7 +5,7 @@ types // rec {
 	serviceType = 
 		lib.types.enum [
 			"step-ca"
-			"ldap"
+			"openldap"
 			"keycloak"
 			"garage"
 			"postgres"

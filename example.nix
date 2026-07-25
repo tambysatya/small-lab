@@ -32,7 +32,7 @@ in
         additionalDisks = [{src="/dev/sdb"; dst="vdb"; bind = "/medias/test"; fsType="xfs";}];
 
         ipAddress = "172.31.61.200";
-        services = ["step-ca"]; # ["ldap" "keycloak" "step-ca"];
+        services = ["step-ca" "openldap"]; # ["openldap" "keycloak" "step-ca"];
       };
     };
   };

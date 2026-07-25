@@ -2,7 +2,7 @@
 
 source scripts/functions.sh
 
-DOMAIN="local.lphi.umontpellier.fr"
+DOMAIN="local.fr"
 CA_NAME="ca.$DOMAIN"
 
 
@@ -39,6 +39,10 @@ generate_secret "nextcloud-dbpass" # postgres password
 generate_secret "nextcloud-adminpass" # admin password
 generate_s3_keypair "nextcloud" # s3 API key
 
+blue "LDAP admin password"
+generate_secret "ldap-adminpass"
+cat "secrets/plain/tokens/ldap-adminpass.key" | slappasswd -s -- -h "{SSHA}" > "secrets/plain/ldap-adminpass.ssha"
+
 echo "Encrypting tokens" | boxes -d ansi
 encrypt_secret "identity" "keycloak-db"
 
@@ -58,7 +62,7 @@ encrypt_s3 "storage" "nextcloud"
 echo "Bootstraping Encrypted TLS certificates" | boxes -d ansi
 blue "Identity VM"
 generate_encrypted_certificate $DOMAIN "identity" "auth" 
-generate_encrypted_certificate $DOMAIN "identity" "ldap"
+generate_encrypted_certificate $DOMAIN "identity" "openldap"
 
 blue "Storage VM"
 generate_encrypted_certificate $DOMAIN "storage" "s3"
