@@ -7,9 +7,12 @@ let
   services = import ./services {inherit inputs lib;};
   serviceGenerator = services.generator;
 
+  # generates the services configuration for each service deployed on the VM
+  allServicesModules = infra: vmName: vmConf: lib.map (serviceName: serviceGenerator infra vmName vmConf serviceName) vmConf.services;
+
   generateConf = infra: vmName: vmConf: 
-    {inputs, config, lib, pkgs,...}:
-        ({
+    {inputs, config, ...}:
+        utils.mergeAll ([{
 
           imports = let path = inputs.self.outPath;
                     in ["${path}/modules/disko-vm.nix"
@@ -51,18 +54,27 @@ let
           services.openssh.enable = true;
           users.users.root.openssh.authorizedKeys.keys = infra.root_ssh_pubkeys;
 
+          /* Initializing step-renew */
           services.step-renew  = {
               enable = true;
               caURL = infra.ca.url;
+              caFingerprint = builtins.readFile "${path}/secrets/plain/CA/fingerprint";
           };
+
+          /* Initializing sops */
           sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
           networking.firewall = { #TODO
             allowedTCPPorts = [22]; # ++ generateTCPPorts vmConf.services 
             allowedUDPPorts = []; # ++ generateUDPPorts vmConf.services
           };
-      } //  (services.generator infra vmName vmConf "step-ca")); #(lib.mkMerge (lib.map (serviceName: serviceConf: serviceGenerator infra vmName vmConf serviceName) vmConf.services)));
+      }] 
+      ++ (allServicesModules infra vmName vmConf)
+      );
 in {
+
+  # Generates the configuration of a given VM
+  # Infra -> VMName -> VMConf -> NixOSConfig
 
   generateConf = generateConf;
   generateVMs = infra: utils.mergeAll (lib.mapAttrsToList (generateConf infra) (infra.vms));

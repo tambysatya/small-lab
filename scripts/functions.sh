@@ -126,7 +126,7 @@ generate_certificate(){
 		--san $SAN --ca-password-file $STEPPATH/ca-password \
 		--no-password --insecure 
 
-	step certificate fingerprint $STEPPATH/certs/root_ca.crt > $STEPPATH/fingerprint
+	step certificate fingerprint $STEPPATH/certs/root_ca.crt | tr -d '\n' > $STEPPATH/fingerprint # step adds a \n at the end of the line
 }
 
 generate_encrypted_certificate(){
