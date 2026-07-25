@@ -43,6 +43,7 @@ let
             nameservers = infra.dns;
           };
 
+          /* Mounts additional disks */
           fileSystems = utils.mergeAll (lib.map 
                           (disk: {
                                   "${disk.bind}" = {
@@ -54,14 +55,14 @@ let
           services.openssh.enable = true;
           users.users.root.openssh.authorizedKeys.keys = infra.root_ssh_pubkeys;
 
-          /* Initializing step-renew */
+          /* Initializes step-renew */
           services.step-renew  = {
               enable = true;
               caURL = infra.ca.url;
-              caFingerprint = builtins.readFile "${path}/secrets/plain/CA/fingerprint";
+              caFingerprint = builtins.readFile "${path}/secrets/plain/CA/fingerprint"; # the fingerprint is also generated with the bootstrap script
           };
 
-          /* Initializing sops */
+          /* Initializes sops */
           sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
           networking.firewall = { #TODO
