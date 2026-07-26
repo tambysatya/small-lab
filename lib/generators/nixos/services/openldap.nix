@@ -17,7 +17,7 @@ in {
             suffix = domainToLdapSuffix infra.domain;
         in 
         {
-          imports = [(certlib.registerCertificate infra vmName "openldap" "openldap")];
+          imports = [(certlib.generateCertificates infra vmName "openldap" "openldap.service" "openldap.${infra.domain}")];
           services.openldap = {
             enable = true;
 

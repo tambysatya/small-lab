@@ -5,34 +5,34 @@
 {
 
   /* Generates the secret and the auto-refresh service for a given certificate.
-     registerCertificate : vmName -> owner -> serviceName -> NixosConfig
+     registerCertificate : vmName -> owner -> serviceUnit -> NixosConfig
 
-     - the secret will be stored in /var/lib/owner/serviceName.{crt,key}
-     - the reload units are set to [ "serviceName.service" ]
+     - the encrypted secret must have name certName.{crt,key}.enc
+     - the secret will be stored in /var/lib/owner/certName.{crt,key}
+     - the reload units are set to [ serviceUnit ]
   */
      
-  registerCertificate =
-    infra: vmName: owner: serviceName:
-      {inputs,...}:
+  generateCertificates =
+    infra: vmName: owner: serviceUnit: certName:
+      {inputs,config,...}:
         let 
+            basepath = "/var/lib/${owner}/${certName}";
             secretlib = import ./secrets.nix {inherit inputs lib;}; 
-            sslCert = "/var/lib/${owner}/${serviceName}.crt";
-            sslCertKey = "/var/lib/${owner}/${serviceName}.key";
-            unit = "${serviceName}.service";
+            unit = serviceUnit;
             secrets = {
-                        "${serviceName}.${infra.domain}.crt" = {
-                            path = sslCert;
+                        "${certName}.crt" = {
+                            path = config.services.step-renew.certs."${certName}".cert;
                         };
-                        "${serviceName}.${infra.domain}.key" = {
-                            path = sslCertKey;
+                        "${certName}.key" = {
+                            path = config.services.step-renew.certs."${certName}".key;
                         };
                       };
         in{
           imports = [(secretlib.generateSecrets vmName owner [unit] secrets)];
-          services.step-renew.certs."${serviceName}" = {
-            cert = sslCert;
-            key = sslCertKey;
-            reload = [unit];
+          services.step-renew.certs."${certName}" = {
+            cert = "${basepath}.crt";
+            key = "${basepath}.key";
+            reload = [serviceUnit];
           };
         };
 
