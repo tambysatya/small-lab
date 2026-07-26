@@ -17,9 +17,10 @@ let
                     in ["${path}/modules/disko-vm.nix"
                         "${path}/profiles/vm.nix"
                         "${path}/modules/step-renew"
+                        (serviceGenerator infra vmName "step-ca")
                     ];
-          config = lib.mkMerge ([
-            {
+                    # ++ (allServicesModules infra vmName vmConf);
+
               boot.loader.systemd-boot.enable = true;
               boot.loader.efi.canTouchEfiVariables = true;
               time.timeZone = "Europe/Paris";
@@ -69,16 +70,12 @@ let
                 allowedTCPPorts = [22]; # ++ generateTCPPorts vmConf.services 
                 allowedUDPPorts = []; # ++ generateUDPPorts vmConf.services
               };
-          }] ++ 
-          (allServicesModules infra vmName vmConf)
-        );
-      };
+        };  
 in {
 
   # Generates the configuration of a given VM
-  # Infra -> VMName -> VMConf -> NixOSConfig
+  # Infra -> VMName -> VMConf -> NixOSModule
 
   generateConf = generateConf;
-  generateVMs = infra: utils.mergeAll (lib.mapAttrsToList (generateConf infra) (infra.vms));
 
 }

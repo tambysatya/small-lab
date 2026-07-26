@@ -2,7 +2,7 @@
 
 let 
   STEPPATH="/var/lib/step-ca";
-  secretLib = import ./secrets.nix {inherit lib inputs;};
+  secretlib = import ./secrets.nix {inherit lib;};
   secrets = {
     "ca.json" = {
         path = "${STEPPATH}/config";
@@ -24,22 +24,23 @@ let
   };
 in {
 
-generator = infra: vmName:
-            let settings=  infra.services.step-ca.settings or {};
-            in {
-              services.step-ca = lib.mkMerge 
-              [
-                {
-                  enable = true;
-                  settings = lib.mkDefault (builtins.fromJSON (builtins.readFile "${inputs.self.outPath}/secrets/plain/CA/config/ca.json"));
-                  address = lib.mkDefault "${vmName}.${infra.domain}";
-                  intermediatePasswordFile = "/var/lib/step-ca/ca-password";
-                  openFirewall = lib.mkdefault true;
-                }
-                settings
-                ];
+  generator = infra: vmName:
+              {inputs, ...}:
+                let settings =  infra.services.step-ca.settings or {};
+                in {
 
-              sops.secrets = secretLib.generateSecrets vmName "step-ca" ["step-ca.service"] secrets;
-            };
+                  imports = [(secretlib.generateSecrets vmName "step-ca" ["step-ca.service"] secrets)];
+                  services.step-ca = lib.mkMerge 
+                    [
+                      {
+                        enable = true;
+                        settings = lib.mkDefault (builtins.fromJSON (builtins.readFile "${inputs.self.outPath}/secrets/plain/CA/config/ca.json"));
+                        address = lib.mkDefault "${vmName}.${infra.domain}";
+                        intermediatePasswordFile = "/var/lib/step-ca/ca-password";
+                        openFirewall = lib.mkdefault true;
+                      }
+                      settings
+                      ];
+                };
 
 }

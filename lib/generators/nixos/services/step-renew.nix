@@ -1,4 +1,4 @@
-{inputs, lib, ...}:
+{lib, ...}:
 
 
 let secretLib = import ./secrets.nix {inherit inputs lib;}; 
@@ -14,24 +14,25 @@ in {
      
   registerCertificate =
     infra: vmName: owner: serviceName:
-      let sslCert = "/var/lib/${owner}/${serviceName}.crt";
-          sslCertKey = "/var/lib/${owner}/${serviceName}.key";
-          unit = "${serviceName}.service";
-          secrets = {
-                      "${serviceName}.${infra.domain}.crt" = {
-                          path = sslCert;
+      {inputs,...}:
+        let sslCert = "/var/lib/${owner}/${serviceName}.crt";
+            sslCertKey = "/var/lib/${owner}/${serviceName}.key";
+            unit = "${serviceName}.service";
+            secrets = {
+                        "${serviceName}.${infra.domain}.crt" = {
+                            path = sslCert;
+                        };
+                        "${serviceName}.${infra.domain}.key" = {
+                            path = sslCertKey;
+                        };
                       };
-                      "${serviceName}.${infra.domain}.key" = {
-                          path = sslCertKey;
-                      };
-                    };
-      in{
-        sops.secrets = secretLib.generateSecrets vmName owner [unit] secrets;
-        services.step-renew.certs."${serviceName}" = {
-          cert = sslCert;
-          key = sslCertKey;
-          reload = [unit];
+        in{
+          imports = [secretLib.generateSecrets vmName owner [unit] secrets];
+          services.step-renew.certs."${serviceName}" = {
+            cert = sslCert;
+            key = sslCertKey;
+            reload = [unit];
+          };
         };
-      };
 
 }
