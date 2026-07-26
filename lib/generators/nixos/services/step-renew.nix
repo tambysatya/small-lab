@@ -1,9 +1,8 @@
 {lib, ...}:
 
 
-let secretLib = import ./secrets.nix {inherit inputs lib;}; 
 
-in {
+{
 
   /* Generates the secret and the auto-refresh service for a given certificate.
      registerCertificate : vmName -> owner -> serviceName -> NixosConfig
@@ -15,7 +14,9 @@ in {
   registerCertificate =
     infra: vmName: owner: serviceName:
       {inputs,...}:
-        let sslCert = "/var/lib/${owner}/${serviceName}.crt";
+        let 
+            secretlib = import ./secrets.nix {inherit inputs lib;}; 
+            sslCert = "/var/lib/${owner}/${serviceName}.crt";
             sslCertKey = "/var/lib/${owner}/${serviceName}.key";
             unit = "${serviceName}.service";
             secrets = {
@@ -27,7 +28,7 @@ in {
                         };
                       };
         in{
-          imports = [secretLib.generateSecrets vmName owner [unit] secrets];
+          imports = [(secretlib.generateSecrets vmName owner [unit] secrets)];
           services.step-renew.certs."${serviceName}" = {
             cert = sslCert;
             key = sslCertKey;

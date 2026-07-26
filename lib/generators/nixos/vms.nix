@@ -17,9 +17,8 @@ let
                     in ["${path}/modules/disko-vm.nix"
                         "${path}/profiles/vm.nix"
                         "${path}/modules/step-renew"
-                        (serviceGenerator infra vmName "step-ca")
-                    ];
-                    # ++ (allServicesModules infra vmName vmConf);
+                    ]
+                    ++ (allServicesModules infra vmName vmConf);
 
               boot.loader.systemd-boot.enable = true;
               boot.loader.efi.canTouchEfiVariables = true;
