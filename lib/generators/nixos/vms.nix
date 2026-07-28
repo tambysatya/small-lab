@@ -4,21 +4,24 @@ let
   path = "${inputs.self.outPath}";
   utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
 
-  services = import ./services {inherit inputs lib;};
-  serviceGenerator = services.generator;
-
-  # generates the services configuration for each service deployed on the VM
-  allServicesModules = infra: vmName: vmConf: lib.map (serviceName: serviceGenerator infra vmName serviceName) vmConf.services;
-
-  generateConf = infra: vmName: vmConf: 
-    {inputs, config, ...}:
+  generateConf = 
+    {infra, vmname, vmconf, inputs, config, ...}:
       {
           imports = let path = inputs.self.outPath;
-                    in ["${path}/modules/disko-vm.nix"
+                    in [
+                        inputs.sops-nix.nixosModules.sops
+                        "${path}/modules/infra"
+                        "${path}/modules/infra-services"
+                        "${path}/modules/disko-vm.nix"
                         "${path}/profiles/vm.nix"
                         "${path}/modules/step-renew"
-                    ]
-                    ++ (allServicesModules infra vmName vmConf);
+                        "${path}/modules/step-ca.nix"
+                        "${path}/modules/openldap.nix"
+                        "${path}/modules/keycloak.nix"
+                        "${path}/modules/garage.nix"
+                        "${path}/modules/postgres.nix"
+                    ];
+
 
               boot.loader.systemd-boot.enable = true;
               boot.loader.efi.canTouchEfiVariables = true;
@@ -28,12 +31,12 @@ let
 
 
               networking = {
-                hostName = vmName;
+                hostName = vmname;
                 interfaces.enp1s0 = {
                   useDHCP = false;
                   ipv4 = {
                     addresses = [
-                      {address = vmConf.ipAddress; prefixLength = 24;}
+                      {address = vmconf.ipAddress; prefixLength = 24;}
                     ];
                     routes = [
                       {address = "0.0.0.0"; via = infra.gateway; prefixLength = 0;}
@@ -51,7 +54,7 @@ let
                                           fsType = disk.fsType;
                                           options = disk.options;
                                       };
-                                }) vmConf.additionalDisks);
+                                }) vmconf.additionalDisks);
               services.openssh.enable = true;
               users.users.root.openssh.authorizedKeys.keys = infra.root_ssh_pubkeys;
 
@@ -62,12 +65,10 @@ let
                   caFingerprint = builtins.readFile "${path}/secrets/plain/CA/fingerprint"; # the fingerprint is also generated with the bootstrap script
               };
 
-              /* Initializes sops */
-              sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
               networking.firewall = { #TODO
-                allowedTCPPorts = [22]; # ++ generateTCPPorts vmConf.services 
-                allowedUDPPorts = []; # ++ generateUDPPorts vmConf.services
+                allowedTCPPorts = [22]; # ++ generateTCPPorts vmconf.services 
+                allowedUDPPorts = []; # ++ generateUDPPorts vmconf.services
               };
         };  
 in {

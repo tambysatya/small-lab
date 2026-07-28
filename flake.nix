@@ -21,43 +21,74 @@
 	};
 
   outputs = inputs@{nixpkgs,...}:
+
     let
-			system = "x86_64-linux";
-			mkSystem = modules: 
-					nixpkgs.lib.nixosSystem 
-					{
-						system = system;
-						inherit modules;
-						specialArgs = {
-							inherit inputs; 
-						};
-					};
+    system = "x86_64-linux";
+    mkSystem = infra: registry: vmname: vmconf: modules: 
+            nixpkgs.lib.nixosSystem 
+            {
+                system = system;
+                inherit modules;
+                specialArgs = {
+                    inherit inputs infra vmname vmconf; 
+                };
+            };
       lib = nixpkgs.lib;
       nixos-generator = (import ./lib/generators/nixos {inherit lib inputs;}).generator;
       terranix-generator = (import ./lib/generators/terranix {inherit lib inputs;}).generator;
 
-      test-inventory = (lib.evalModules 
+      infra-config = (lib.evalModules 
                           {modules = [
                               "${nixpkgs}/nixos/modules/misc/assertions.nix"
                               ./modules/infra
-                              ./example.nix];}).config.infra;
+                              ./example.nix];}).config;
+      infra = infra-config.infra;
+
+      registry = lib.foldl' 
+                    lib.recursiveUpdate
+                    {}
+                    (lib.mapAttrsToList 
+                        (vmname: vmconf: 
+                            (nixpkgs.lib.nixosSystem {
+                                    inherit system;
+                                    specialArgs = {inherit inputs lib infra vmname vmconf;};
+                                    modules = [
+                                        ./modules/infra-services
+                                        ./modules/garage.nix
+                                        ./modules/keycloak.nix
+                                        ./modules/openldap.nix
+                                        ./modules/postgres.nix
+                                        ./modules/step-ca.nix
+
+                                        ./modules/step-renew
+                                    ];
+                                }).config.infra-services.registry)
+                        infra.vms);
+                            
       configs = lib.mapAttrs 
-                  (vmName: vmConf: 
-                    mkSystem [(nixos-generator test-inventory vmName vmConf)])
-                  test-inventory.vms;
+                  (vmname: vmconf: 
+                    mkSystem 
+                        infra 
+                        registry 
+                        vmname vmconf 
+                        [ 
+                            infra-config
+                            # modules/infra-services/lib/processRegisters.nix
+                        ])
+                    infra.vms;
 
     in {
       generators = {
         nixos = nixos-generator; 
         terranix = terranix-generator; 
       };
-      nixosConfigurations = configs;
+      nixosConfigurations = registry;
 
       terranixConfigurations =
-        terranix-generator test-inventory;
+        terranix-generator infra-config.infra;
 
-      debugModule = configs;
-			devShells.${system}.default = let pkgs = nixpkgs.legacyPackages.${system};
+      debugModule = registry;
+      devShells.${system}.default = let pkgs = nixpkgs.legacyPackages.${system};
 							in pkgs.mkShell {
 								packages = [pkgs.sops pkgs.age pkgs.opentofu pkgs.terranix pkgs.boxes
                             pkgs.openldap # for slappaswd

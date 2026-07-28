@@ -6,6 +6,7 @@ in
   imports = [./modules/infra];
 
   config.infra = {
+    caURL = "ca.local.fr";
     domain = "local.fr";
     dns = ["8.8.8.8"];
     gateway = "172.31.61.1";
@@ -29,43 +30,29 @@ in
         host = "cpuhost1";
         vcpu = 4;
         memory = 4096;
+        ipAddress = "172.31.61.200";
+        services = ["keycloak" "step-ca" "openldap"];
+      };
+      storage = {
+        host = "cpuhost1";
+        vcpu = 4;
+        memory = 4096;
         additionalDisks = [{src="/dev/sdb"; dst="vdb"; bind = "/medias/test"; fsType="xfs";}];
 
-        ipAddress = "172.31.61.200";
-        services = ["step-ca" "openldap"]; # ["openldap" "keycloak" "step-ca"];
-        #services = ["step-ca"];
+        ipAddress = "172.31.61.201";
+        services = ["garage"]; 
+      };
+      postgres = {
+        host = "cpuhost1";
+        vcpu = 4;
+        memory = 4096;
+        additionalDisks = [{src="/dev/sdb"; dst="vdb"; bind = "/medias/test"; fsType="xfs";}];
+
+        ipAddress = "172.31.61.202";
+        services = ["postgres"]; 
       };
     };
   };
 
 }
 
-
-/*
-   {
-
-   infra = {
-   domain = "local.lphi.umontpellier.fr";
-   dns = [...];
-
-   admins = {
-   sat = "ssh...";
-   rudy = "ssh...",
-   };
-   vms = {
-   identity = {
-   host_ip = "...";
-   ip = "...";
-   services = ["ldap" "keycloak"];
-   };
-   };
-
-   services = {
-   step-ca = {
-
-   };
-   };
-   }
-
-   }
- */

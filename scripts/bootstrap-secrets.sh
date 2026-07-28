@@ -35,8 +35,8 @@ generate_secret "garage-admin" #admin token
 generate_secret "garage-metrics" #metrics token
 
 blue "Nextcloud (POSTGRES password, admin password and S3 keypair "
-generate_secret "nextcloud-dbpass" # postgres password
-generate_secret "nextcloud-adminpass" # admin password
+generate_secret "nextcloud-db" # postgres password
+generate_secret "nextcloud-admin" # admin password
 generate_s3_keypair "nextcloud" # s3 API key
 
 blue "LDAP admin password"
@@ -50,10 +50,10 @@ encrypt_secret "storage" "garage-rpc"
 encrypt_secret "storage" "garage-admin"
 encrypt_secret "storage" "garage-metrics"
 
-encrypt_secret "postgres" "nextcloud-dbpass"
-encrypt_secret "apps" "nextcloud-dbpass"
+encrypt_secret "postgres" "nextcloud-db"
+encrypt_secret "apps" "nextcloud-db"
 
-encrypt_secret "apps" "nextcloud-adminpass"
+encrypt_secret "apps" "nextcloud-admin"
 encrypt_s3 "apps" "nextcloud"
 encrypt_s3 "storage" "nextcloud"
 

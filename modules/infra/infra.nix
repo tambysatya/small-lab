@@ -6,14 +6,15 @@ in
 {
   /* Options definitions */
   options.infra = {
+    caURL = lib.mkOption {
+        description = "URL of the CA"; #TODO can be conflictng with the JSON conf
+        type = types.str;
+    };
     domain = lib.mkOption {
       type = types.str;
       example = "infra.local";
     };
-    ca = lib.mkOption {
-      type = types.caConfig;
-      description = "CA authority configuration";
-    };
+
     dns = lib.mkOption {
       type = types.listOf types.str;
       example = ["8.8.8.8" "8.8.4.4"];
@@ -38,16 +39,6 @@ in
     vms = lib.mkOption {
       type = types.attrsOf types.vmConf;
     };
-
-    services = lib.mkOption {
-      type = types.attrsOf types.serviceConfig;
-    };
   };
 
-  /* Module configuration */
-  config.infra = {
-    ca = {
-      url = lib.mkDefault "ca.${config.infra.domain}:8443";
-    };
-  };
 }
