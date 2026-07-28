@@ -2,5 +2,5 @@
 {
     imports = [
                ./options.nix
-               ./baremetal.nix];    
+              ];    
 }

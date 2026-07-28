@@ -1,7 +1,7 @@
 {lib, inputs, infra, vmname, vmconf,...}:
 
 let 
-  reg = import ./infra-services/lib/register.nix {inherit lib inputs infra vmname;};
+  reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname;};
   STEPPATH="/var/lib/step-ca";
   secrets = {
     "ca.json" = {
@@ -22,23 +22,13 @@ let
         mode = "0444";
     };
   };
-in {
-
+in
+{
     config = lib.mkIf 
                 (builtins.elem "step-ca" vmconf.services) 
                 (lib.mkMerge [
                     (reg.registerSecrets "step-ca" "step-ca" ["step-ca.service"] secrets)
-                    {
-                        services.step-ca = {
-                            enable = true;
-                            address = "identity.local.lphi.umontpellier.fr";
-                            port = 8443;
-                            openFirewall = false;
-                            intermediatePasswordFile = "/var/lib/step-ca/password";
-                            settings = builtins.fromJSON (builtins.readFile ../secrets/plain/CA/config/ca.json); 
-                        };
-                    }
                 ]);
-                
-        
+                    
 }
+

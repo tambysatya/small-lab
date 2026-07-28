@@ -1,10 +1,70 @@
+{lib, infra, registry, vmname, vmconf, inputs, config, ...}:
 
+let
+  path = "${inputs.self.outPath}";
+  utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
 
-/* Standard configuration shared by all VMs */
-
+in 
 {
-	imports = [ ./default.nix 
-		   ../modules/console.nix # allows connections from the host using virsh console
-                  ];
-	services.qemuGuest.enable = true;
+
+imports = let path = inputs.self.outPath;
+            in [
+                inputs.sops-nix.nixosModules.sops
+                "${path}/profiles/base.nix"
+
+                "${path}/modules/step-renew"
+                "${path}/modules/step-ca"
+                "${path}/modules/openldap"
+                "${path}/modules/keycloak"
+                "${path}/modules/garage"
+                "${path}/modules/postgres"
+
+                "${path}/modules/registry/baremetal.nix"
+
+            ];
+
+
+config = {
+     
+              boot.loader.systemd-boot.enable = true;
+              boot.loader.efi.canTouchEfiVariables = true;
+              time.timeZone = "Europe/Paris";
+              i18n.defaultLocale = "fr_FR.UTF-8";
+
+
+
+              networking = {
+                hostName = vmname;
+                interfaces.enp1s0 = {
+                  useDHCP = false;
+                  ipv4 = {
+                    addresses = [
+                      {address = vmconf.ipAddress; prefixLength = 24;}
+                    ];
+                    routes = [
+                      {address = "0.0.0.0"; via = infra.gateway; prefixLength = 0;}
+                    ];
+                  };
+                };
+                nameservers = infra.dns;
+              };
+
+              /* Mounts additional disks */
+              fileSystems = utils.mergeAll (lib.map 
+                              (disk: {
+                                      "${disk.bind}" = {
+                                          device = "/dev/${disk.dst}";   
+                                          fsType = disk.fsType;
+                                          options = disk.options;
+                                      };
+                                }) vmconf.additionalDisks);
+              services.openssh.enable = true;
+              users.users.root.openssh.authorizedKeys.keys = infra.root_ssh_pubkeys;
+
+
+              networking.firewall = { #TODO
+                allowedTCPPorts = [22]; # ++ generateTCPPorts vmconf.services 
+                allowedUDPPorts = []; # ++ generateUDPPorts vmconf.services
+              };
+        };  
 }

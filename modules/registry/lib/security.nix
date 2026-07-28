@@ -8,7 +8,7 @@ let
     # Generate the sops options for an attrset of secrets (same owner, same reloadUnit
 
     generateSecret = 
-      servicename: owner: reload: secretname: secret:
+      servicename: secretname: secret:
           let secretFile = "${inputs.self.outPath}/secrets/encrypted/${vmname}-${secretname}.enc";
           in lib.mkMerge [
           {
@@ -16,16 +16,16 @@ let
             sops.age.keyFile = "/var/lib/sops-nix/key.txt";
             sops.secrets."${secretname}" = {
                 sopsFile = secretFile;
-                path = secret.path;
+                path = secret.path or "/run/secrets/${secretname}";
                 format = "binary";
-                owner = owner;
-                restartUnits = reload;
+                owner = secret.owner or "root";
+                restartUnits = secret.reload;
                 mode = secret.mode or "400";
              };
           }
          ];
-    generateSecrets = servicename: owner: reload: secrets: 
-                            lib.mkMerge (lib.mapAttrsToList (generateSecret servicename owner reload) secrets);
+    generateSecrets = servicename: secrets: 
+                            lib.mkMerge (lib.mapAttrsToList (generateSecret servicename) secrets);
 
    /* Generates the secret and the auto-refresh service for a given certificate.
       registerCertificate : vmname -> owner -> serviceunit -> NixosConfig
@@ -39,38 +39,22 @@ let
     */
 
     generateCertificate =
-       servicename: owner: serviceunit: certname:
-          let 
-              basepath = "/var/lib/${owner}/${certname}";
-              secrets = {
-                          "${certname}.crt" = {
-                              path = "${basepath}.crt";
-                          };
-                          "${certname}.key" = {
-                              path = "${basepath}.key";
-                          };
-                        };
-          in lib.mkMerge [
+       servicename: certname: sslcert:
+          lib.mkMerge [
           {
                 services.step-renew = {
                     enable = true;
                     caURL = "ca.${infra.domain}";
                     caFingerprint = builtins.readFile "${inputs.self.outPath}/secrets/plain/CA/fingerprint";
-                    certs."${certname}" = {
-                      cert = "${basepath}.crt";
-                      key = "${basepath}.key";
-                      reload = [serviceunit];
-                      };
+                    certs."${certname}" = sslcert;
                 };
-           }
-           (generateSecrets servicename owner [serviceunit] secrets)];
+           }];
 
     generateReverseProxy =
         fronthost: backhost: 
         let
 
         in lib.mkMerge [
-            (generateCertificate "nginx" "nginx" "nginx.service" fronthost)
             {
                 services.nginx = {
                     enable = true;
@@ -97,5 +81,5 @@ let
             ];
 
 in {
-    inherit generateSecrets generateCertificate generateReverseProxy;
+    inherit generateSecret generateCertificate generateReverseProxy;
 }

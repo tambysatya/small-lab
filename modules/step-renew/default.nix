@@ -1,6 +1,7 @@
 { lib, ... }:
 
-{
+let customtypes = import ../../lib/types.nix {inherit lib;};
+in {
   imports = [
     ./bootstrap.nix # bootstrap step-ca at the first launch
     ./renew.nix
@@ -28,24 +29,7 @@
 
     certs = lib.mkOption {
       default = {};
-      type = lib.types.attrsOf (lib.types.submodule {
-        options = {
-
-          cert = lib.mkOption {
-            type = lib.types.path;
-          };
-
-          key = lib.mkOption {
-            type = lib.types.path;
-          };
-
-          reload = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [ ];
-          };
-
-        };
-      });
+      type = lib.types.attrsOf customtypes.sslCertificate;
     };
   };
 }
