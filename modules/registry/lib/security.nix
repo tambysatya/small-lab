@@ -9,7 +9,7 @@ let
 
     generateSecret = 
       servicename: secretname: secret:
-          let secretFile = "${inputs.self.outPath}/secrets/encrypted/${vmname}-${secretname}.enc";
+          let secretFile = "${infra.secrets-path}/secrets/encrypted/${vmname}-${secretname}.enc";
           in lib.mkMerge [
           {
 
@@ -43,7 +43,7 @@ let
                 services.step-renew = {
                     enable = true;
                     caURL = "ca.${infra.domain}";
-                    caFingerprint = builtins.readFile "${inputs.self.outPath}/secrets/plain/CA/fingerprint";
+                    caFingerprint = builtins.readFile "${infra.secrets-path}/secrets/plain/CA/fingerprint";
                     certs."${certname}" = sslcert;
                 };
            }];
