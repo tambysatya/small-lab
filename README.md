@@ -20,5 +20,5 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 
 - containers lib: maybe, instead of defining the reverse proxys IN each service module, define a function that browses the services/containers of each VM and generates the reverse proxies. This would allow the possibility to transparently choose if a service should be containerized or not.
 
-- initialize the database password from the provisioning machine (in order to avoid storing all the passwords on the database/S3 servers) (how to maintain it declaratively ?)
+- initialize the database password from the provisioning machine (in order to avoid storing all the passwords on the database/S3 servers) (how to maintain it declaratively ?) TODO
 

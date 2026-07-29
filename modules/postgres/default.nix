@@ -27,8 +27,9 @@ let sec = import ../registry/lib/security.nix {inherit inputs lib vmconf vmname 
 
 in {
 
-    config = lib.mkMerge [
-        # (lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "postgres") (lib.foldl' lib.recursiveUpdate {} secrets))) # generates the secrets for each service
+    config = lib.mkIf (builtins.elem "postgres" vmconf.services)
+        (lib.mkMerge [
+         (lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "postgres") (lib.foldl' lib.recursiveUpdate {} secrets))) # generates the secrets for each service
         {  
             networking.firewall.allowedTCPPorts = [5432];
             services.postgresql = {
@@ -50,7 +51,6 @@ in {
                     ssl_ca_file = "/etc/root_ca.crt";
                 };
             };
-            /*
             systemd.services.postgresql-password = {
                 description = "Configure PostgreSQL passwords and permissions";
 
@@ -74,8 +74,7 @@ in {
 
                 };
             };
-            */
         }
-    ];
+    ]);
 
 }

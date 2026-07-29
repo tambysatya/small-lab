@@ -54,12 +54,12 @@ let
     registerDBAccess = servicename: secretowner: access:
         let secret = {
                path = "/run/secrets/${servicename}-${access.table}db.key";
-               owner = access.role;
+               owner = secretowner;
                reload = access.serviceUnits;
 
             };
         in lib.mkMerge [
-            (registerSecret secretowner "${servicename}-db.key" secret)
+            (registerSecret servicename "${servicename}-${access.table}-db.key" secret)
             {
                 infra-services.registry.vms."${vmname}".use-db = [servicename];
                 infra-services.registry.services."${servicename}".dbAccesses = [access];
@@ -69,7 +69,7 @@ let
         let secrets =  {
             "${servicename}-s3-id.key" = {
                    path = "/run/secrets/${servicename}-s3-id.key";
-                   owner = access.role;
+                   owner = secretowner;
                    reload = access.serviceUnits;
 
                 };
