@@ -27,7 +27,7 @@ encrypt_CA "identity"
 
 echo "Bootstraping tokens " | boxes -d ansi
 blue "Keycloak (database password)"
-generate_secret "keycloak-db" 
+generate_secret "keycloak-keycloak-db" 
 
 blue "Garage (RPC secret, admin token and metrics token)"
 generate_secret "garage-rpc" #rpc-secret
@@ -35,7 +35,7 @@ generate_secret "garage-admin" #admin token
 generate_secret "garage-metrics" #metrics token
 
 blue "Nextcloud (POSTGRES password, admin password and S3 keypair "
-generate_secret "nextcloud-db" # postgres password
+generate_secret "nextcloud-nextcloud-db" # postgres password
 generate_secret "nextcloud-admin" # admin password
 generate_s3_keypair "nextcloud" # s3 API key
 
@@ -44,14 +44,15 @@ generate_secret "ldap-adminpass"
 cat "secrets/plain/tokens/ldap-adminpass.key" | slappasswd -s -- -h "{SSHA}" > "secrets/plain/ldap-adminpass.ssha"
 
 echo "Encrypting tokens" | boxes -d ansi
-encrypt_secret "identity" "keycloak-db"
+encrypt_secret "identity" "keycloak-keycloak-db"
+encrypt_secret "postgres" "keycloak-keycloak-db"
 
 encrypt_secret "storage" "garage-rpc"
 encrypt_secret "storage" "garage-admin"
 encrypt_secret "storage" "garage-metrics"
 
-encrypt_secret "postgres" "nextcloud-db"
-encrypt_secret "apps" "nextcloud-db"
+encrypt_secret "postgres" "nextcloud-nextcloud-db"
+encrypt_secret "apps" "nextcloud-nextcloud-db"
 
 encrypt_secret "apps" "nextcloud-admin"
 encrypt_s3 "apps" "nextcloud"

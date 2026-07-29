@@ -24,8 +24,6 @@ let
              };
           }
          ];
-    generateSecrets = servicename: secrets: 
-                            lib.mkMerge (lib.mapAttrsToList (generateSecret servicename) secrets);
 
    /* Generates the secret and the auto-refresh service for a given certificate.
       registerCertificate : vmname -> owner -> serviceunit -> NixosConfig

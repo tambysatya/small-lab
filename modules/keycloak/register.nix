@@ -10,7 +10,8 @@ in
 {
    config = lib.mkIf (builtins.elem "keycloak" vmconf.services)
                      (lib.mkMerge [
-                         (reg.registerDBAccess "keycloak" {role = "keycloak"; table="keycloak"; serviceUnits = ["keycloak.service"];})
+                         (reg.registerDBAccess "keycloak" "root" 
+                                {role = "keycloak"; table="keycloak"; serviceUnits = ["keycloak.service"];})
                          (reg.registerEndpoints "keycloak" [{host=servicevhost; port=serviceport;}])]);
 }
 
