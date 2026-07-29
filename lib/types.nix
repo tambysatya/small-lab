@@ -52,5 +52,33 @@ in
                 };
             };
         };
+        dbAccess = types.submodule {
+            options = {
+                role = lib.mkOption {
+                    description = "Role / User of the table";
+                    type = types.str;
+                };
+                serviceUnits = lib.mkOption {
+                    description = "Services that requires the database. A dependency service will be created.";
+                    type = types.listOf types.str;
+                    default = [];
+                };
+            };
+        };
+        s3Access = types.submodule {
+            options = {
+                keyID = lib.mkOption {
+                    description = "Identifier of the key";
+                    type = types.str;
+                };
+                serviceUnits = lib.mkOption {
+                    description = "Services that requires the database. A dependency service will be created.";
+                    type = types.listOf types.str;
+                    default = [];
+                };
+            };
+        };
+
+
 
 }

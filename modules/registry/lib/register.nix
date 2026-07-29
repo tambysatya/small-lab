@@ -5,7 +5,7 @@
 let 
     registerSecret = servicename: secretname: secret: {
         infra-services.enable = true;
-        infra-services.registry."${servicename}".secrets."${secretname}" = secret; 
+        infra-services.registry.services."${servicename}".secrets."${secretname}" = secret; 
     };
     registerSecrets = servicename: owner: reload: secrets:
         lib.mkMerge 
@@ -28,7 +28,7 @@ let
                     })
                 {
                     infra-services.enable = true;
-                    infra-services.registry."${servicename}".sslCertificates."${vhost}" = {
+                    infra-services.registry.services."${servicename}".sslCertificates."${vhost}" = {
                         cert = "/var/lib/${owner}/${vhost}.crt";
                         key = "/var/lib/${owner}/${vhost}.key";
                         reload = reload;
@@ -41,7 +41,7 @@ let
         lib.mkMerge [
             {
                 infra-services.enable = true;
-                infra-services.registry."${servicename}".endpoints = endpoints;
+                infra-services.registry.services."${servicename}".endpoints = endpoints;
             }
             #registers SSL certificates for each endpoints asking for HTTPS reverse proxy
             (lib.mkMerge 

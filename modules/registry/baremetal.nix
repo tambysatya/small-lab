@@ -32,7 +32,7 @@ let
 in{
    config = let 
                 vmservices = infra.vms."${vmname}".services;
-                configuredservices = lib.filterAttrs (srv: _: builtins.elem srv vmservices) registry;
+                configuredservices = lib.filterAttrs (srv: _: builtins.elem srv vmservices) registry.services;
                 #configuredservices = lib.filter (srv: builtins.hasAttr srv registry) vmservices;
                 _ = builtins.seq registry null;
             #in lib.mkIf cfg.enable (builtins.seq configuredservices {});

@@ -1,9 +1,10 @@
 {lib,...}:
-let inherit (lib) types;
-    customtypes = import ../../lib/types.nix {inherit lib;};
+let libtypes = lib.types;
+    customtypes = import ../../../../lib/types.nix {inherit lib;};
+    types = libtypes // customtypes;
     
 in
-types // customtypes // rec {
+{
     serviceConfig = lib.types.submodule {
       options = {
         settings = lib.mkOption {
@@ -35,20 +36,25 @@ types // customtypes // rec {
             internal = true;
             description = "List of reverse proxy that will be created";
             default = [];
-            type = types.listOf customtypes.endpoint;
+            type = types.listOf types.endpoint;
         };
         secrets = lib.mkOption{ 
             internal = true;
             description = "List of required by the service";
             default = {};
-            type = types.attrsOf customtypes.secret;
+            type = types.attrsOf types.secret;
         };
         sslCertificates = lib.mkOption{
             internal = true;
             description = "List of TLS certificates handled by the service";
             default = {};
-            type = types.attrsOf customtypes.sslCertificate;
-
+            type = types.attrsOf types.sslCertificate;
+        };
+        dbAccesses = lib.mkOption {
+            internal = true;
+            description = "A description of an access to the database of the infrastructure";
+            default = [];
+            type = types.listOf types.dbAccess;
         };
      };
   };
