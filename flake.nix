@@ -20,7 +20,7 @@
     };
 	};
 
-  outputs = inputs@{nixpkgs,...}:
+  outputs = inputs@{nixpkgs, terranix, ...}:
 
     let
       system = "x86_64-linux";
@@ -62,28 +62,31 @@
                             specialArgs = {
                                 inherit inputs infra registry vmname vmconf;
                             };
-                            modules = [./profiles/vm.nix];
+                            modules = [./profiles/vm.nix
+                                       ./modules/disko-vm.nix
+                                ];
                         })
                     infra.vms;
-#      configs = lib.mapAttrs 
-#                  (vmname: vmconf: 
-#                    mkSystem 
-#                        infra 
-#                        registry 
-#                        vmname vmconf 
-#                        [ 
-#                            ./profiles/vm.nix 
-#                        ])
-#                    infra.vms;
 
     in {
       generators = {
         terranix = terranix-generator; 
       };
-      nixosConfigurations = registry;
+      nixosConfigurations = configs // {
+                            iso = lib.nixosSystem {
+                                    modules = [
+                                           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+                                           ./profiles/iso.nix
+                                    ];
+                                    inherit system;
+                                    specialArgs = {inherit inputs;};
+                                };
+                                };
 
       terranixConfigurations =
-        terranix-generator infra-config.infra;
+
+        terranix.lib.terranixConfiguration {inherit system; 
+                                            modules = [{config = (terranix-generator infra-config.infra);}];};
 
       debugPhase1 = registry;
       debugPhase2 = configs; 

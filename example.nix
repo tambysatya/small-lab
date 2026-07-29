@@ -32,12 +32,19 @@ in
         memory = 4096;
         ipAddress = "172.31.61.200";
         services = ["keycloak" "step-ca" "openldap"];
+        additionalDisks = [
+            {src="/dev/pvhdd/ldap"; dst="vdb"; bind = "/var/lib/openldap/data"; fsType="xfs";}
+        ];
+
       };
       storage = {
         host = "cpuhost1";
         vcpu = 4;
         memory = 4096;
-        additionalDisks = [{src="/dev/sdb"; dst="vdb"; bind = "/medias/test"; fsType="xfs";}];
+        additionalDisks = [
+            {src="/dev/pvhdd/s3"; dst="vdb"; bind = "/var/lib/garage/data"; fsType="xfs";}
+            {src="/dev/ssd/s3_metadatas"; dst="vdc"; bind = "/var/lib/garage/meta"; fsType="xfs";}
+        ];
 
         ipAddress = "172.31.61.201";
         services = ["garage"]; 
@@ -46,7 +53,7 @@ in
         host = "cpuhost1";
         vcpu = 4;
         memory = 4096;
-        additionalDisks = [{src="/dev/sdb"; dst="vdb"; bind = "/medias/test"; fsType="xfs";}];
+        additionalDisks = [{src="/dev/ssd/postgres"; dst="vdb"; bind = "/var/lib/postgres"; fsType="xfs";}];
 
         ipAddress = "172.31.61.202";
         services = ["postgres"]; 
@@ -55,7 +62,6 @@ in
         host = "cpuhost1";
         vcpu = 4;
         memory = 4096;
-        additionalDisks = [{src="/dev/sdb"; dst="vdb"; bind = "/medias/test"; fsType="xfs";}];
 
         ipAddress = "172.31.61.202";
         services = ["nextcloud"]; 
