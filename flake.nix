@@ -50,6 +50,7 @@
                                         ./modules/openldap/register.nix
                                         ./modules/postgres/register.nix
                                         ./modules/step-ca/register.nix
+                                        ./modules/nextcloud/register.nix
                                     ];
                                 }).config.infra-services.registry)
                         infra.vms);

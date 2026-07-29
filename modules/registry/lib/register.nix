@@ -82,7 +82,7 @@ let
 
             };
         in lib.mkMerge [
-            (registerSecrets secretowner secrets)
+            (registerSecrets servicename secretowner access.serviceUnits secrets)
             {
                 infra-services.registry.vms."${vmname}".use-s3 = [servicename];
                 infra-services.registry.services."${servicename}".S3Accesses = [access];
@@ -92,5 +92,5 @@ let
         
 
 in {
-    inherit registerSecrets registerCertificate registerEndpoints registerDBAccess;
+    inherit registerSecrets registerCertificate registerEndpoints registerDBAccess registerS3Access;
 }

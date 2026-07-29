@@ -51,6 +51,16 @@ in
         ipAddress = "172.31.61.202";
         services = ["postgres"]; 
       };
+      apps = {
+        host = "cpuhost1";
+        vcpu = 4;
+        memory = 4096;
+        additionalDisks = [{src="/dev/sdb"; dst="vdb"; bind = "/medias/test"; fsType="xfs";}];
+
+        ipAddress = "172.31.61.202";
+        services = ["nextcloud"]; 
+      };
+
     };
   };
 
