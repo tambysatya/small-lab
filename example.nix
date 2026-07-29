@@ -6,6 +6,7 @@ in
   imports = [./modules/infra];
 
   config.infra = {
+    secrets-path = "./secret";
     caURL = "ca.local.fr";
     domain = "local.fr";
     dns = ["8.8.8.8"];

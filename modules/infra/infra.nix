@@ -8,7 +8,7 @@ in
   options.infra = {
     secrets-path = lib.mkOption {
         description = "root repository of secrets";
-        type = type.str;
+        type = types.str;
     };
     caURL = lib.mkOption {
         description = "URL of the CA"; #TODO can be conflictng with the JSON conf
