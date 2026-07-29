@@ -3,9 +3,6 @@
 let 
     reg = import ../registry/lib/register.nix {inherit inputs lib vmname infra;};
     secrets = {
-		/* API keys */
-		"nextcloud_s3_id.key" = {path = "/var/lib/garage/nextcloud_s3_id.key";};
-		"nextcloud_s3.key" = {path = "/var/lib/garage/nextcloud_s3.key";};
 		/* Admin secrets */
 		"garage-rpc.key" = {path = "/var/lib/garage/garage-rpc.key";};
 		"garage-admin.key" = {path = "/var/lib/garage/garage-admin.key";};

@@ -43,6 +43,8 @@ generate_secret(){
 
 generate_s3_keypair(){
 	local SECRET_NAME=$1
+	local BUCKET=$2
+	local TARGET_DIR="secrets/plain/tokens"
 	generate_plain_hex "${SECRET_NAME}-s3-id.key" 64
 	ret=$?
 
@@ -51,11 +53,12 @@ generate_s3_keypair(){
 		return 1
 	elif [ $ret -eq 0 ]; then
 		generate_secret "${SECRET_NAME}-s3"
-		return $?
 	else
 		red "cannot generate $SECRET_NAME ID : unknown error."
 		return $ret
 	fi
+	cp "$TARGET_DIR/${SECRET_NAME}-s3-id.key" "$TARGET_DIR/${SECRET_NAME}-${BUCKET}-s3-id.key"
+	cp "$TARGET_DIR/${SECRET_NAME}-s3-id.key" "$TARGET_DIR/${SECRET_NAME}-${BUCKET}-s3.key"
 }
 
 generate_age_keypair(){

@@ -20,7 +20,7 @@ let
                 format = "binary";
                 owner = secret.owner or "root";
                 restartUnits = secret.reload;
-                mode = secret.mode or "400";
+                mode = secret.mode or "0400";
              };
           }
          ];
