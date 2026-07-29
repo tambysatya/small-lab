@@ -28,13 +28,16 @@
       pkgs = nixpkgs.legacyPackages.${system};
 
       terranix-generator = (import ./lib/generators/terranix {inherit lib inputs;}).generator;
-      nixos-generator = inventory:
+      nixos-generator = extra: inventory:
         let 
               infra-config = (lib.evalModules 
-                          {modules = [
+                          {
+                            modules = [
                               "${nixpkgs}/nixos/modules/misc/assertions.nix"
                               ./modules/infra
-                              inventory];}).config;
+                              inventory];
+                            specialArgs = {inherit extra;};
+                           }).config;
               infra = infra-config.infra;
 
               registry = lib.foldl' 
@@ -105,7 +108,7 @@
                                 }).config.infra-services.registry)
                         infra.vms);
                             
-       configs = nixos-generator ./example.nix;
+       configs = nixos-generator inputs ./example.nix;
 
     in {
       generators = {

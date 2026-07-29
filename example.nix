@@ -1,12 +1,10 @@
-#{lib, ...}:
+{lib, extra, ...}:
 
-let lib = import <nixpks.lib>{};
-in
 {
   imports = [./modules/infra];
 
   config.infra = {
-    secrets-path = "./secret";
+    secrets-path = "${extra.self.outPath}/secrets";
     caURL = "ca.local.fr";
     domain = "local.fr";
     dns = ["8.8.8.8"];
