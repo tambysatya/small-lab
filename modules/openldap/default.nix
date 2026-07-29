@@ -44,7 +44,7 @@ in {
                             ];
                             olcSuffix = suffix;
                             olcRootDN = "cn=admin,${suffix}";
-                            olcRootPW = builtins.readFile "${infra.secrets-path}/secrets/plain/ldap-adminpass.ssha";
+                            olcRootPW = builtins.readFile "${infra.secrets-path}/plain/ldap-adminpass.ssha";
                             olcDbDirectory = "/var/lib/openldap/data";  #TODO persistent
                                 olcDbIndex = [
                                 "objectClass eq"

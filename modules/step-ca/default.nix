@@ -11,7 +11,7 @@
                             port = 8443;
                             openFirewall = false;
                             intermediatePasswordFile = "/var/lib/step-ca/password";
-                            settings = builtins.fromJSON (builtins.readFile ../secrets/plain/CA/config/ca.json); 
+                            settings = builtins.fromJSON (builtins.readFile "${infra.secrets-path}/plain/CA/config/ca.json"); 
                         };
                     };
         
