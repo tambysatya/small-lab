@@ -58,6 +58,9 @@ in
                     description = "Role / User of the table";
                     type = types.str;
                 };
+                table = lib.mkOption {
+                    description = "Tables to be created";
+                };
                 serviceUnits = lib.mkOption {
                     description = "Services that requires the database. A dependency service will be created.";
                     type = types.listOf types.str;

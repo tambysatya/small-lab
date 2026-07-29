@@ -50,8 +50,23 @@ let
                     (lib.filter (ep: ep.is_http or true) endpoints)))
             
         ];
+
+    registerDBAccess = servicename: access:
+        let secret = {
+               path = "/var/lib/${access.role}/${servicename}-db.key";
+               owner = access.role;
+               reload = access.serviceUnits;
+
+            };
+        in lib.mkMerge [
+            (registerSecret servicename "${servicename}-db.key" secret)
+            {
+                infra-services.registry.vms."${vmname}".use-db = [servicename];
+                infra-services.registry.services."${servicename}".dbAccesses = [access];
+            }
+        ];
         
 
 in {
-    inherit registerSecrets registerCertificate registerEndpoints;
+    inherit registerSecrets registerCertificate registerEndpoints registerDBAccess;
 }
