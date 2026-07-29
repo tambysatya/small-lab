@@ -4,7 +4,7 @@
 let
     domainToLdapSuffix = domain:
         let parts = lib.reverseList (lib.splitString "." domain);
-        in lib.concatString "," (lib.map (x: "dc=${x}") parts);
+        in lib.concatStringsSep "," (lib.map (x: "dc=${x}") parts);
     suffix = domainToLdapSuffix infra.domain;
 
 in {

@@ -7,14 +7,15 @@ let
     serviceaddr = "127.0.0.1";
     serviceport = 8000;
 in {
-    config ={
+    config = lib.mkIf (builtins.elem "keycloak" vmconf.services)
+        {
 
                 services.keycloak = {
                   enable = true;
 
                   database = {
                     createLocally = true; #TODO
-                    passwordFile = registry.secrets."keycloak"."keycloak-db.key".path;
+                    passwordFile = registry.services."keycloak".secrets."keycloak-db.key".path;
                   };
                   settings = {
                     hostname = servicevhost;
@@ -26,5 +27,5 @@ in {
                     
                   };
                 };
-             };
+           };
 }

@@ -14,6 +14,11 @@ iso :
 	 nix build --impure path:.#nixosConfigurations.iso.config.system.build.isoImage
 	 cp result/iso/*.iso bootstrap.iso
 
+
+mount:
+	# mounts the vm-provisioning repo
+	sshfs vm-provisioning:git/secrets-provisioner/ssl secrets/plain/certs
+	sshfs vm-provisioning:git/secrets-provisioner/tokens tokens
 deploy :
 
 	 ./scripts/bootstrap-secrets.sh
