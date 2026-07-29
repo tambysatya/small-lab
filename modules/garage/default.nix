@@ -1,8 +1,8 @@
-{lib, inputs, infra, registry, vmname, vmconf, pkgs,...}:
+{lib, inputs, infra, registry, vmname, vmconf, pkgs, config,...}:
 
 let 
     sec = import ../registry/lib/security.nix {inherit inputs lib vmconf vmname infra;};
-    s3lib = import ./lib.nix {inherit lib pkgs;};
+    s3lib = import ./lib.nix {inherit lib pkgs config;};
     servicenames = lib.concatMap (v: v.use-s3) (lib.attrValues registry.vms);
     accesses = lib.concatMap (v: registry.services.${v}.S3Accesses) servicenames;
     secrets = lib.map 
@@ -83,11 +83,11 @@ config = lib.mkIf
                                 Restart = "on-failure";
                                 RestartSec = "30s";
                             };
-                            script = lib.concatStringsSep 
-                                            ([s3lib.bootstrapNode]
-                                              ++ lib.concatMapStringsSep "\n" 
-                                                        (args: s3lib.generateAccess args.fst args.snd) 
-                                                        (lib.lists.zipLists servicenames accesses));
+                            script = lib.concatStringsSep "\n" 
+                                            [s3lib.bootstrapNode
+                                             (lib.concatMapStringsSep "\n" 
+                                                  (args: s3lib.generateAccess args.fst args.snd) 
+                                                  (lib.lists.zipLists servicenames accesses))];
                         };
                     }
         ]);
