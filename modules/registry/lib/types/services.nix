@@ -31,9 +31,15 @@ in
         };
         dbAccesses = lib.mkOption {
             internal = true;
-            description  = "List of tuples user/tables to be created on the database. The tables will be accessible through TLS only. Note that the password is set at every-rebuild so you can change it without losing access to the datas.";
+            description  = "List of user/tables to be created on the database. The tables will be accessible through TLS only. Note that the password is set at every-rebuild so you can change it without losing access to the datas.";
             default = [];
             type = types.listOf types.dbAccess;
+        };
+        S3Accesses = lib.mkOption {
+            internal = true;
+            description  = "List of bucket/key to be created on the s3 server.";
+            default = [];
+            type = types.listOf types.S3Access;
         };
      };
   };

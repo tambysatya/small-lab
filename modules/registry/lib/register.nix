@@ -53,7 +53,7 @@ let
 
     registerDBAccess = servicename: secretowner: access:
         let secret = {
-               path = "/var/lib/${access.role}/${servicename}-db.key";
+               path = "/run/secrets/${servicename}-${access.table}db.key";
                owner = access.role;
                reload = access.serviceUnits;
 
@@ -65,6 +65,30 @@ let
                 infra-services.registry.services."${servicename}".dbAccesses = [access];
             }
         ];
+    registerS3Access = servicename: secretowner: access:
+        let secrets =  {
+            "${servicename}-s3-id.key" = {
+                   path = "/run/secrets/${servicename}-s3-id.key";
+                   owner = access.role;
+                   reload = access.serviceUnits;
+
+                };
+            "${servicename}-s3.key" = {
+                   path = "/run/secrets/${servicename}-s3.key";
+                   owner = access.role;
+                   reload = access.serviceUnits;
+
+                };
+
+            };
+        in lib.mkMerge [
+            (registerSecrets secretowner secrets)
+            {
+                infra-services.registry.vms."${vmname}".use-s3 = [servicename];
+                infra-services.registry.services."${servicename}".S3Accesses = [access];
+            }
+        ];
+ 
         
 
 in {

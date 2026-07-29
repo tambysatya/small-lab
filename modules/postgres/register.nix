@@ -2,12 +2,12 @@
 
 let
     reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname;};
-    secrets = {
-        /* User passwords */
-        "nextcloud-db.key" = {
-            path = "/run/secrets/nextcloud-db.key";
-        };
-    };
+#    secrets = {
+#        /* User passwords */
+#        "nextcloud-db.key" = {
+#            path = "/run/secrets/nextcloud-db.key";
+#        };
+#    };
     endpoints = [{
                    host = "postgres.${infra.domain}";
                    port = 5432; 
@@ -17,7 +17,7 @@ in {
 
     config = lib.mkIf (builtins.elem "postgres" vmconf.services)
                 (lib.mkMerge [ 
-                    (reg.registerSecrets "postgres" "postgres" ["postgres.service"] secrets)
+                    #(reg.registerSecrets "postgres" "postgres" ["postgres.service"] secrets)
                     (reg.registerCertificate "postgres" "postgres" ["postgres.service"] "postgres.${infra.domain}")
                     (reg.registerEndpoints "postgres" endpoints)]);
 }

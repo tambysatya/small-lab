@@ -12,6 +12,12 @@ in
             use-db = lib.mkOption {
                 type = types.listOf infratypes.serviceType;
                 default = [];
+                description = "List of services requesting a POSTGRESQL access";
+            };
+            use-s3 = lib.mkOption {
+                type = types.listOf infratypes.serviceType;
+                default = [];
+                description = "List of services requesting a S3 access";
             };
         };
     };

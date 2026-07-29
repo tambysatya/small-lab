@@ -62,20 +62,23 @@ in
                     description = "Tables to be created";
                 };
                 serviceUnits = lib.mkOption {
-                    description = "Services that requires the database. A dependency service will be created.";
+                    description = "Services that requires the database.";
                     type = types.listOf types.str;
                     default = [];
                 };
             };
         };
-        s3Access = types.submodule {
+        S3Access = types.submodule {
             options = {
+                bucket = lib.mkOption {
+                    type = types.str;
+                };
                 keyID = lib.mkOption {
                     description = "Identifier of the key";
                     type = types.str;
                 };
                 serviceUnits = lib.mkOption {
-                    description = "Services that requires the database. A dependency service will be created.";
+                    description = "Services that requires the database.";
                     type = types.listOf types.str;
                     default = [];
                 };

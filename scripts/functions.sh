@@ -43,14 +43,14 @@ generate_secret(){
 
 generate_s3_keypair(){
 	local SECRET_NAME=$1
-	generate_plain_hex "${SECRET_NAME}_s3_id.key" 64
+	generate_plain_hex "${SECRET_NAME}-s3-id.key" 64
 	ret=$?
 
 	if [ $ret -eq 1 ]; then
 		yellow "Skipping $SECRET_NAME ID: already exists"
 		return 1
 	elif [ $ret -eq 0 ]; then
-		generate_secret "${SECRET_NAME}_s3"
+		generate_secret "${SECRET_NAME}-s3"
 		return $?
 	else
 		red "cannot generate $SECRET_NAME ID : unknown error."
@@ -173,8 +173,8 @@ encrypt_secret(){
 encrypt_s3(){
 	local RECIPIENT=$1
 	local TOKEN_NAME=$2
-	encrypt_secret $RECIPIENT "${TOKEN_NAME}_s3_id"
-	encrypt_secret $RECIPIENT "${TOKEN_NAME}_s3"
+	encrypt_secret $RECIPIENT "${TOKEN_NAME}-s3-id"
+	encrypt_secret $RECIPIENT "${TOKEN_NAME}-s3"
 }
 
 encrypt_CA(){
