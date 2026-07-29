@@ -32,7 +32,7 @@ let installer = pkgs.writeShellApplication {
 				umask 077
 				mkdir -p /var/lib/sops-nix
 				mkdir -p /mnt/var/lib/sops-nix
-				curl --cacert /etc/nixos/certs/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$HOST$TOKEN" > /var/lib/sops-nix/key.txt
+				curl --cacert /etc/nixos/secrets/plain/CA/certs/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$HOST$TOKEN" > /var/lib/sops-nix/key.txt
 				cp /var/lib/sops-nix/key.txt /mnt/var/lib/sops-nix
 				set +x
 
