@@ -22,3 +22,4 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 
 - initialize the database password from the provisioning machine (in order to avoid storing all the passwords on the database/S3 servers) (how to maintain it declaratively ?) TODO
 
+- step-renew increase the refresh rate

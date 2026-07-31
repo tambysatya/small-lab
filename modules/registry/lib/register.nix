@@ -5,14 +5,19 @@
 let 
     registerSecret = servicename: secretname: secret: {
         infra-services.enable = true;
-        infra-services.registry.services."${servicename}".secrets."${secretname}" = secret; 
+        infra-services.registry.services."${servicename}".secrets."${secretname}" = {
+                                        path = secret.path or "/run/secrets/${secretname}";
+                                        mode = secret.mode or "0400";
+                                        owner = secret.owner or "root";
+                                        reload = secret.reload or [];
+                                    }; 
     };
     registerSecrets = servicename: owner: reload: secrets:
         lib.mkMerge 
             (lib.mapAttrsToList 
                 (secretname: secret: 
                     let sec = {
-                            inherit (secret) path;
+                            path = secret.path or "/run/secrets/${secretname}";
                             mode = secret.mode or "0400";
                             owner = owner;
                             reload = reload;
@@ -53,7 +58,7 @@ let
 
     registerDBAccess = servicename: secretowner: access:
         let secret = {
-               path = "/run/secrets/${servicename}-${access.table}db.key";
+               path = "/run/secrets/${servicename}-${access.table}-db.key";
                owner = secretowner;
                reload = access.serviceUnits;
 

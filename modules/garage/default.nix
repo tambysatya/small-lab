@@ -12,12 +12,12 @@ let
                                 "${name}-${access.bucket}-s3-id.key" = {
                                     path = "/run/secrets/${name}-s3-id.key";
                                     reload = ["garage.service"];
-                                    owner = "root";
+                                    owner = "garage";
                                 };
                                 "${name}-${access.bucket}-s3.key" = {
                                     path = "/run/secrets/${name}-s3.key";
                                     reload = ["garage.service"];
-                                    owner = "root";
+                                    owner = "garage";
                                 };
 
                             })
@@ -28,7 +28,6 @@ config = lib.mkIf
             (builtins.elem "garage" vmconf.services)
             (lib.mkMerge [
                     (lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "garage") (lib.foldl' lib.recursiveUpdate {} secrets)))
-                    #(lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "garage") (lib.foldl' lib.recursiveUpdate {} secrets)))
                     { 
                         services.garage = 
                         {
@@ -36,8 +35,10 @@ config = lib.mkIf
                             package = pkgs.garage_2; 
                             settings = 
                             {
+                                data_dir = "/srv/data";
+                                metadata_dir = "/srv/meta";
                                 rpc_bind_addr = "[::]:3901";
-                                rpc_secret_file = "/var/lib/garage/garage-rpc.key";
+                                rpc_secret_file = config.sops.secrets."garage-rpc.key".path;
                                 replication_factor = 1;
                                 s3_api = 
                                 {
@@ -47,13 +48,12 @@ config = lib.mkIf
                                 };
                                 admin = {
                                     api_bind_addr = "127.0.0.1:3903"; # localhost because not encrypted
-                                    admin_token_file = "/var/lib/garage/garage-admin.key";
-                                    metrics_token_file = "/var/lib/garage/garage-metrics.key";
+                                    admin_token_file = config.sops.secrets."garage-admin.key".path;
+                                    metrics_token_file =  config.sops.secrets."garage-metrics.key".path;
                                 };
                             };
                         };
 
-                        /*
 
                         users.users.garage = {
                             isSystemUser = true;
@@ -62,19 +62,36 @@ config = lib.mkIf
                             createHome = true;
                         };
                         users.groups.garage = {};
-
-
                         systemd.services.garage = {
                             serviceConfig = {
                                 DynamicUser = false;
                                 User = "garage";
                                 Group = "garage";
-
                                 StateDirectory = "garage";
                             };
-
+                            after = ["garage-permissions.service"];
+                            requires = ["garage-permissions.service"];
                         };
-                        */
+
+                        systemd.services.garage-permissions = {
+                            description = "Garage volumes permissions";
+                            wantedBy = ["multi-agent.target"];
+
+                            after = [
+                                "srv-meta.mount"
+                                "srv-data.mount"
+                            ];
+                            requires = [
+                                "srv-meta.mount"
+                                "srv-data.mount"
+                            ];
+
+                            serviceConfig.Type = "oneshot";
+                            script = ''
+                                chown -R garage:garage /srv/meta
+                                chown -R garage:garage /srv/data
+                            '';
+                        };
 
                         systemd.services.garage-bootstrap = {
                             description = "Bootstrap the configuration of garage (bucket creation and keys assignments)";

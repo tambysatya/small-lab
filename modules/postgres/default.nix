@@ -7,7 +7,7 @@ let sec = import ../registry/lib/security.nix {inherit inputs lib vmconf vmname 
     users = lib.map (access: 
                         {
                             name = access.role;
-                            # ensureDBOwnership = true; # creates a database of the same name
+                            ensureDBOwnership = true; # creates a database of the same name #TODO
                             ensureClauses = { login = true; };
                         }) dbaccesses;
     tables = lib.map (access: access.table) dbaccesses;
@@ -69,10 +69,11 @@ in {
                                     (args: let name = args.fst;
                                                access = args.snd;
                                     in [
-                                        ''
-                                            ${pkgs.postgresql}/bin/psql -d ${access.table} \
-                                                -c "GRANT ALL PRIVILEGES ON DATABASE ${access.table} TO ${access.role};"
-                                        '' 
+                                        # TODO - removed custom base name
+                                       # ''
+                                       #     ${pkgs.postgresql}/bin/psql -d ${access.table} \
+                                       #         -c "GRANT ALL PRIVILEGES ON DATABASE ${access.table} TO ${access.role};"
+                                       # '' 
                                         ''
                                               PASSWORD="$(< /run/secrets/${name}-${access.table}-db.key)"
                                               ${pkgs.postgresql}/bin/psql -U postgres \

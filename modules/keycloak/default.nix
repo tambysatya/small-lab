@@ -12,10 +12,13 @@ in {
 
                 services.keycloak = {
                   enable = true;
+                  initialAdminPassword = builtins.readFile "${infra.secrets-path}/plain/keycloak-initial-admin";
 
                   database = {
-                    createLocally = true; #TODO
                     passwordFile = registry.services."keycloak".secrets."keycloak-keycloak-db.key".path;
+                    useSSL = true;
+                    host = "postgres.${infra.domain}";
+                    caCert = "/etc/intermediate_ca.crt";
                   };
                   settings = {
                     hostname = servicevhost;

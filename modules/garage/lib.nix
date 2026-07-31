@@ -21,7 +21,7 @@ let
 
     generateAccess = servicename: access@{bucket, keyID, serviceUnits}:
                     ''
-                if [! -f "/var/lib/garage/bootstrap-${keyID}" ]; then
+                if [ ! -f "/var/lib/garage/bootstrap-${keyID}" ]; then
                         if ! ${pkgs.garage_2}/bin/garage bucket info ${bucket}; then
                             echo "Creating bucket: ${bucket}"
                             ${pkgs.garage_2}/bin/garage bucket create ${bucket}
