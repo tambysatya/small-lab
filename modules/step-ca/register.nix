@@ -4,9 +4,9 @@ let
   reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname;};
   STEPPATH="/var/lib/step-ca";
   secrets = {
-    "ca.json" = {
-        path = "${STEPPATH}/config";
-    };
+   # "ca.json" = {
+   #     path = "${STEPPATH}/config";
+   # };
     "ca-password" = {
         path = "${STEPPATH}/ca-password";
     };

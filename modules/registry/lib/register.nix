@@ -23,14 +23,14 @@ let
     registerCertificate = servicename: owner: reload: vhost:
         lib.mkMerge [
                 (registerSecrets servicename owner reload {
-                        "${vhost}.crt" = {path = "/var/lib/${owner}/${vhost}.crt";};
-                        "${vhost}.key" = {path = "/var/lib/${owner}/${vhost}.key";};
+                        "${vhost}.crt" = {path = "/run/secrets/${vhost}.crt";};
+                        "${vhost}.key" = {path = "/run/secrets/${vhost}.key";};
                     })
                 {
                     infra-services.enable = true;
                     infra-services.registry.services."${servicename}".sslCertificates."${vhost}" = {
-                        cert = "/var/lib/${owner}/${vhost}.crt";
-                        key = "/var/lib/${owner}/${vhost}.key";
+                        cert = "/run/secrets/${vhost}.crt";
+                        key = "/run/secrets/${vhost}.key";
                         reload = reload;
                     };
                     

@@ -61,18 +61,29 @@ in {
                 serviceConfig = {
                     Type = "oneshot";
                     User = "postgres";
-                    ExecStart = lib.concatStringsSep "\n"
-                                    (lib.concatMap 
-                                        (args: let name = args.fst;
-                                                   access = args.snd;
-                                        in [
-                                            ''${pkgs.postgresql}/bin/psql -d ${access.table} -c "GRANT ALL PRIVILEGES ON DATABASE ${access.table} TO ${access.role};"'' 
-                                            ''${pkgs.postgresql}/bin/psql -d postgres -f /run/secrets/${name}-${access.table}-db.key''
-                                        ])
-                                        (lib.lists.zipLists servicenames dbaccesses));
-
 
                 };
+
+                script = lib.concatStringsSep "\n"
+                                (lib.concatMap 
+                                    (args: let name = args.fst;
+                                               access = args.snd;
+                                    in [
+                                        ''
+                                            ${pkgs.postgresql}/bin/psql -d ${access.table} \
+                                                -c "GRANT ALL PRIVILEGES ON DATABASE ${access.table} TO ${access.role};"
+                                        '' 
+                                        ''
+                                              PASSWORD="$(< /run/secrets/${name}-${access.table}-db.key)"
+                                              ${pkgs.postgresql}/bin/psql -U postgres \
+                                                -c "ALTER ROLE ${access.role} WITH PASSWORD '$PASSWORD';"
+                                        ''
+
+                                        #''${pkgs.postgresql}/bin/psql -d postgres -f /run/secrets/${name}-${access.table}-db.key''
+                                    ])
+                                    (lib.lists.zipLists servicenames dbaccesses));
+
+
             };
         }
     ]);

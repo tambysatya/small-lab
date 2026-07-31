@@ -22,7 +22,7 @@ let
 in {
     config = lib.mkIf (builtins.elem "garage" vmconf.services)
                 (lib.mkMerge [
-                    (reg.registerSecrets "garage" "garage" ["garage.service"] secrets)
+                    (reg.registerSecrets "garage" "root" ["garage.service"] secrets)
                     (reg.registerEndpoints "garage" endpoints)]);
 }
 

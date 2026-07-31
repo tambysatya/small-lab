@@ -42,7 +42,7 @@ let
           {
                 services.step-renew = {
                     enable = true;
-                    caURL = "ca.${infra.domain}";
+                    caURL = "${infra.caURL}:${lib.toString infra.caPort}";
                     caFingerprint = builtins.readFile "${infra.secrets-path}/plain/CA/fingerprint";
                     certs."${certname}" = sslcert;
                 };
@@ -54,11 +54,12 @@ let
 
         in lib.mkMerge [
             {
+                networking.firewall.allowedTCPPorts = [80 443];
                 services.nginx = {
                     enable = true;
                     virtualHosts."${fronthost}" ={
-                        sslCertificate = "/var/lib/nginx/${fronthost}.crt";
-                        sslCertificateKey = "/var/lib/nginx/${fronthost}.key";
+                        sslCertificate = "/run/secrets/${fronthost}.crt";
+                        sslCertificateKey = "/run/secrets/${fronthost}.key";
                         forceSSL = true;
 
                         locations."/" = {

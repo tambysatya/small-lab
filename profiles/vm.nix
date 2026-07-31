@@ -26,6 +26,8 @@ imports = let path = inputs.self.outPath;
 
 config = {
      
+              boot.kernelParams = ["console=tty1" "console=ttyS0,115200"];
+
               boot.loader.systemd-boot.enable = true;
               boot.loader.efi.canTouchEfiVariables = true;
               time.timeZone = "Europe/Paris";

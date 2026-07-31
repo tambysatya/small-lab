@@ -16,9 +16,9 @@ let
           provider = "libvirt.${hostName}";
         };
         "default_${hostName}" = {
-          name = "default";
+          name = "qcow";
           type = "dir";
-          target.path = "/var/lib/libvirt/qcow";
+          target.path = "/var/lib/libvirt/qcow/terranix";
           provider = "libvirt.${hostName}";
         };
       };

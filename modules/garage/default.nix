@@ -12,12 +12,12 @@ let
                                 "${name}-${access.bucket}-s3-id.key" = {
                                     path = "/run/secrets/${name}-s3-id.key";
                                     reload = ["garage.service"];
-                                    owner = "garage";
+                                    owner = "root";
                                 };
                                 "${name}-${access.bucket}-s3.key" = {
                                     path = "/run/secrets/${name}-s3.key";
                                     reload = ["garage.service"];
-                                    owner = "garage";
+                                    owner = "root";
                                 };
 
                             })
@@ -28,6 +28,7 @@ config = lib.mkIf
             (builtins.elem "garage" vmconf.services)
             (lib.mkMerge [
                     (lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "garage") (lib.foldl' lib.recursiveUpdate {} secrets)))
+                    #(lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "garage") (lib.foldl' lib.recursiveUpdate {} secrets)))
                     { 
                         services.garage = 
                         {
@@ -36,7 +37,7 @@ config = lib.mkIf
                             settings = 
                             {
                                 rpc_bind_addr = "[::]:3901";
-                                rpc_secret_file = "/var/lib/garage/rpc-secret";
+                                rpc_secret_file = "/var/lib/garage/garage-rpc.key";
                                 replication_factor = 1;
                                 s3_api = 
                                 {
@@ -51,6 +52,8 @@ config = lib.mkIf
                                 };
                             };
                         };
+
+                        /*
 
                         users.users.garage = {
                             isSystemUser = true;
@@ -71,6 +74,7 @@ config = lib.mkIf
                             };
 
                         };
+                        */
 
                         systemd.services.garage-bootstrap = {
                             description = "Bootstrap the configuration of garage (bucket creation and keys assignments)";

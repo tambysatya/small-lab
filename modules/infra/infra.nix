@@ -14,6 +14,12 @@ in
         description = "URL of the CA"; #TODO can be conflictng with the JSON conf
         type = types.str;
     };
+    caPort = lib.mkOption {
+        description = "Port of the CA"; #TODO can be conflictng with the JSON conf
+        default = 8443;
+        type = types.port;
+    };
+
     domain = lib.mkOption {
       type = types.str;
       example = "infra.local";

@@ -13,7 +13,7 @@ in {
     caURL = lib.mkOption {
       type = lib.types.str;
       description = "Step CA URL.";
-      example = "https://step.example.com";
+      example = "https://step.example.com:8443";
     };
 
     caFingerprint = lib.mkOption {

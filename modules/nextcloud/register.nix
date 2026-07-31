@@ -18,7 +18,7 @@ in {
                     (reg.registerS3Access "nextcloud" "nextcloud" 
                         {
                             bucket="nextcloud";
-                            keyID=builtins.readFile "${inputs.self.outPath}/secrets/plain/tokens/nextcloud-s3-id.key";
+                            keyID=builtins.readFile "${infra.secrets-path}/plain/tokens/nextcloud-s3-id.key"; #TODO maybe rename bc the name suggest that this value is sensitive
                             serviceUnits = ["nginx.service"];
 
                         })

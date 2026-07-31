@@ -15,7 +15,7 @@ in {
 
                   database = {
                     createLocally = true; #TODO
-                    passwordFile = registry.services."keycloak".secrets."keycloak-${keycloak}-db.key".path;
+                    passwordFile = registry.services."keycloak".secrets."keycloak-keycloak-db.key".path;
                   };
                   settings = {
                     hostname = servicevhost;

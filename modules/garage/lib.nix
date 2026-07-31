@@ -16,6 +16,7 @@ let
                             echo "Skipping layout creation"
                         fi
                         touch /var/lib/garage/bootstrap-done
+                    fi
     '';
 
     generateAccess = servicename: access@{bucket, keyID, serviceUnits}:
@@ -30,7 +31,7 @@ let
                         if ! ${pkgs.garage_2}/bin/garage key info ${servicename}; then
                             echo "Creating nextcloud key"
                                 ${pkgs.garage_2}/bin/garage key import --yes \
-                                $(cat  ${config.sops.secrets."${servicename}-${bucket}-s3-id.key".path} \
+                                $(cat  ${config.sops.secrets."${servicename}-${bucket}-s3-id.key".path}) \
                                 $(cat  ${config.sops.secrets."${servicename}-${bucket}-s3.key".path}) \
                                 -n ${servicename}
                                 ${pkgs.garage_2}/bin/garage bucket allow \
