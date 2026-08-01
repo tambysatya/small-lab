@@ -1,9 +1,10 @@
 {lib, inputs, infra, vmname, vmconf,...}:
-
-{
+let 
+  infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
+in {
 
     config = lib.mkIf 
-                (builtins.elem "step-ca" vmconf.services) 
+                (infralib.hostsService "step-ca")
                     {
                         services.step-ca = {
                             enable = true;

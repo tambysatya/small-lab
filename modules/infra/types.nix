@@ -69,11 +69,13 @@ types // rec {
           type = types.listOf serviceType;
           description = "List of services names deployed on the VM";
           example = ["ldap"];
+          default = [];
         };
         containers = lib.mkOption {
           type = types.listOf serviceType;
           description = "List of services names deployed inside a container VM";
           example = ["ldap"];
+          default = [];
         };
 
       };

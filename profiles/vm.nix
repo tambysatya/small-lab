@@ -12,16 +12,7 @@ imports = let path = inputs.self.outPath;
                 inputs.sops-nix.nixosModules.sops
                 "${path}/profiles/base.nix"
 
-                "${path}/modules/step-renew"
-                "${path}/modules/step-ca"
-                "${path}/modules/openldap"
-                "${path}/modules/keycloak"
-                "${path}/modules/garage"
-                "${path}/modules/postgres"
-
-                "${path}/modules/registry/baremetal.nix"
-
-            ];
+             ];
 
 
 config = {

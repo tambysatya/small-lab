@@ -1,6 +1,7 @@
 {lib, inputs, config, infra, vmname, vmconf, pkgs,...}:
 
 let 
+    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
     reg = import ../registry/lib/register.nix {inherit inputs lib vmname infra;};
     secrets = {
 		/* Admin secrets */
@@ -20,7 +21,7 @@ let
     ];
 
 in {
-    config = lib.mkIf (builtins.elem "garage" vmconf.services)
+    config = lib.mkIf (infralib.hostsService "garage")
                 (lib.mkMerge [
                     (reg.registerSecrets "garage" "garage" ["garage.service"] secrets)
                     (reg.registerEndpoints "garage" endpoints)]);

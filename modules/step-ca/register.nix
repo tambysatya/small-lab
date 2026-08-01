@@ -1,6 +1,7 @@
 {lib, inputs, infra, vmname, vmconf,...}:
 
 let 
+  infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
   reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname;};
   STEPPATH="/var/lib/step-ca";
   secrets = {
@@ -25,7 +26,7 @@ let
 in
 {
     config = lib.mkIf 
-                (builtins.elem "step-ca" vmconf.services) 
+                (infralib.hostsService "step-ca")
                 (lib.mkMerge [
                     (reg.registerSecrets "step-ca" "step-ca" ["step-ca.service"] secrets)
                 ]);

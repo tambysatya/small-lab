@@ -2,13 +2,14 @@
 {lib, inputs, infra, vmname, vmconf, pkgs, config, ...}:
 
 let
+    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
     domainToLdapSuffix = domain:
         let parts = lib.reverseList (lib.splitString "." domain);
         in lib.concatStringsSep "," (lib.map (x: "dc=${x}") parts);
     suffix = domainToLdapSuffix infra.domain;
 
 in {
-    config = lib.mkIf (builtins.elem "openldap" vmconf.services)
+    config = lib.mkIf (infralib.hostsService "openldap")
     {
         services.openldap = {
             enable = true;

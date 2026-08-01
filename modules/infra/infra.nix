@@ -21,8 +21,14 @@ in
     };
 
     domain = lib.mkOption {
-      type = types.str;
-      example = "infra.local";
+        type = types.str;
+        example = "infra.local";
+    };
+
+    subnet = lib.mkOption {
+        type = types.str;
+        example = "10.0.1.0/24";
+        description = "Subnet of the vlan";
     };
 
     dns = lib.mkOption {

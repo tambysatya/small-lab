@@ -23,3 +23,8 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - initialize the database password from the provisioning machine (in order to avoid storing all the passwords on the database/S3 servers) (how to maintain it declaratively ?) TODO
 
 - step-renew increase the refresh rate
+
+- network config in infra + regroup the options by theme 
+- containers: each containers has a SOPS key and decrypt its own secrets
+
+- build the iso from this module (using the path of the root directory of the private flake, passed in `infra`)

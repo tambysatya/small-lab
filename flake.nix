@@ -89,6 +89,17 @@
                                     modules = [
                                             ./modules/disko-vm.nix
                                             ./profiles/vm.nix
+
+                                            ./modules/registry/baremetal.nix
+
+                                            ./modules/step-renew
+                                            ./modules/step-ca
+                                            ./modules/openldap
+                                            ./modules/keycloak
+                                            ./modules/garage
+                                            ./modules/postgres
+                                            ./modules/nextcloud
+
                                         ];
                                 })
                             infra.vms;

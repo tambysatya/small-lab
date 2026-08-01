@@ -2,6 +2,8 @@
 
 let
     reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname;};
+    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
+
 #    secrets = {
 #        /* User passwords */
 #        "nextcloud-db.key" = {
@@ -15,7 +17,7 @@ let
                  }];
 in {
 
-    config = lib.mkIf (builtins.elem "postgres" vmconf.services)
+    config = lib.mkIf (infralib.hostsService "postgres")
                 (lib.mkMerge [ 
                     #(reg.registerSecrets "postgres" "postgres" ["postgres.service"] secrets)
                     (reg.registerCertificate "postgres" "postgres" ["postgres.service"] "postgres.${infra.domain}")

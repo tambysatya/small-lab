@@ -72,14 +72,14 @@ let
         ];
     registerS3Access = servicename: secretowner: access:
         let secrets =  {
-            "${servicename}-s3-id.key" = {
-                   path = "/run/secrets/${servicename}-s3-id.key";
+            "${servicename}-${access.bucket}-s3-id.key" = {
+                   path = "/run/secrets/${servicename}-${access.bucket}-s3-id.key";
                    owner = secretowner;
                    reload = access.serviceUnits;
 
                 };
-            "${servicename}-s3.key" = {
-                   path = "/run/secrets/${servicename}-s3.key";
+            "${servicename}-${access.bucket}-s3.key" = {
+                   path = "/run/secrets/${servicename}-${access.bucket}-s3.key";
                    owner = access.role;
                    reload = access.serviceUnits;
 

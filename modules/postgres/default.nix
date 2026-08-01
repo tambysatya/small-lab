@@ -1,7 +1,9 @@
 
 {inputs, infra, registry, vmname, vmconf, config, lib, pkgs,...}:
 
-let sec = import ../registry/lib/security.nix {inherit inputs lib vmconf vmname infra;};
+let 
+    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
+    sec = import ../registry/lib/security.nix {inherit inputs lib vmconf vmname infra;};
     servicenames = lib.concatMap (v: v.use-db) (lib.attrValues registry.vms); #list of services requesting a db access
     dbaccesses = lib.concatMap (v: registry.services.${v}.dbAccesses) servicenames; #list of dbAccesses in the infrastructure
     users = lib.map (access: 
@@ -27,7 +29,7 @@ let sec = import ../registry/lib/security.nix {inherit inputs lib vmconf vmname 
 
 in {
 
-    config = lib.mkIf (builtins.elem "postgres" vmconf.services)
+    config = lib.mkIf (infralib.hostsService "postgres")
         (lib.mkMerge [
          (lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "postgres") (lib.foldl' lib.recursiveUpdate {} secrets))) # generates the secrets for each service
         {  

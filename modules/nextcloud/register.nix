@@ -2,15 +2,20 @@
 
 let
     reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname;};
+    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
     endpoints = [{
                    host = "nextcloud.${infra.domain}";
                    port = 80; 
-                   is_http = false; #use port redirection instead of nginx + TLS
+                   is_http = true; #use port redirection instead of nginx + TLS
                  }];
 in {
 
-    config = lib.mkIf (builtins.elem "nextcloud" vmconf.services)
+    config = lib.mkIf (infralib.hostsService "nextcloud")
                 (lib.mkMerge [ 
+                    (reg.registerSecrets "nextcloud" "nextcloud" ["phpfmp.service"] 
+                        {
+                            "nextcloud-admin.key"={owner="nextcloud";};
+                        })
                     (reg.registerDBAccess "nextcloud" "nextcloud" 
                         {
                             role="nextcloud"; table="nextcloud"; serviceUnits=["nginx.service"];

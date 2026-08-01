@@ -3,11 +3,13 @@
 
 
 let
+    
+    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
     servicevhost = "auth.${infra.domain}";
     serviceaddr = "127.0.0.1";
     serviceport = 8000;
 in {
-    config = lib.mkIf (builtins.elem "keycloak" vmconf.services)
+    config = lib.mkIf (infralib.hostsService "keycloak")
         {
 
                 services.keycloak = {
