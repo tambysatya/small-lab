@@ -9,7 +9,7 @@ let
     serviceaddr = "127.0.0.1";
     serviceport = 8000;
 in {
-    config = lib.mkIf (infralib.hostsService "keycloak")
+    config = lib.mkIf (infralib.runsService "keycloak")
         {
 
                 services.keycloak = {

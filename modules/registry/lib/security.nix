@@ -38,7 +38,16 @@ let
 
     generateCertificate =
        servicename: certname: sslcert:
+       let
+            secrets = {
+                "${certname}.crt" = {owner = servicename; path = sslcert.cert; reload=sslcert.reload;};
+                "${certname}.key" = {owner = servicename; path = sslcert.key; reload=sslcert.reload;};
+            };
+       in
           lib.mkMerge [
+            (lib.mkMerge (lib.mapAttrsToList 
+                            (generateSecret servicename)
+                            secrets))
           {
                 services.step-renew = {
                     enable = true;
@@ -53,6 +62,12 @@ let
         let
 
         in lib.mkMerge [
+            (generateCertificate "nginx" fronthost 
+                {
+                    cert = "/run/secrets/${fronthost}.crt"; 
+                    key = "/run/secrets/${fronthost}.key";
+                    reload = ["nginx.service"];
+                })
             {
                 networking.firewall.allowedTCPPorts = [80 443];
                 services.nginx = {

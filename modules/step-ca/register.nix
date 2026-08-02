@@ -2,7 +2,7 @@
 
 let 
   infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
-  reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname;};
+  reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname vmconf;};
   STEPPATH="/var/lib/step-ca";
   secrets = {
    # "ca.json" = {
@@ -25,8 +25,7 @@ let
   };
 in
 {
-    config = lib.mkIf 
-                (infralib.hostsService "step-ca")
+    config = 
                 (lib.mkMerge [
                     (reg.registerSecrets "step-ca" "step-ca" ["step-ca.service"] secrets)
                 ]);

@@ -2,7 +2,7 @@
 
 let 
     infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
-    reg = import ../registry/lib/register.nix {inherit inputs lib vmname infra;};
+    reg = import ../registry/lib/register.nix {inherit inputs lib vmname infra vmconf;};
     secrets = {
 		/* Admin secrets */
 		"garage-rpc.key" = {path = "/var/lib/garage/garage-rpc.key";};
@@ -21,10 +21,10 @@ let
     ];
 
 in {
-    config = lib.mkIf (infralib.hostsService "garage")
-                (lib.mkMerge [
+    config = 
+                lib.mkMerge [
                     (reg.registerSecrets "garage" "garage" ["garage.service"] secrets)
-                    (reg.registerEndpoints "garage" endpoints)]);
+                    (reg.registerEndpoints "garage" endpoints)];
 }
 
 

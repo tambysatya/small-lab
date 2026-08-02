@@ -4,7 +4,7 @@ let
 in {
 
     config = lib.mkIf 
-                (infralib.hostsService "step-ca")
+                (infralib.runsService "step-ca")
                     {
                         services.step-ca = {
                             enable = true;

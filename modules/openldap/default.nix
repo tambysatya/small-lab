@@ -9,7 +9,7 @@ let
     suffix = domainToLdapSuffix infra.domain;
 
 in {
-    config = lib.mkIf (infralib.hostsService "openldap")
+    config = lib.mkIf (infralib.runsService "openldap")
     {
         services.openldap = {
             enable = true;

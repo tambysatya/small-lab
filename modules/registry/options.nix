@@ -26,5 +26,8 @@ in
                 };
         };
     };
+    options.infra-compiler = {
+        no-endpoints = lib.mkEnableOption "Generates endpoints settings";
+    };
 }
 

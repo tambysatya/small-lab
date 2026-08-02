@@ -5,8 +5,9 @@ let
     infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
 in {
 
-    config = lib.mkIf (infralib.hostsService "nextcloud")
+    config = lib.mkIf (infralib.runsService "nextcloud")
     {
+        networking.firewall.allowedTCPPorts = [80];
         services.nextcloud = {
             enable = true;	
             #https = true; /*IMPORTANT IF HTTPS*/

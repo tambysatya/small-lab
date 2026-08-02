@@ -1,7 +1,7 @@
 {inputs, infra, vmname, vmconf, config, lib, pkgs,...}:
 
 let
-    reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname;};
+    reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname vmconf;};
     infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
 
 #    secrets = {
@@ -17,7 +17,7 @@ let
                  }];
 in {
 
-    config = lib.mkIf (infralib.hostsService "postgres")
+    config = 
                 (lib.mkMerge [ 
                     #(reg.registerSecrets "postgres" "postgres" ["postgres.service"] secrets)
                     (reg.registerCertificate "postgres" "postgres" ["postgres.service"] "postgres.${infra.domain}")

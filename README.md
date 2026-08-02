@@ -28,3 +28,5 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - containers: each containers has a SOPS key and decrypt its own secrets
 
 - build the iso from this module (using the path of the root directory of the private flake, passed in `infra`)
+
+- REGISTER should do nothing, every complex steps should be moved in the processing phase

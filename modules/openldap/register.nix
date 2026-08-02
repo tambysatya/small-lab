@@ -1,11 +1,11 @@
 {lib, inputs, infra, vmname, vmconf, pkgs, config, ...}:
 
 let 
-    reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname;};
+    reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname vmconf;};
     infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
 
 in {
-    config = lib.mkIf (infralib.hostsService "openldap")
+    config = 
                       (lib.mkMerge [
                             (reg.registerCertificate "openldap" "openldap" ["openldap.service"] "openldap.${infra.domain}")
                             (reg.registerEndpoints "openldap" [

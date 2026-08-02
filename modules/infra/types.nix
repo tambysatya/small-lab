@@ -50,10 +50,12 @@ types // rec {
         vcpu = lib.mkOption {
           type = types.ints.unsigned;
           description = "The number of vCPUS allocated to the VM";
+          default = 1;
         };
         memory = lib.mkOption {
           type = types.ints.unsigned;
           description = "The size of the memory (MiB) allocated to the VM";
+          default = 1024;
         };
         additionalDisks = lib.mkOption {
           type = types.listOf disk;

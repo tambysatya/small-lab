@@ -1,8 +1,9 @@
-{inputs, lib, infra, vmname,  ...}:
+{inputs, lib, infra, vmname, vmconf,  ...}:
 
 /* Called by the modules to register services properties*/
 
 let 
+    infralib = import "${inputs.self.outPath}/modules/infra/lib.nix" {inherit lib vmname vmconf;};
     registerSecret = servicename: secretname: secret: {
         infra-services.enable = true;
         infra-services.registry.services."${servicename}".secrets."${secretname}" = {
@@ -27,10 +28,6 @@ let
 
     registerCertificate = servicename: owner: reload: vhost:
         lib.mkMerge [
-                (registerSecrets servicename owner reload {
-                        "${vhost}.crt" = {path = "/run/secrets/${vhost}.crt";};
-                        "${vhost}.key" = {path = "/run/secrets/${vhost}.key";};
-                    })
                 {
                     infra-services.enable = true;
                     infra-services.registry.services."${servicename}".sslCertificates."${vhost}" = {
@@ -48,12 +45,6 @@ let
                 infra-services.enable = true;
                 infra-services.registry.services."${servicename}".endpoints = endpoints;
             }
-            #registers SSL certificates for each endpoints asking for HTTPS reverse proxy
-            (lib.mkMerge 
-                (lib.map
-                    (ep: registerCertificate servicename "nginx" ["nginx.service"] ep.host)
-                    (lib.filter (ep: ep.is_http or true) endpoints)))
-            
         ];
 
     registerDBAccess = servicename: secretowner: access:
@@ -65,8 +56,8 @@ let
             };
         in lib.mkMerge [
             (registerSecret servicename "${servicename}-${access.table}-db.key" secret)
+            (lib.mkIf (infralib.hostsService servicename) {infra-services.registry.vms."${vmname}".use-db = [servicename];})
             {
-                infra-services.registry.vms."${vmname}".use-db = [servicename];
                 infra-services.registry.services."${servicename}".dbAccesses = [access];
             }
         ];
@@ -88,8 +79,8 @@ let
             };
         in lib.mkMerge [
             (registerSecrets servicename secretowner access.serviceUnits secrets)
+            (lib.mkIf (infralib.hostsService servicename) {infra-services.registry.vms."${vmname}".use-s3 = [servicename];})
             {
-                infra-services.registry.vms."${vmname}".use-s3 = [servicename];
                 infra-services.registry.services."${servicename}".S3Accesses = [access];
             }
         ];

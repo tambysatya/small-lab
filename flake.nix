@@ -90,7 +90,8 @@
                                             ./modules/disko-vm.nix
                                             ./profiles/vm.nix
 
-                                            ./modules/registry/baremetal.nix
+                                            ./modules/registry
+                                            ./modules/registry/lib/processing
 
                                             ./modules/step-renew
                                             ./modules/step-ca

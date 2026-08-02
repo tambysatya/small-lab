@@ -26,7 +26,7 @@ let
 
 in {
 config = lib.mkIf 
-            (infralib.hostsService "garage")
+            (infralib.runsService "garage")
             (lib.mkMerge [
                     (lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "garage") (lib.foldl' lib.recursiveUpdate {} secrets)))
                     { 

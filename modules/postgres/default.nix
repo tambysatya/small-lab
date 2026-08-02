@@ -29,7 +29,7 @@ let
 
 in {
 
-    config = lib.mkIf (infralib.hostsService "postgres")
+    config = lib.mkIf (infralib.runsService "postgres")
         (lib.mkMerge [
          (lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "postgres") (lib.foldl' lib.recursiveUpdate {} secrets))) # generates the secrets for each service
         {  
