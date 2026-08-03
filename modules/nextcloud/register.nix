@@ -16,6 +16,11 @@ let
                                 proxy_http_version 1.1;
                                 proxy_read_timeout 1h;
                                 proxy_send_timeout 1h;
+                                send_timeout 3600s;
+
+                                keepalive_timeout 65s;
+                                proxy_set_header Connection "";
+
                             '';
                         clientMaxBodySize = "100G";
                    };

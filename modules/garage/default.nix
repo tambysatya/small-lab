@@ -41,6 +41,14 @@ config = lib.mkIf
                                 rpc_bind_addr = "[::]:3901";
                                 rpc_secret_file = config.sops.secrets."garage-rpc.key".path;
                                 replication_factor = 1;
+
+                                /* TESTS */
+                                metadata_fsync = false;
+                                data_fsync=false;
+                                compression_level="none";
+                                block_size = "32M";
+                                #############################
+
                                 s3_api = 
                                 {
                                     api_bind_addr = "127.0.0.1:3900"; # localhost because not encrypted
@@ -69,6 +77,7 @@ config = lib.mkIf
                                 User = "garage";
                                 Group = "garage";
                                 StateDirectory = "garage";
+
                             };
                             after = ["garage-permissions.service"];
                             requires = ["garage-permissions.service"];
