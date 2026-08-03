@@ -17,9 +17,9 @@ in {
                             {
                                 "nextcloud-admin.key"={owner="nextcloud";};
                             })
-                        (reg.registerDBAccess "nextcloud" "nextcloud" 
+                        (reg.registerDBAccess "nextcloud" 
                             {
-                                role="nextcloud"; table="nextcloud"; serviceUnits=["nginx.service"];
+                                owner="nextcloud"; role="nextcloud"; table="nextcloud"; serviceUnits=["nginx.service"];
                             })
                         (reg.registerS3Access "nextcloud" "nextcloud" 
                             {

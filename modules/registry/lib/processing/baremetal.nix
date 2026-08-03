@@ -27,7 +27,16 @@ let
             (lib.mapAttrsToList
                 (sec.generateCertificate servicename)
                 (reg.sslCertificates or {}));
-        
+
+    # Generates the secrets for a service requesting a database access
+    processDBAccessClient = servicename: reg:
+        lib.mkMerge 
+            (lib.map
+                (access:
+                    let secretname = "${servicename}-${access.table}-db.key";
+                    in sec.generateSecret servicename secretname 
+                        {owner = access.owner; reload = access.serviceUnits;} )
+                (reg.dbAccesses or []));
 
 
 in{
@@ -48,6 +57,8 @@ in{
                             (lib.mapAttrsToList processSecrets configuredservices))
                         (lib.mkMerge
                             (lib.mapAttrsToList processCertificates (configuredservices // hostedservices)))
+                        (lib.mkMerge
+                            (lib.mapAttrsToList processDBAccessClient configuredservices))
 
                     ]);
 }

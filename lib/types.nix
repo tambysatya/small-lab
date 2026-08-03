@@ -54,6 +54,11 @@ in
         };
         dbAccess = types.submodule {
             options = {
+                owner = lib.mkOption {
+                    description = "Owner of the database key";
+                    type = types.str;
+                    default = "root";
+                };
                 role = lib.mkOption {
                     description = "Role / User of the table";
                     type = types.str;
