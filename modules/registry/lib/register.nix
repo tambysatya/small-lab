@@ -54,24 +54,8 @@ let
                 infra-services.registry.services."${servicename}".dbAccesses = [access];
             }
         ];
-    registerS3Access = servicename: secretowner: access:
-        let secrets =  {
-            "${servicename}-${access.bucket}-s3-id.key" = {
-                   path = "/run/secrets/${servicename}-${access.bucket}-s3-id.key";
-                   owner = secretowner;
-                   reload = access.serviceUnits;
-
-                };
-            "${servicename}-${access.bucket}-s3.key" = {
-                   path = "/run/secrets/${servicename}-${access.bucket}-s3.key";
-                   owner = access.role;
-                   reload = access.serviceUnits;
-
-                };
-
-            };
-        in lib.mkMerge [
-            (registerSecrets servicename secretowner access.serviceUnits secrets)
+    registerS3Access = servicename: access:
+        lib.mkMerge [
             (lib.mkIf (infralib.hostsService servicename) {infra-services.registry.vms."${vmname}".use-s3 = [servicename];})
             {
                 infra-services.registry.services."${servicename}".S3Accesses = [access];

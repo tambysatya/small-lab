@@ -66,7 +66,7 @@ in
                 table = lib.mkOption {
                     description = "Tables to be created";
                 };
-                serviceUnits = lib.mkOption {
+                reload = lib.mkOption {
                     description = "Services that requires the database.";
                     type = types.listOf types.str;
                     default = [];
@@ -75,6 +75,11 @@ in
         };
         S3Access = types.submodule {
             options = {
+                owner = lib.mkOption {
+                    description = "Owner of the S3 key";
+                    type = types.str;
+                    default = "root";
+                };
                 bucket = lib.mkOption {
                     type = types.str;
                 };
@@ -82,7 +87,7 @@ in
                     description = "Identifier of the key";
                     type = types.str;
                 };
-                serviceUnits = lib.mkOption {
+                reload = lib.mkOption {
                     description = "Services that requires the database.";
                     type = types.listOf types.str;
                     default = [];

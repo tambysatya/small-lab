@@ -28,15 +28,29 @@ let
                 (sec.generateCertificate servicename)
                 (reg.sslCertificates or {}));
 
-    # Generates the secrets for a service requesting a database access
+    # Generates the secrets for a service requesting database accesses
     processDBAccessClient = servicename: reg:
         lib.mkMerge 
             (lib.map
                 (access:
                     let secretname = "${servicename}-${access.table}-db.key";
                     in sec.generateSecret servicename secretname 
-                        {owner = access.owner; reload = access.serviceUnits;} )
+                        {inherit (access) owner reload;} )
                 (reg.dbAccesses or []));
+
+    # Generates the secrets for a service requesting S3 accesses
+    processS3AccessClient = servicename: reg:
+        lib.mkMerge
+            (lib.map 
+                (access:
+                    let secret-basename = "${servicename}-${access.bucket}-s3";
+                    in lib.mkMerge [
+                            (sec.generateSecret servicename "${secret-basename}-id.key"
+                                {inherit (access) owner reload;})
+                            (sec.generateSecret servicename "${secret-basename}.key"
+                                {inherit (access) owner reload;})
+                        ])
+                (reg.S3Accesses or []));
 
 
 in{
@@ -59,6 +73,8 @@ in{
                             (lib.mapAttrsToList processCertificates (configuredservices // hostedservices)))
                         (lib.mkMerge
                             (lib.mapAttrsToList processDBAccessClient configuredservices))
+                        (lib.mkMerge
+                            (lib.mapAttrsToList processS3AccessClient configuredservices))
 
                     ]);
 }

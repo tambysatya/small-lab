@@ -12,7 +12,7 @@ in
    config = 
                      (lib.mkMerge [
                          (reg.registerDBAccess "keycloak" 
-                                {role = "keycloak"; table="keycloak"; serviceUnits = ["keycloak.service"]; owner="root";})
+                                {role = "keycloak"; table="keycloak"; reload= ["keycloak.service"]; owner="root";})
                          (reg.registerEndpoints "keycloak" [{host=servicevhost; port=serviceport;}])]);
 }
 
