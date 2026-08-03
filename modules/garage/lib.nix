@@ -19,7 +19,7 @@ let
                     fi
     '';
 
-    generateAccess = servicename: access@{bucket, keyID, serviceUnits}:
+    generateAccess = servicename: access@{bucket, keyID, ...}:
                     ''
                 if [ ! -f "/var/lib/garage/bootstrap-${keyID}" ]; then
                         if ! ${pkgs.garage_2}/bin/garage bucket info ${bucket}; then
