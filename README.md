@@ -30,3 +30,5 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - build the iso from this module (using the path of the root directory of the private flake, passed in `infra`)
 
 - REGISTER should do nothing, every complex steps should be moved in the processing phase (check registerS3 + registerDBACcess)
+
+- unify the sources of truth regarding the secrets paths (imho all the packages confs should refer to `sops.secrets.<name>.path`)

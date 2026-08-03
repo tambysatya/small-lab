@@ -17,15 +17,16 @@ in {
                             {
                                 "nextcloud-admin.key"={owner="nextcloud";};
                             })
-                        (reg.registerDBAccess "nextcloud" "nextcloud" 
+                        (reg.registerDBAccess "nextcloud" 
                             {
-                                role="nextcloud"; table="nextcloud"; serviceUnits=["nginx.service"];
+                                owner="nextcloud"; role="nextcloud"; table="nextcloud"; reload=["phpfmp.service"];
                             })
-                        (reg.registerS3Access "nextcloud" "nextcloud" 
+                        (reg.registerS3Access "nextcloud" 
                             {
+                                owner = "nextcloud";
                                 bucket="nextcloud";
                                 keyID=builtins.readFile "${infra.secrets-path}/plain/tokens/nextcloud-s3-id.key"; #TODO maybe rename bc the name suggest that this value is sensitive
-                                serviceUnits = ["nginx.service"];
+                                reload = ["phpfmp.service"];
 
                             })])
                     (reg.registerEndpoints "nextcloud" endpoints)]);

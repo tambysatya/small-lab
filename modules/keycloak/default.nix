@@ -17,7 +17,7 @@ in {
                   initialAdminPassword = builtins.readFile "${infra.secrets-path}/plain/keycloak-initial-admin";
 
                   database = {
-                    passwordFile = registry.services."keycloak".secrets."keycloak-keycloak-db.key".path;
+                    passwordFile = config.sops.secrets."keycloak-keycloak-db.key".path;
                     useSSL = true;
                     host = "postgres.${infra.domain}";
                     caCert = "/etc/intermediate_ca.crt";
