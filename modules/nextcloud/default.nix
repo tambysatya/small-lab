@@ -15,6 +15,8 @@ in {
             hostName = "nextcloud.${infra.domain}";
             #phpPackage = lib.mkForce (pkgs.php83.withExtensions ({ all, enabled }: enabled ++ [ all.smbclient ]));
 
+            maxUploadSize = "100G";
+
             config.adminuser = "admin";
             config.adminpassFile = "/run/secrets/nextcloud-admin.key";
             config.dbtype = "pgsql";

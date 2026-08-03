@@ -58,7 +58,7 @@ let
            }];
 
     generateReverseProxy =
-        fronthost: backhost: 
+        {fronthost, backhost, extraNginxConfig ? {}}: 
         let
 
         in lib.mkMerge [
@@ -70,27 +70,29 @@ let
                 })
             {
                 networking.firewall.allowedTCPPorts = [80 443];
-                services.nginx = {
-                    enable = true;
-                    virtualHosts."${fronthost}" ={
-                        sslCertificate = "/run/secrets/${fronthost}.crt";
-                        sslCertificateKey = "/run/secrets/${fronthost}.key";
-                        forceSSL = true;
+                services.nginx = lib.mkMerge [
+                    {
+                        enable = true;
+                        virtualHosts."${fronthost}" ={
+                            sslCertificate = "/run/secrets/${fronthost}.crt";
+                            sslCertificateKey = "/run/secrets/${fronthost}.key";
+                            forceSSL = true;
 
-                        locations."/" = {
-                            proxyPass = backhost;
-                            extraConfig = ''
-                                  proxy_set_header Host $host;
-                                  proxy_set_header X-Forwarded-Host $host;
-                                  proxy_set_header X-Forwarded-Proto $scheme;
-                                  proxy_set_header X-Forwarded-Port $server_port;
-                                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                            locations."/" = {
+                                proxyPass = backhost;
+                                extraConfig = ''
+                                      proxy_set_header Host $host;
+                                      proxy_set_header X-Forwarded-Host $host;
+                                      proxy_set_header X-Forwarded-Proto $scheme;
+                                      proxy_set_header X-Forwarded-Port $server_port;
+                                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-                              '';
+                                  '' ;
 
+                            };
                         };
-                    };
-                };
+                    }
+                    extraNginxConfig];
             }
             ];
 

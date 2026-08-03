@@ -3,10 +3,22 @@
 let
     reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname vmconf;};
     infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
+    host = "nextcloud.${infra.domain}";
     endpoints = [{
-                   host = "nextcloud.${infra.domain}";
+                   host = host;
                    port = 80; 
                    is_http = true; #use port redirection instead of nginx + TLS
+                   extraNginxConfig = {
+                        virtualHosts.${host}.extraConfig = 
+                            ''
+                                proxy_request_buffering off;
+                                proxy_buffering off;
+                                proxy_http_version 1.1;
+                                proxy_read_timeout 1h;
+                                proxy_send_timeout 1h;
+                            '';
+                        clientMaxBodySize = "100G";
+                   };
                  }];
 in {
 

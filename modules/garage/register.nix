@@ -13,6 +13,20 @@ let
         {
             host = "s3.${infra.domain}";
             port = 3900;
+             extraNginxConfig = {
+                virtualHosts."s3.${infra.domain}".extraConfig = 
+                    ''
+                        proxy_request_buffering off;
+                        proxy_buffering off;
+                        proxy_http_version 1.1;
+                        proxy_read_timeout 1h;
+                        proxy_send_timeout 1h;
+                        send_timeout 3600s;
+
+                    '';
+                clientMaxBodySize = "100G";
+             };
+
         }
         {
             host = "s3-admin.${infra.domain}";

@@ -50,6 +50,11 @@ in
                     type = types.bool;
                     default = true;
                 };
+                extraNginxConfig = lib.mkOption {
+                    description = "Extra config passed to the reverse proxy";
+                    type = types.attrs;
+                    default = {};
+                };
             };
         };
         dbAccess = types.submodule {

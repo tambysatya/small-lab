@@ -74,7 +74,10 @@ config = lib.mkIf (vmconf.containers != [])
                                         (lib.mkMerge 
                                             (lib.map 
                                                 (ep: if ep.is_http then
-                                                        sec.generateReverseProxy ep.host "http://${local-addr}:${lib.toString ep.port}"
+                                                        sec.generateReverseProxy {
+                                                            fronthost = ep.host;
+                                                            backhost = "http://${local-addr}";
+                                                            inherit (ep) extraNginxConfig;}
                                                      else
                                                         {})
                                                 registry.services.${servicename}.endpoints)))
