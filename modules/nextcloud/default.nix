@@ -20,6 +20,7 @@ in {
         services.nextcloud = {
             enable = true;	
             #https = true; /*IMPORTANT IF HTTPS*/
+            #overwriteprotocol = "https";
             home = "/var/lib/nextcloud";
             hostName = "nextcloud.${infra.domain}";
             #phpPackage = lib.mkForce (pkgs.php83.withExtensions ({ all, enabled }: enabled ++ [ all.smbclient ]));
@@ -63,7 +64,6 @@ in {
                     
                 ];
                 overwritehost = "nextcloud.${infra.domain}";	
-                overwriteprotocol = "https";
 
                 objectstore = {
                     class = "\\OC\\Files\\ObjectStore\\S3";
