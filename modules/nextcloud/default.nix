@@ -9,7 +9,7 @@ in {
     config = lib.mkIf (infralib.runsService "nextcloud")
     {
         networking.firewall.allowedTCPPorts = [80];
-        services.nginx.clientMaxBOdySize = "100G";
+        services.nginx.clientMaxBodySize = "100G";
         services.nextcloud = {
             enable = true;	
             https = true; /*IMPORTANT IF HTTPS*/
