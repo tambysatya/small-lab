@@ -43,11 +43,11 @@ config = lib.mkIf
                                 replication_factor = 1;
 
                                 /* TESTS */
-                                metadata_fsync = false;
-                                data_fsync=false;
-                                compression_level="none";
-                                block_size = "32M";
-                                #############################
+                               # metadata_fsync = false;
+                               # data_fsync=false;
+                               # compression_level="none";
+                               # block_size = "32M";
+                               # #############################
 
                                 s3_api = 
                                 {

@@ -47,7 +47,7 @@ in {
 
                             })])
                     #(reg.registerEndpoints "nextcloud" endpoints)
-                    (reg.registerCertificate "nginx" "nginx" ["nginx.service"] "nextcloud.local.lphi.umontpellier.fr" )
+                    (reg.registerCertificate "nextcloud" "nginx" ["nginx.service"] "nextcloud.local.lphi.umontpellier.fr" )
                     ]);
 }
 

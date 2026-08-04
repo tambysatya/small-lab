@@ -17,6 +17,14 @@ in {
                 sslCertificate = "/run/secrets/${hostname}.crt";
                 sslCertificateKey = "/run/secrets/${hostname}.key";
                 extraConfig = ''
+                        proxy_request_buffering off;
+                        proxy_buffering off;
+                        proxy_http_version 1.1;
+                        proxy_read_timeout 1h;
+                        proxy_send_timeout 1h;
+                        send_timeout 3600s;
+
+ 
                         client_body_timeout 3600s;
                         fastcgi_request_buffering off;
                         fastcgi_read_timeout 3600s;
@@ -73,16 +81,16 @@ in {
                 overwritehost = "nextcloud.${infra.domain}";	
                 overwriteprotocol = "https";
 
-                objectstore = {
-                    class = "\\OC\\Files\\ObjectStore\\S3";
-                    arguments = {
-                            timeout = 300;
-                            connect_timeout = 300;
-                            concurrency = 5;
-                            uploadPartSize = 524288000;
-                            putSizeLimit = 524288000;
-                    };
-                };
+               # objectstore = {
+               #     class = "\\OC\\Files\\ObjectStore\\S3";
+               #     arguments = {
+               #             timeout = 300;
+               #             connect_timeout = 300;
+               #             concurrency = 5;
+               #             uploadPartSize = 524288000;
+               #             putSizeLimit = 524288000;
+               #     };
+               # };
             };
             config.objectstore.s3 = {
                   enable = true;

@@ -40,8 +40,8 @@ let
        servicename: certname: sslcert:
        let
             secrets = {
-                "${certname}.crt" = {owner = servicename; path = sslcert.cert; reload=sslcert.reload;};
-                "${certname}.key" = {owner = servicename; path = sslcert.key; reload=sslcert.reload;};
+                "${certname}.crt" = {owner = sslcert.owner; path = sslcert.cert; reload=sslcert.reload;};
+                "${certname}.key" = {owner = sslcert.owner; path = sslcert.key; reload=sslcert.reload;};
             };
        in
           lib.mkMerge [
@@ -67,6 +67,7 @@ let
                     cert = "/run/secrets/${fronthost}.crt"; 
                     key = "/run/secrets/${fronthost}.key";
                     reload = ["nginx.service"];
+                    owner = "nginx";
                 })
             {
                 networking.firewall.allowedTCPPorts = [80 443];
