@@ -4,23 +4,30 @@
 
 let
     infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
+    hostname = "nextcloud.${infra.domain}";
 in {
 
     config = lib.mkIf (infralib.runsService "nextcloud")
     {
-        networking.firewall.allowedTCPPorts = [80];
+        networking.firewall.allowedTCPPorts = [443 80];
         services.nginx.clientMaxBodySize = "100G";
-        services.nginx.virtualHosts."nextcloud.${infra.domain}".extraConfig = ''
-            client_body_timeout 3600s;
-            fastcgi_request_buffering off;
-            fastcgi_read_timeout 3600s;
-            send_timeout 3600s;
-        '';
+        services.nginx.virtualHosts."nextcloud.${infra.domain}" = 
+            {
+                forceSSL = true;
+                sslCertificate = "/run/secrets/${hostname}.crt";
+                sslCertificateKey = "/run/secrets/${hostname}.key";
+                extraConfig = ''
+                        client_body_timeout 3600s;
+                        fastcgi_request_buffering off;
+                        fastcgi_read_timeout 3600s;
+                    '';
+            };
 
         services.nextcloud = {
             enable = true;	
-            #https = true; /*IMPORTANT IF HTTPS*/
-            #overwriteprotocol = "https";
+
+            https = true; /*IMPORTANT IF HTTPS*/
+
             home = "/var/lib/nextcloud";
             hostName = "nextcloud.${infra.domain}";
             #phpPackage = lib.mkForce (pkgs.php83.withExtensions ({ all, enabled }: enabled ++ [ all.smbclient ]));
@@ -64,6 +71,7 @@ in {
                     
                 ];
                 overwritehost = "nextcloud.${infra.domain}";	
+                overwriteprotocol = "https";
 
                 objectstore = {
                     class = "\\OC\\Files\\ObjectStore\\S3";
