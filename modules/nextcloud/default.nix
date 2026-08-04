@@ -10,9 +10,16 @@ in {
     {
         networking.firewall.allowedTCPPorts = [80];
         services.nginx.clientMaxBodySize = "100G";
+        services.nginx.virtualHosts."nextcloud.${infra.domain}".extraConfig = ''
+            client_body_timeout 3600s;
+            fastcgi_request_buffering off;
+            fastcgi_read_timeout 3600s;
+            send_timeout 3600s;
+        '';
+
         services.nextcloud = {
             enable = true;	
-            https = true; /*IMPORTANT IF HTTPS*/
+            #https = true; /*IMPORTANT IF HTTPS*/
             home = "/var/lib/nextcloud";
             hostName = "nextcloud.${infra.domain}";
             #phpPackage = lib.mkForce (pkgs.php83.withExtensions ({ all, enabled }: enabled ++ [ all.smbclient ]));
@@ -28,7 +35,23 @@ in {
             
             occ = ["user:report"];
 
+            phpOptions = {
+                upload_max_filesize = "100G";
+                post_max_size = "100G";
+                max_execution_time = 3600;
+                max_input_time = 3600;
+                output_buffering = 0;
+                #memory_limit = "5G";
+                "opcache.enable" = 1;
+                "opcache.memory_consumption" = 128;
+                "opcache.interned_strings_buffer" = 16;
+                "opcache.max_accelerated_files" = 10000;
+                "opcache.revalidate_freq" = 1;
+                "opcache.save_comments" = 1;
+            };
             settings = {
+                loglevel = 1;
+                log_type = "file";
                 maintenance_window_start = 0;
                 maintenance_window_end = 3;
                 trusted_domains = [
@@ -67,6 +90,10 @@ in {
                   port = 443;
                   usePathStyle = true;
             };
+
+            caching.memcached = true;
+            caching.redis = true;
+            configureRedis = true;
         };
 
         systemd.services.nextcloud-setup = {

@@ -46,6 +46,7 @@ in {
                                 reload = ["phpfmp.service"];
 
                             })])
-                    (reg.registerEndpoints "nextcloud" endpoints)]);
+                    #(reg.registerEndpoints "nextcloud" endpoints)
+                    ]);
 }
 
