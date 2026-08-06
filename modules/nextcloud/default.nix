@@ -13,9 +13,9 @@ in {
         services.nginx.clientMaxBodySize = "100G";
         services.nginx.virtualHosts."nextcloud.${infra.domain}" = 
             {
-                forceSSL = true;
-                sslCertificate = "/run/secrets/${hostname}.crt";
-                sslCertificateKey = "/run/secrets/${hostname}.key";
+                #forceSSL = true;
+                #sslCertificate = "/run/secrets/${hostname}.crt";
+                #sslCertificateKey = "/run/secrets/${hostname}.key";
                 extraConfig = ''
                         proxy_request_buffering off;
                         proxy_buffering off;
@@ -34,7 +34,7 @@ in {
         services.nextcloud = {
             enable = true;	
 
-            https = true; /*IMPORTANT IF HTTPS*/
+            #https = true; /*IMPORTANT IF HTTPS*/
 
             home = "/var/lib/nextcloud";
             hostName = "nextcloud.${infra.domain}";

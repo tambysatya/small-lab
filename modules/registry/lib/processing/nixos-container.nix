@@ -19,6 +19,12 @@ let
     # creates an entry of containers= on the host
     mkContainer = {servicename, host-addr, local-addr}:  
         {
+            #TODO
+           networking.nat.forwardPorts = {
+            destination = "${local-addr}:443";
+            proto = "tcp";
+            sourceport = 443;
+           }];
            containers."ct-${servicename}" = 
                let ct-name = "ct-${servicename}";
                    ct-conf = {
@@ -69,18 +75,18 @@ config = lib.mkIf (vmconf.containers != [])
                                 let local-addr = "192.168.100.${lib.toString (50+i)}";
                                 in lib.mkMerge [
                                     (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.10";})
-                                    (sec.generateSecret "ct-${servicename}" "ct-${servicename}.key" {reload = ["container@ct-${servicename}.service"];})
-                                    (lib.mkIf (lib.hasAttr servicename registry.services)
-                                        (lib.mkMerge 
-                                            (lib.map 
-                                                (ep: if ep.is_http then
-                                                        sec.generateReverseProxy {
-                                                            fronthost = ep.host;
-                                                            backhost = "http://${local-addr}";
-                                                            inherit (ep) extraNginxConfig;}
-                                                     else
-                                                        {})
-                                                registry.services.${servicename}.endpoints)))
+                                    #(sec.generateSecret "ct-${servicename}" "ct-${servicename}.key" {reload = ["container@ct-${servicename}.service"];})
+                                   # (lib.mkIf (lib.hasAttr servicename registry.services)
+                                   #     (lib.mkMerge 
+                                   #         (lib.map 
+                                   #             (ep: if ep.is_http then
+                                   #                     sec.generateReverseProxy {
+                                   #                         fronthost = ep.host;
+                                   #                         backhost = "http://${local-addr}";
+                                   #                         inherit (ep) extraNginxConfig;}
+                                   #                  else
+                                   #                     {})
+                                   #             registry.services.${servicename}.endpoints)))
                                 ])
                             vmconf.containers))
             ]);
