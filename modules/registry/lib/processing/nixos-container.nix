@@ -75,7 +75,7 @@ config = lib.mkIf (vmconf.containers != [])
                                 let local-addr = "192.168.100.${lib.toString (50+i)}";
                                 in lib.mkMerge [
                                     (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.10";})
-                                    #(sec.generateSecret "ct-${servicename}" "ct-${servicename}.key" {reload = ["container@ct-${servicename}.service"];})
+                                    (sec.generateSecret "ct-${servicename}" "ct-${servicename}.key" {reload = ["container@ct-${servicename}.service"];})
                                    # (lib.mkIf (lib.hasAttr servicename registry.services)
                                    #     (lib.mkMerge 
                                    #         (lib.map 
