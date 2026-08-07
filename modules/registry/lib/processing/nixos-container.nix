@@ -21,9 +21,9 @@ let
         {
             #TODO
            networking.nat.forwardPorts = [{
-            destination = "${local-addr}:443";
+            destination = "${local-addr}:80";
             proto = "tcp";
-            sourcePort = 443;
+            sourcePort = 80;
            }];
            containers."ct-${servicename}" = 
                let ct-name = "ct-${servicename}";
