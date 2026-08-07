@@ -46,7 +46,7 @@ in {
                                 reload = ["phpfmp.service"];
 
                             })])
-                    #(reg.registerEndpoints "nextcloud" endpoints)
+                    (reg.registerEndpoints "nextcloud" endpoints)
                     #(reg.registerCertificate "nextcloud" "nginx" ["nginx.service"] "nextcloud.local.lphi.umontpellier.fr" )
                     ]);
 }
