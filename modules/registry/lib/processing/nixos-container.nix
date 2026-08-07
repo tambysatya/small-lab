@@ -23,7 +23,7 @@ let
            networking.nat.forwardPorts = [{
             destination = "${local-addr}:443";
             proto = "tcp";
-            sourceport = 443;
+            sourcePort = 443;
            }];
            containers."ct-${servicename}" = 
                let ct-name = "ct-${servicename}";
