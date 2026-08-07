@@ -20,7 +20,7 @@ let
     mkContainer = {servicename, host-addr, local-addr}:  
         {
             #TODO
-           networking.nat.forwardPorts = {
+           networking.nat.forwardPorts = [{
             destination = "${local-addr}:443";
             proto = "tcp";
             sourceport = 443;
