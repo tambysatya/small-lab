@@ -79,7 +79,7 @@ in {
                     
                 ];
                 overwritehost = "nextcloud.${infra.domain}";	
-                overwriteprotocol = "https";
+                #overwriteprotocol = "https";
 
                # objectstore = {
                #     class = "\\OC\\Files\\ObjectStore\\S3";
