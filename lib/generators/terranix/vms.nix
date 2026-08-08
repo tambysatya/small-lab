@@ -84,6 +84,7 @@ let
             memory = vm.memory;
             memory_unit = "MiB";
             vcpu = vm.vcpu;
+            cpu.mode = "host-passthrough";
 
             features.acpi = true;
             os = {

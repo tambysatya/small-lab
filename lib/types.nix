@@ -9,6 +9,7 @@ in
             cert = lib.mkOption {type=types.str;};
             key = lib.mkOption {type = types.str;};
             reload = lib.mkOption {type = types.listOf types.str;};
+            owner = lib.mkOption {type = types.str; default = "root";};
         };
     };
     secret = types.submodule {
@@ -49,6 +50,11 @@ in
                     description = "If set to false, the redirection will be done using port forwarding (through nat). Otherwise, the forwarding will be done using nginx"; #TODO
                     type = types.bool;
                     default = true;
+                };
+                extraNginxConfig = lib.mkOption {
+                    description = "Extra config passed to the reverse proxy";
+                    type = types.attrs;
+                    default = {};
                 };
             };
         };

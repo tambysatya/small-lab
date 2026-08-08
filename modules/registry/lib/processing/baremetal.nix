@@ -7,9 +7,11 @@ let
 
     processEndpoints = servicename: reg:
         let
-            processEndpoint = {host, is_http, port}: #creates an nginx reverse proxy if needed
+            processEndpoint = {host, is_http, port, extraNginxConfig ? "",...}: #creates an nginx reverse proxy if needed
                 if is_http
-                then (sec.generateReverseProxy host "http://127.0.0.1:${lib.toString port}")
+                then sec.generateReverseProxy {fronthost = host; 
+                                               backhost = "http://127.0.0.1:${lib.toString port}";
+                                               inherit extraNginxConfig;}
                 else {}; #TODO pnat
         in lib.mkIf (! config.infra-compiler.no-endpoints)
             (lib.mkMerge 

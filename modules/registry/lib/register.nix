@@ -33,7 +33,7 @@ let
                     infra-services.registry.services."${servicename}".sslCertificates."${vhost}" = {
                         cert = "/run/secrets/${vhost}.crt";
                         key = "/run/secrets/${vhost}.key";
-                        reload = reload;
+                        inherit owner reload;
                     };
                     
                 }
