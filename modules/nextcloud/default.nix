@@ -43,11 +43,11 @@ in {
             maxUploadSize = "100G";
 
             config.adminuser = "admin";
-            config.adminpassFile = "/run/secrets/nextcloud-admin.key";
+            config.adminpassFile = config.sops.secrets."nextcloud-admin.key".path;
             config.dbtype = "pgsql";
             config.dbhost = "postgres.${infra.domain}:5432";
             config.dbuser = "nextcloud";
-            config.dbpassFile = "/run/secrets/nextcloud-nextcloud-db.key";
+            config.dbpassFile = config.sops.secrets."nextcloud-nextcloud-db.key".path;
             
             occ = ["user:report"];
 
@@ -99,7 +99,7 @@ in {
                   #autocreate = true;
                   verify_bucket_exists = true;
                   key = builtins.readFile "${infra.secrets-path}/plain/tokens/nextcloud-nextcloud-s3-id.key"; #Key ID #TODO
-                  secretFile = "/run/secrets/nextcloud-nextcloud-s3.key";
+                  secretFile = config.sops.secrets."nextcloud-nextcloud-s3.key".path;
 
                   hostname = "s3.${infra.domain}";
                   useSsl = true;
@@ -129,38 +129,6 @@ in {
                 PGSSLMODE = "require";
             };
         };
-
-    /*
-        systemd.services.nextcloud-wait-postgres = {
-          description = "Wait for PostgreSQL";
-
-          after = [
-            "network-online.target"
-          ];
-
-          requires = [
-            "network-online.target"
-          ];
-
-          serviceConfig = {
-            Restart = "on-failure";
-            RestartSec = "10s";
-            Type = "oneshot";
-            ExecStart = "${pkgs.netcat}/bin/nc -z postgres.local.lphi.umontpellier.fr 5432"; #TODO parametrize the url
-          };
-        };
-        systemd.services.nextcloud-setup = {
-          requires = [
-            "nextcloud-wait-postgres.service"
-          ];
-
-          after = [
-            "nextcloud-wait-postgres.service"
-          ];
-
-        };
-    */
-
     };
 
 }

@@ -22,3 +22,6 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - build the iso from this module (using the path of the root directory of the private flake, passed in `infra`)
 
 - unify the sources of truth regarding the secrets paths (imho all the packages confs should refer to `sops.secrets.<name>.path`)
+- unify the source of truth for the IP addresses
+
+- persistence of datas

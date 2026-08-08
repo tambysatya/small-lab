@@ -72,7 +72,7 @@ in
       wantedBy = [ "timers.target" ];
 
       timerConfig = {
-        OnCalendar = "daily";
+        OnCalendar = "hourly";
         Persistent = true;
       };
 
