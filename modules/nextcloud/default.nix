@@ -66,6 +66,7 @@ in {
                 "opcache.save_comments" = 1;
             };
             settings = {
+                instanceid = builtins.readFile "${infra.secrets-path}/plain/nextcloud-instanceid";
                 loglevel = 1;
                 log_type = "file";
                 maintenance_window_start = 0;
