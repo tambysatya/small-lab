@@ -121,8 +121,11 @@ in {
                 "network.target"
             ];
             serviceConfig = { 
-                ExecStartPre = "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
-                ExecStartPre = "[ -d /var/lib/nextcloud/data ] || mkdir -p /var/lib/nextcloud/data";
+                ExecStartPre = 
+                    [
+                    "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432" # wait for the database to be up²
+                    "${pkgs.bash}/bin/bash -c '[ -d /var/lib/nextcloud/data ] || mkdir -p /var/lib/nextcloud/data'"
+                    ];
                 Restart = "on-failure";
                 RestartSec = "30s"; #TODO put a condition (like touch a file) to avoid running this at every startup
             };
