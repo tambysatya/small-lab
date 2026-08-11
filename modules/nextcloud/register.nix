@@ -21,6 +21,11 @@ let
                                 keepalive_timeout 65s;
                                 proxy_set_header Connection "";
 
+                                client_body_timeout 3600s;
+                                fastcgi_request_buffering off;
+                                fastcgi_read_timeout 3600s;
+
+
                             '';
                         clientMaxBodySize = "100G";
                    };
