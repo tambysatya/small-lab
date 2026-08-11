@@ -28,8 +28,6 @@ let
       create.content.url = "bootstrap.iso";
       provider = "libvirt.${hostName}";
     };
-
-
   };
 in {generateHosts = generateHosts;}
 

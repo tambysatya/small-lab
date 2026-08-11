@@ -41,6 +41,12 @@ in
             default = [];
             type = types.listOf types.S3Access;
         };
+        volumes = lib.mkOption {
+            internal = true;
+            description  = "List of persistent volumes used by the service.";
+            default = [];
+            type = types.attrsOf types.volume;
+        };
      };
   };
 

@@ -2,7 +2,7 @@
   let inherit (lib) types;
 in
 types // rec {
-	serviceType = 
+  serviceType = 
 		lib.types.enum [
 			"step-ca"
 			"openldap"
@@ -11,6 +11,7 @@ types // rec {
 			"postgres"
 			"nextcloud"
 		];
+  volumeType = lib.types.enum ["dev" "qcow2"];
   disk = lib.types.submodule {
     options = {
       src = lib.mkOption { 
@@ -36,6 +37,11 @@ types // rec {
       fsType = lib.mkOption {
         type = types.str;
         description = "Filesystem";
+      };
+      volumeType = lib.mkOption {
+        type = volumeType;
+        description = "Format of the disk";
+        default = "dev";
       };
     };
   };

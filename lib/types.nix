@@ -1,4 +1,6 @@
-/* Basic type definition */
+/* Basic type definition:
+    Represents informations that can be registered by the services.
+*/
 {lib,...}:
 let inherit (lib) types;
 in
@@ -31,7 +33,7 @@ in
               mode = lib.mkOption {
                 description = "permissions";
                 type = types.str;
-                default = "044";
+                default = "0400";
               };
             };
         };
@@ -100,7 +102,31 @@ in
                 };
             };
         };
+        volume = types.submodule { #persistent volumes
+            options = {
+                owner = lib.mkOption {
+                    description = "Owner of the directory";
+                    type = types.str;
+                    default = "root";
+                };
+                path = lib.mkOption {
+                    description = "Path of the persistent direectory";
+                    example = "/var/lib/volumes";
+                    type = types.str;
+                    default = "/srv/persistent";
+                };
 
+                mode = lib.mkOption {
+                    description = "Permissions of the directory";
+                    type = types.str;
+                    default = "0400";
+                };
+                reload = lib.mkOption {
+                    type = types.listOf types.str;
+                    default = [];
+                };
 
+            };
+        };
 
 }

@@ -61,9 +61,14 @@ let
                 infra-services.registry.services."${servicename}".S3Accesses = [access];
             }
         ];
+
+    registerVolume = servicename : volumename: volume:
+        {
+            infra-services.registry.services."${servicename}".volumes.${volumename} = volume;
+        };
  
         
 
 in {
-    inherit registerSecrets registerCertificate registerEndpoints registerDBAccess registerS3Access;
+    inherit registerSecrets registerCertificate registerEndpoints registerDBAccess registerS3Access registerVolume;
 }

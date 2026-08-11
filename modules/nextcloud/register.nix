@@ -53,6 +53,13 @@ in {
                             })])
                     (reg.registerEndpoints "nextcloud" endpoints)
                     #(reg.registerCertificate "nextcloud" "nginx" ["nginx.service"] "nextcloud.local.lphi.umontpellier.fr" )
+
+                    (reg.registerVolume "nextcloud" "nextcloud-config"
+                        {
+                            path = "/var/lib/nextcloud/config";
+                            owner = "nextcloud";
+                            reload = ["phpfmp.service" "nextcloud-setup.service"];
+                        })
                     ]);
 }
 
