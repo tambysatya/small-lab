@@ -12,6 +12,7 @@ in
             owner = lib.mkOption {type = types.str; default = "root";};
         };
     };
+
     secret = types.submodule {
         options = {
               path = lib.mkOption {
@@ -31,9 +32,26 @@ in
               mode = lib.mkOption {
                 description = "permissions";
                 type = types.str;
-                default = "044";
+                default = "0400";
               };
-            };
+              kind = lib.mkOption {
+                description = "Specifies how the secret should be generated using openssl rand during the deployement";
+                type = types.submodule {
+                        options = {
+                            provider = lib.mkOption{
+                                description = "Specifies which external tool should be used. Use null if the generation should not be done by small-lab";
+                                type = types.nullOr (types.enum ["openssl" "step"]);
+                                default = null;
+                            };
+                            providerArgs = lib.mkOption {
+                                description = "Extra args passed to the provider for the secret generation.";
+                                type = types.attrs;
+                                default = {};
+                            };
+                        };
+                    };
+                };
+              };
         };
         endpoint = types.submodule {
             options = {
