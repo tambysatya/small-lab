@@ -44,6 +44,6 @@ let
             lib.concatMapStringsSep "\n" (name: provider-openssl name secret.kind.providerArgs.size secret.kind.providerArgs.type) secret.names;
 
 in {
-    inherit gen_age encrypt gen_openssl; 
+    inherit gen_age encrypt provider-openssl gen_openssl; 
 }
 

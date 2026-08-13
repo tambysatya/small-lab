@@ -42,10 +42,63 @@ let
         in ''
             # Generates the SSL secrets for ${recipient}
             ${lib.concatMapStringsSep "\n" gen.gen_openssl sslsecrets}
-
-            # Encrypt them
+            # Encrypt
             ${lib.concatMapStringsSep "\n" (gen.encrypt recipient) (lib.concatMap (sec: sec.names) sslsecrets) }
         '';
+
+
+    # list of the hosts running garage (the S3 service)
+    s3hosts = registry.services."garage".hosts.vms
+           ++ (lib.map (vmname: get-ct-id vmname "garage") 
+                    registry.services."garage".hosts.containers);
+    processS3Secrets = recipient: serviceslist:
+        let s3access = lib.concatMap (srv: srv.s3Accesses) serviceslist;
+        in ''
+            # S3 Accesses for ${recipient}
+            ${lib.concatMapStringsSep "\n" 
+                (access: gen.provider-openssl "s3-${access.bucket}_id" 64 "hex") s3access}
+            ${lib.concatMapStringsSep "\n" 
+                (access: gen.provider-openssl "s3-${access.bucket}.key" 64 "hex") s3access}
+            ${lib.concatMapStringsSep "\n"
+                (gen.encrypt recipient) 
+                (lib.map (access: "s3-${access.bucket}.key") s3access)}
+            ${lib.concatMapStringsSep "\n"
+                (filename:
+                    lib.concatMapStringsSep "\n"
+                        (recipient: gen.encrypt recipient filename) 
+                        s3hosts)
+                (lib.map (access: "s3-${access.bucket}.key") s3access)}
+
+
+        '';
+
+    # list of the hosts running postgres (the DB service)
+    dbhosts = registry.services."postgres".hosts.vms
+           ++ (lib.map (vmname: get-ct-id vmname "postgres") 
+                    registry.services."postgres".hosts.containers);
+
+    processDBSecrets = recipient: serviceslist:
+        let dbaccess = lib.concatMap (srv: srv.dbAccesses) serviceslist;
+        in ''
+            #DB Accesses for ${recipient}
+            ${lib.concatMapStringsSep "\n" 
+                (access: gen.provider-openssl "db-${access.role}-${access.table}.key" 64 "base64") dbaccess}
+            ${lib.concatMapStringsSep "\n"
+                (gen.encrypt recipient) 
+                (lib.map (access: "db-${access.role}-${access.table}.key") dbaccess)}
+            ${lib.concatMapStringsSep "\n"
+                (filename:
+                    lib.concatMapStringsSep "\n"
+                        (recipient: gen.encrypt recipient filename) 
+                        dbhosts)
+                (lib.map (access: "db-${access.role}-${access.table}.key") dbaccess)}
+
+
+            
+
+
+        '';
+        
 
     /*
     processAllServices = serviceslist:
@@ -67,6 +120,7 @@ in
                 pkgs.openssl
                 pkgs.sops
             ];
+            # For each kind of secret, we generate for the services running natively AND running within a container
             text = ''
                     set -x
                     ${gen_all_ages}
@@ -82,6 +136,33 @@ in
                             (ctname: serviceslist:
                                 processSSLSecrets ctname serviceslist)
                             allContainers)}
+
+                    #S3Secrets
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (vmname: serviceslist:
+                                processS3Secrets vmname serviceslist)
+                            allServices)}
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (vmname: serviceslist:
+                                processS3Secrets vmname serviceslist)
+                            allContainers)}
+
+                    #DBSecrets
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (vmname: serviceslist:
+                                processDBSecrets vmname serviceslist)
+                            allServices)}
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (vmname: serviceslist:
+                                processDBSecrets vmname serviceslist)
+                            allContainers)}
+
+
+
             '';
     };
 }
