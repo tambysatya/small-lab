@@ -100,6 +100,20 @@ in
                 };
             };
         };
+        volume = types.submodule { # Persistent volumes
+            options = {
+                owner = lib.mkOption {
+                    description = "Owner of the directory";
+                    type = types.str;
+                    default = "root";
+                };
+                path = lib.mkOption {
+                    description = "Path of the persistent directory";
+                    type = types.str;
+                    example = "/var/lib/docker/storage";
+                };
+            };
+        };
 
 
 
