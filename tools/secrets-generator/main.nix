@@ -35,15 +35,15 @@ let
 
 
 
-    processSSLSecrets = recipient: serviceslist:
-        let sslsecrets = 
+    processPasswordSecrets = recipient: serviceslist:
+        let pwsecrets = 
                 (lib.filter (sec: sec.kind.provider == "openssl") 
                     (lib.concatMap (srv: builtins.attrValues srv.secrets) serviceslist));
         in ''
             # Generates the SSL secrets for ${recipient}
-            ${lib.concatMapStringsSep "\n" gen.gen_openssl sslsecrets}
+            ${lib.concatMapStringsSep "\n" gen.gen_openssl pwsecrets}
             # Encrypt
-            ${lib.concatMapStringsSep "\n" (gen.encrypt recipient) (lib.concatMap (sec: sec.names) sslsecrets) }
+            ${lib.concatMapStringsSep "\n" (gen.encrypt recipient) (lib.concatMap (sec: sec.names) pwsecrets) }
         '';
 
 
@@ -98,17 +98,34 @@ let
 
 
         '';
-        
 
-    /*
-    processAllServices = serviceslist:
-        ''
-            ${processSSLSecrets serviceslist}
-            ${processDBAccess serviceslist}
-            ${processS3Access serviceslist}
-        ''
-    */
-    
+    gen_step_ca = ''
+        PWD=$(pwd)
+        export STEPPATH="$PWD/${infra.secretsPath}/plain/CA";
+        CA_NAME="ca.${infra.domain}"
+
+        if [[ ! -d $STEPPATH ]]; then
+            install -d -m 711 "$STEPPATH"
+            umask 077
+            ${lib.getExe pkgs.openssl} rand -base64 48 > "$STEPPATH"/ca-password
+            ${lib.getExe pkgs.step-cli} ca init \
+                --dns $CA_NAME \
+                --name $CA_NAME \
+                --password-file "$STEPPATH"/ca-password \
+                --deployment-type standalone \
+                --address :443 \
+                --provisioner=ca
+
+            # Patching STEPPATH
+            sed -i "s+$STEPPATH/secrets+/run/secrets+" "$STEPPATH"/config/ca.json 
+            sed -i "s+$STEPPATH/certs+/run/secrets+" "$STEPPATH"/config/ca.json 
+            sed -i "s+$STEPPATH+/var/lib/step-ca+" "$STEPPATH"/config/ca.json 
+
+            ${lib.getExe pkgs.step-cli} certificate fingerprint "$STEPPATH/certs/root_ca.crt" | tr -d '\n' > "$STEPPATH/fingerprint" # step adds a \n at the end of the line
+        fi
+
+    '';
+   
 in
 {
     #test = lib.mapAttrs (vmname: _: processAllServices_ vmname (getAllServices vmname)) (infra.vms);
@@ -119,22 +136,25 @@ in
                 pkgs.age
                 pkgs.openssl
                 pkgs.sops
+                pkgs.step-cli
             ];
             # For each kind of secret, we generate for the services running natively AND running within a container
             text = ''
                     set -x
                     ${gen_all_ages}
 
-                    #SSL Secrets
+                    ${gen_step_ca}
+
+                    #Password Secrets
                     ${lib.concatStringsSep "\n" 
                         (lib.mapAttrsToList
                             (vmname: serviceslist:
-                                processSSLSecrets vmname serviceslist)
+                                processPasswordSecrets vmname serviceslist)
                             allServices)}
                     ${lib.concatStringsSep "\n" 
                         (lib.mapAttrsToList
                             (ctname: serviceslist:
-                                processSSLSecrets ctname serviceslist)
+                                processPasswordSecrets ctname serviceslist)
                             allContainers)}
 
                     #S3Secrets
