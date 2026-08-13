@@ -23,11 +23,6 @@ types // rec {
         description = "mountpoint on the vm";
         example = "vda";
       };
-      bind = lib.mkOption {
-        type = types.str;
-        description = "Mounting directory";
-        example = "/medias/usb";
-      };
       options = lib.mkOption {
         type = types.listOf types.str;
         description = "Mounting options";
@@ -58,10 +53,10 @@ types // rec {
           default = 1024;
         };
         additionalDisks = lib.mkOption {
-          type = types.listOf disk;
+          type = types.attrsOf disk;
           description = "Additional disks that will be passed to the VM";
-          example = [{src = "/dev/sdb"; dst="vdb";}];
-          default = [];
+          example = {"/srv/data" = {src = "/dev/sdb"; dst="vdb"; options=["noauto"]; fsType="ext4";};};
+          default = {};
         };
         ipAddress = lib.mkOption { 
           type = types.str;
