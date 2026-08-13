@@ -1,7 +1,7 @@
-{lib, ...}:
+{lib, inputs, ...}:
 
 let
-  utils = import ../../utils.nix {inherit lib;};
+  utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
   generateHosts = infra: lib.foldl' utils.merge {} (lib.mapAttrsToList generateHost infra.hosts); # generates the list of pools/resources for each host
   generateHost = hostName: host: { # generates a single host
       provider.libvirt = [{

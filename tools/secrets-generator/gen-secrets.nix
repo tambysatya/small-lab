@@ -26,7 +26,7 @@ let
             TOKEN="${name}$TOKEN_NUMBER"
             mkdir -p ${path}/tokens
             cp "${age}/${lib.escapeShellArg name}.key" "${path}/tokens/$TOKEN"
-            echo "$TOKEN" > ${age}/${lib.escapeShellArg name}.token
+            echo "$TOKEN" > /tmp/${lib.escapeShellArg name}.token
             
         '';
     provider-openssl = name: size: type:

@@ -1,7 +1,7 @@
-{lib,...}:
+{lib,inputs,...}:
 
 let
-  utils = import ../../utils.nix {inherit lib;};
+  utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
 
   generateQcow = 
     vmName: vmConfig:
@@ -21,11 +21,11 @@ let
   generateVMDomains = infra: utils.mergeAll 
     (lib.mapAttrsToList 
       (vmName: vmConf: 
-        generateVMDomain vmName (generateInstanceFromConf vmName vmConf))
+        generateVMDomain vmName (generateInstanceFromConf infra vmName vmConf))
       infra.vms);
-  generateInstanceFromConf = vmName: vmConf: {token = builtins.getEnv "TOKEN_${vmName}"; config=vmConf;};
+  generateInstanceFromConf = infra: vmName: vmConf: {token = builtins.readFile "/tmp/${vmName}.token"; config=vmConf;};
   generateDisks = vmInstance: 
-    map (disk: 
+    lib.mapAttrsToList (_: disk: 
         {
           source = {
               block = {

@@ -27,7 +27,7 @@
       lib = nixpkgs.lib;
       pkgs = nixpkgs.legacyPackages.${system};
 
-      terranix-generator_fun = (import ./lib/generators/terranix {inherit lib inputs;}).generator;
+      terranix-generator_fun = (import ./lib/terranix {inherit lib inputs;}).generator;
       terranix-generator  = 
         {inventory, extraArgs ? {}}:
         let 
@@ -100,11 +100,14 @@
                             infra.vms;
 
         in configs;
+
+        extraArgs = {path=inputs.self.outPath;};
         test-infra = compile-infra {
                         inventory = ./examples/example.nix;
-                        extraArgs = {path=inputs.self.outPath;};
+                        inherit extraArgs;
                      };
         test-registry = compile-registry test-infra;
+        terranix-conf = terranix-generator_fun test-infra;
 
 
         gen-secrets = (import tools/secrets-generator/main.nix 
@@ -138,6 +141,11 @@
       infra = test-infra;
       registry = test-registry;
       test = gen-secrets.test;
+      #terranix = terranix;
+      terranix = terranix.lib.terranixConfiguration {
+                                inherit system;
+                                modules = [{config=terranix-conf;}];
+                            };
                    
 
       #nixosConfigurations = configs;

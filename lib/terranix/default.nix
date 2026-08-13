@@ -1,7 +1,7 @@
-{lib,...}:
+{lib,inputs,...}:
 
-let hostlib = import ./hosts.nix {inherit lib;};
-    vmlib = import ./vms.nix {inherit lib;};
+let hostlib = import ./hosts.nix {inherit lib inputs;};
+    vmlib = import ./vms.nix {inherit lib inputs;};
     generateConfig = infra:
       lib.mkMerge [
         {
