@@ -10,10 +10,14 @@ let
     ctnames = lib.concatLists (
                     lib.mapAttrsToList (vmname: vmconf: 
                         lib.map (service: get-ct-id vmname service ) vmconf.containers) infra.vms);
+    
     # all vm + containers identities
+    all_names = builtins.attrNames infra.vms ++ ctnames;
+
+    # generates all the identity keys
     gen_all_ages = lib.concatMapStringsSep "\n"
                             (name: gen.gen_age name)
-                            ((builtins.attrNames infra.vms) ++ ctnames);
+                            all_names;
 
 
 
@@ -178,9 +182,7 @@ in
             ];
             # For each kind of secret, we generate for the services running natively AND running within a container
             text = ''
-                    set -x
                     ${gen_all_ages}
-
                     ${gen_step_ca}
 
                     #Password Secrets
@@ -243,9 +245,9 @@ in
                             allContainersInVM)}
 
 
-
-
-
+                    #Tokens generation for the secret provisionner
+                    ${lib.concatStringsSep "\n"
+                        (lib.map gen.gen_age_token (builtins.attrNames infra.vms))}
 
             '';
     };

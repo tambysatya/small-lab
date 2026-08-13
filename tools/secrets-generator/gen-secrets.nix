@@ -12,13 +12,22 @@ let
     gen_age = name:  #Generate an AGE keypair for a vm or a container
         ''
             TARGET=${age}/${lib.escapeShellArg name}
+            umask 077
             mkdir -p ${age}
             if [[ ! -f $TARGET.key ]]; then
-                umask 077
                 ${pkgs.age}/bin/age-keygen -o $TARGET.key
                 ${pkgs.age}/bin/age-keygen -y $TARGET.key \
                     > $TARGET.pub
             fi
+         '';
+    gen_age_token = name:
+        ''
+            TOKEN_NUMBER=$(${lib.getExe pkgs.openssl} rand -hex 32)
+            TOKEN="${name}$TOKEN_NUMBER"
+            mkdir -p ${path}/tokens
+            cp "${age}/${lib.escapeShellArg name}.key" "${path}/tokens/$TOKEN"
+            echo "$TOKEN" > ${age}/${lib.escapeShellArg name}.token
+            
         '';
     provider-openssl = name: size: type:
         ''
@@ -63,6 +72,6 @@ let
             '';
 
 in {
-    inherit gen_age encrypt provider-openssl gen_openssl gen_ssl_certificate; 
+    inherit gen_age encrypt provider-openssl gen_openssl gen_ssl_certificate gen_age_token; 
 }
 
