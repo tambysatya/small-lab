@@ -40,10 +40,29 @@ let
                 > "$TARGET"
         '';
 
-    gen_openssl= secret: 
+    gen_openssl = secret: 
             lib.concatMapStringsSep "\n" (name: provider-openssl name secret.kind.providerArgs.size secret.kind.providerArgs.type) secret.names;
+    gen_ssl_certificate = crtname:
+            ''
+                PWD=$(pwd)
+                export STEPPATH="$PWD/${infra.secretsPath}/plain/CA";
+
+                TARGET_PATH="${infra.secretsPath}/plain"
+                if [[ -f "$TARGET_PATH/${crtname}.key" ]]; then
+                    rm "$TARGET_PATH/${crtname}.key"
+                fi
+                if [[ -f "$TARGET_PATH/${crtname}.crt" ]]; then
+                    rm "$TARGET_PATH/${crtname}.crt"
+                fi
+                ${lib.getExe pkgs.step-cli} certificate create \
+                    ${crtname} "$TARGET_PATH/${crtname}.crt" "$TARGET_PATH/${crtname}.key" \
+                    --san ${crtname} \
+                    --ca "$STEPPATH/certs/intermediate_ca.crt" --ca-key "$STEPPATH/secrets/intermediate_ca_key" \
+                    --ca-password-file "$STEPPATH/ca-password" \
+                    --no-password --insecure
+            '';
 
 in {
-    inherit gen_age encrypt provider-openssl gen_openssl; 
+    inherit gen_age encrypt provider-openssl gen_openssl gen_ssl_certificate; 
 }
 

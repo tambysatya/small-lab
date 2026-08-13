@@ -20,10 +20,14 @@ let
     # Gets the list of the register entries of all the services running natively (respect. within a container) on a vm
     # VMName -> [ServiceEntry]
     getNativeServices = vmname: lib.map (service: registry.services.${service}) (infra.vms.${vmname}.services);
+    getContainersServices = vmname: lib.map (service: registry.services.${service}) (infra.vms.${vmname}.containers);
 
-    # allServices : Map VMName [ServiceEntry]
+    # allServices : Map VMName [ServiceEntry] for the natives services
     allServices = lib.mapAttrs (vmname: _: getNativeServices vmname) infra.vms;
+    # Map VMName [ServiceEntry] (but for the containers)
+    allContainersInVM = lib.mapAttrs (vmname: _: getContainersServices vmname) infra.vms;
 
+    #Map ContainerName [ServiceEntry]
     allContainers = utils.mergeAll 
                         (lib.mapAttrsToList
                             (vmname: vmconf:
@@ -132,27 +136,32 @@ let
             ${lib.concatStringsSep "\n"
                 (lib.mapAttrsToList
                     (crtname: certificate:
-                        ''
-                            PWD=$(pwd)
-                            export STEPPATH="$PWD/${infra.secretsPath}/plain/CA";
+                    ''
+                        ${gen.gen_ssl_certificate crtname}
+                        ${gen.encrypt recipient "${crtname}.crt"}
+                        ${gen.encrypt recipient "${crtname}.key"}
 
-                            TARGET_PATH="${infra.secretsPath}/plain"
-                            if [[ -f "$TARGET_PATH/${crtname}.key" ]]; then
-                                rm "$TARGET_PATH/${crtname}.key"
-                            fi
-                            if [[ -f "$TARGET_PATH/${crtname}.crt" ]]; then
-                                rm "$TARGET_PATH/${crtname}.crt"
-                            fi
-                            ${lib.getExe pkgs.step-cli} certificate create \
-                                ${crtname} "$TARGET_PATH/${crtname}.crt" "$TARGET_PATH/${crtname}.key" \
-                                --san ${crtname} \
-                                --ca "$STEPPATH/certs/intermediate_ca.crt" --ca-key "$STEPPATH/secrets/intermediate_ca_key" \
-                                --ca-password-file "$STEPPATH/ca-password" \
-                                --no-password --insecure
-                            ${gen.encrypt recipient "${crtname}.crt"}
-                            ${gen.encrypt recipient "${crtname}.key"}
-                        '')
+                    ''
+                    )
                     sslcerts)}
+        '';
+
+    processEndpoints = recipient: serviceslist:
+        let endpoints = lib.filter 
+                            (endpoint: endpoint.is_http)
+                            (lib.concatMap (srv: srv.endpoints) serviceslist);
+        in ''
+            ${lib.concatStringsSep "\n"
+                (lib.map
+                    (endpoint:
+                    ''
+                        ${gen.gen_ssl_certificate endpoint.host}
+                        ${gen.encrypt recipient "${endpoint.host}.crt"}
+                        ${gen.encrypt recipient "${endpoint.host}.key"}
+
+                    ''
+                    )
+                    endpoints)}
         '';
    
 in
@@ -221,6 +230,18 @@ in
                             (vmname: serviceslist:
                                 processSSLCertificates vmname serviceslist)
                             allContainers)}
+                    #Endpoints
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (vmname: serviceslist:
+                                processEndpoints vmname serviceslist)
+                            allServices)}
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (vmname: serviceslist:
+                                processEndpoints vmname serviceslist)
+                            allContainersInVM)}
+
 
 
 
