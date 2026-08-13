@@ -64,12 +64,6 @@
                             specialArgs = {inherit inputs lib pkgs infra vmname vmconf;};
                             modules = [
                                 ./modules/registry
-                                ./services/garage/register.nix
-                                ./services/keycloak/register.nix
-                                ./services/openldap/register.nix
-                                ./services/postgres/register.nix
-                                ./services/step-ca/register.nix
-                                ./services/nextcloud/register.nix
                             ];
                         }).config.registry)
                     infra.vms);

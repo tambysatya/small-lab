@@ -41,6 +41,22 @@ in
             default = [];
             type = types.listOf types.s3Access;
         };
+        hosts = lib.mkOption {
+            type = types.submodule {
+                options = {
+                    vms = lib.mkOption {
+                        description = "List of the virtual machines running the service natively";
+                        type = types.listOf types.str;
+                        default = [];
+                    };
+                    containers = lib.mkOption {
+                        description = "List of the virtual machines on which the service runs within a container";
+                        type = types.listOf types.str;
+                        default = [];
+                    };
+                };
+            };
+        };
      };
   };
 
