@@ -3,12 +3,18 @@
 let 
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
     reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
-    secrets = {
-		/* Admin secrets */
-		"garage-rpc.key" = {path = "/var/lib/garage/garage-rpc.key";};
-		"garage-admin.key" = {path = "/var/lib/garage/garage-admin.key";};
-		"garage-metrics.key" = {path = "/var/lib/garage/garage-metrics.key";};
-	};
+    secret = {
+        names = ["garage-rpc.key" "garage-admin.key" "garage-metrics.key"];
+        owner = "garage";
+        reload = ["garage.service"];
+        kind = {
+            provider = "openssl";
+            providerArgs = {
+                size = 32;
+                type = "hex";
+            };
+        };
+    };
     endpoints = [
         {
             host = "s3.${infra.domain}";
@@ -45,7 +51,7 @@ let
 in {
     config = 
                 lib.mkMerge [
-                    (reg.registerSecrets "garage" "garage" ["garage.service"] secrets)
+                    (reg.registerSecret "garage" "garage-keys" secret)
                     (reg.registerEndpoints "garage" endpoints)];
 }
 

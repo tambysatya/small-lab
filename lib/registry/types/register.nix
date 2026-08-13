@@ -15,10 +15,10 @@ in
 
     secret = types.submodule {
         options = {
-              path = lib.mkOption {
-                description = "Mount point";
-                type = types.str;
-                example = "/run/secrets/nextcloud.key";
+              names = lib.mkOption {
+                description = "The list of filenames composing this secret";
+                type = types.listOf types.str;
+                example = ["nextcloud-admin.key" "nextcloud-db.key"];
               };
               owner = lib.mkOption {
                 description = "Secret owner";

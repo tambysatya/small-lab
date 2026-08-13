@@ -31,14 +31,18 @@ let
                         clientMaxBodySize = "100G";
                    };
                  }];
+    secret = {names = ["nextcloud-admin.key"]; owner="nextcloud"; reload=["phpfmp.service"]; kind = {provider="openssl";};};
 in {
 
     config = 
                 (lib.mkMerge [ 
                     (lib.mkMerge [
-                        (reg.registerSecrets "nextcloud" "nextcloud" ["phpfmp.service"] 
+                        (reg.registerSecret "nextcloud" "nextcloud-keys" 
                             {
-                                "nextcloud-admin.key"={owner="nextcloud";};
+                                names = ["nextcloud-admin.key"];
+                                owner="nextcloud";
+                                reload = ["phpfmp.service"];
+                                kind = {provider="openssl";};
                             })
                         (reg.registerDBAccess "nextcloud" 
                             {

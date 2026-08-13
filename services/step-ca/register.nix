@@ -1,33 +1,19 @@
 {lib, inputs, infra, vmname, vmconf,...}:
 
+# TODO: patch the config file to use /run/secrets/ instead of /var/lib/step-ca in the path of the secrets
 let 
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
     reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
-    STEPPATH="/var/lib/step-ca";
     secrets = {
-       # "ca.json" = {
-       #     path = "${STEPPATH}/config";
-       # };
-        "ca-password" = {
-            path = "${STEPPATH}/ca-password";
-        };
-        "intermediate_ca_key" = {
-            path = "${STEPPATH}/secrets/intermediate_ca_key";
-        };
-        "intermediate_ca.crt" = {
-            path = "${STEPPATH}/certs/intermediate_ca.crt";
-            mode = "0444";
-        };
-        "root_ca.crt" = {
-            path = "${STEPPATH}/certs/root_ca.crt";
-            mode = "0444";
-        };
-      };
+        names = ["ca-password.key" "intermediate_ca.key" "intermediate_ca.crt" "root_ca.crt"];
+        owner = "step-ca";
+        kind = {provider = "step";};
+    };
 in
 {
     config = 
                 (lib.mkMerge [
-                    (reg.registerSecrets "step-ca" "step-ca" ["step-ca.service"] secrets)
+                    (reg.registerSecret "step-ca" "step-ca-keys" secrets)
                 ]);
                     
 }

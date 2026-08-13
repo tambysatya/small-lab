@@ -4,26 +4,27 @@
 
 let 
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit inputs lib vmname vmconf;};
-    registerSecret = servicename: secretname: secret: {
-        registry.services."${servicename}".secrets."${secretname}" = {
-                                        path = secret.path or "/run/secrets/${secretname}";
-                                        mode = secret.mode or "0400";
-                                        owner = secret.owner or "root";
-                                        reload = secret.reload or [];
-                                    }; 
+    registerSecret = servicename: secretname: secret: let
+        provider = secret.kind.provider;
+        providerargs = secret.kind.providerArgs or {};
+        opensslArgs  = {
+            size = providerargs.size or 64;
+            type = providerargs.type or "base64";
+        };
+
+        addDefault = secret: { #sets the default values depending on which provider is selected
+            inherit (secret) names;
+            mode = secret.mode or "0400";
+            owner = secret.owner or "root";
+            reload = secret.reload or [];
+            kind = {
+                inherit provider;
+                providerArgs = if provider == "openssl" then opensslArgs else providerargs;
+            };
+        };
+    in{
+        registry.services."${servicename}".secrets."${secretname}" = addDefault secret;
     };
-    registerSecrets = servicename: owner: reload: secrets:
-        lib.mkMerge 
-            (lib.mapAttrsToList 
-                (secretname: secret: 
-                    let sec = {
-                            path = secret.path or "/run/secrets/${secretname}";
-                            mode = secret.mode or "0400";
-                            owner = owner;
-                            reload = reload;
-                        };
-                    in registerSecret servicename secretname sec)
-                secrets);
 
     registerCertificate = servicename: owner: reload: vhost:
         lib.mkMerge [
@@ -62,5 +63,5 @@ let
         
 
 in {
-    inherit registerSecrets registerCertificate registerEndpoints registerDBAccess registerS3Access;
+    inherit registerSecret registerCertificate registerEndpoints registerDBAccess registerS3Access;
 }
