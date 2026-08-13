@@ -9,7 +9,7 @@ let
     plain = lib.escapeShellArg "${infra.secretsPath}/plain";
     enc = lib.escapeShellArg "${infra.secretsPath}/encrypted";
 
-    generate_age = name:  #Generate an AGE keypair for a vm or a container
+    gen_age = name:  #Generate an AGE keypair for a vm or a container
         ''
             TARGET=${age}/${lib.escapeShellArg name}
             mkdir -p ${age}
@@ -20,12 +20,12 @@ let
                     > $TARGET.pub
             fi
         '';
-    generate_plain_hex = name: size:
+    provider-openssl = name: size: type:
         ''
             mkdir -p ${plain}
             if [[ ! -f  "${plain}/${lib.escapeShellArg name}" ]]; then
                 umask 077
-                ${lib.getExe pkgs.openssl} rand -hex ${size} > ${plain}/${lib.escapeShellArg name}
+                ${lib.getExe pkgs.openssl} rand -${type} ${lib.toString size} > ${plain}/${lib.escapeShellArg name}
             fi
         '';
 
@@ -33,14 +33,17 @@ let
         ''
            mkdir -p ${enc} 
            SRC=${plain}/${lib.escapeShellArg secretname}
-           KEY=${age}/${lib.escapeShellArg recipient}.pub
+           KEY=$(cat ${age}/${lib.escapeShellArg recipient}.pub)
            TARGET=${enc}/${lib.escapeShellArg "${recipient}-${secretname}.enc"}
            ${lib.getExe pkgs.sops} --input-type binary --output-type binary \
-                encrypt --age $KEY $SRC \
-                > $TARGET
+                encrypt --age "$KEY" "$SRC" \
+                > "$TARGET"
         '';
 
+    gen_openssl= secret: 
+            lib.concatMapStringsSep "\n" (name: provider-openssl name secret.kind.providerArgs.size secret.kind.providerArgs.type) secret.names;
+
 in {
-    inherit generate_plain_hex generate_age encrypt;
+    inherit gen_age encrypt gen_openssl; 
 }
 

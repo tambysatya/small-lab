@@ -109,7 +109,7 @@
 
         gen-secrets = (import tools/secrets-generator/main.nix 
                                 {inherit inputs lib pkgs; infra=test-infra; registry=test-registry;}
-                          ).main;
+                          );
                             
     
 
@@ -126,17 +126,18 @@
       };
 
       packages.${system} = {
-        inherit gen-secrets;
+         gen-secrets = gen-secrets.main;
       };
       apps.${system} = {
             gen-secrets = {
                 type = "app";
-                program = lib.getExe gen-secrets;
+                program = lib.getExe gen-secrets.main;
             };
       };
 
       infra = test-infra;
       registry = test-registry;
+      test = gen-secrets.test;
                    
 
       #nixosConfigurations = configs;
