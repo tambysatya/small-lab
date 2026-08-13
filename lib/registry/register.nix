@@ -3,10 +3,9 @@
 /* Called by the modules to register services properties*/
 
 let 
-    infralib = import "${inputs.self.outPath}/modules/infra/lib.nix" {inherit lib vmname vmconf;};
+    infralib = import "${inputs.self.outPath}/lib/infra" {inherit inputs lib vmname vmconf;};
     registerSecret = servicename: secretname: secret: {
-        infra-services.enable = true;
-        infra-services.registry.services."${servicename}".secrets."${secretname}" = {
+        registry.services."${servicename}".secrets."${secretname}" = {
                                         path = secret.path or "/run/secrets/${secretname}";
                                         mode = secret.mode or "0400";
                                         owner = secret.owner or "root";
@@ -29,8 +28,7 @@ let
     registerCertificate = servicename: owner: reload: vhost:
         lib.mkMerge [
                 {
-                    infra-services.enable = true;
-                    infra-services.registry.services."${servicename}".sslCertificates."${vhost}" = {
+                    registry.services."${servicename}".sslCertificates."${vhost}" = {
                         cert = "/run/secrets/${vhost}.crt";
                         key = "/run/secrets/${vhost}.key";
                         inherit owner reload;
@@ -42,23 +40,22 @@ let
     registerEndpoints = servicename: endpoints:
         lib.mkMerge [
             {
-                infra-services.enable = true;
-                infra-services.registry.services."${servicename}".endpoints = endpoints;
+                registry.services."${servicename}".endpoints = endpoints;
             }
         ];
 
     registerDBAccess = servicename: access:
         lib.mkMerge [
-            (lib.mkIf (infralib.hostsService servicename) {infra-services.registry.vms."${vmname}".use-db = [servicename];})
+            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".use-db = [servicename];})
             {
-                infra-services.registry.services."${servicename}".dbAccesses = [access];
+                registry.services."${servicename}".dbAccesses = [access];
             }
         ];
     registerS3Access = servicename: access:
         lib.mkMerge [
-            (lib.mkIf (infralib.hostsService servicename) {infra-services.registry.vms."${vmname}".use-s3 = [servicename];})
+            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".use-s3 = [servicename];})
             {
-                infra-services.registry.services."${servicename}".S3Accesses = [access];
+                registry.services."${servicename}".s3Accesses = [access];
             }
         ];
  

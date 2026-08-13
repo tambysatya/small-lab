@@ -2,8 +2,9 @@
 {inputs, infra, registry, vmname, vmconf, config, lib, pkgs,...}:
 
 let 
-    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
-    sec = import ../registry/lib/security.nix {inherit inputs lib vmconf vmname infra;};
+
+    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
+    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit inputs lib vmconf vmname infra;};
     servicenames = lib.concatMap (v: v.use-db) (lib.attrValues registry.vms); #list of services requesting a db access
     dbaccesses = lib.concatMap (v: registry.services.${v}.dbAccesses) servicenames; #list of dbAccesses in the infrastructure
     users = lib.map (access: 

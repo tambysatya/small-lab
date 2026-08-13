@@ -64,14 +64,14 @@
                             specialArgs = {inherit inputs lib pkgs infra vmname vmconf;};
                             modules = [
                                 ./modules/registry
-                                ./modules/garage/register.nix
-                                ./modules/keycloak/register.nix
-                                ./modules/openldap/register.nix
-                                ./modules/postgres/register.nix
-                                ./modules/step-ca/register.nix
-                                ./modules/nextcloud/register.nix
+                                ./services/garage/register.nix
+                                ./services/keycloak/register.nix
+                                ./services/openldap/register.nix
+                                ./services/postgres/register.nix
+                                ./services/step-ca/register.nix
+                                ./services/nextcloud/register.nix
                             ];
-                        }).config.infra-services.registry)
+                        }).config.registry)
                     infra.vms);
 
 
@@ -106,6 +106,14 @@
                             infra.vms;
 
         in configs;
+        test-infra = compile-infra {
+                        inventory = ./examples/example.nix;
+                        extraArgs = {path=inputs.self.outPath;};
+                     };
+        test-registry = compile-registry test-infra;
+    
+
+            
 
         
 
@@ -117,11 +125,9 @@
         registry = compile-registry;
       };
 
-      infra = compile-infra {
-                    inventory = ./examples/example.nix;
-                    extraArgs = {path="./examples/example.nix";};
-                };
-        
+      infra = test-infra;
+      registry = test-registry;
+                   
 
       #nixosConfigurations = configs;
       #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);

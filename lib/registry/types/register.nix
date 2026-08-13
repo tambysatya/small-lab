@@ -79,7 +79,7 @@ in
                 };
             };
         };
-        S3Access = types.submodule {
+        s3Access = types.submodule {
             options = {
                 owner = lib.mkOption {
                     description = "Owner of the S3 key";
@@ -87,10 +87,6 @@ in
                     default = "root";
                 };
                 bucket = lib.mkOption {
-                    type = types.str;
-                };
-                keyID = lib.mkOption {
-                    description = "Identifier of the key";
                     type = types.str;
                 };
                 reload = lib.mkOption {

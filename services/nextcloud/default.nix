@@ -3,8 +3,8 @@
 # https://danubedata.ro/blog/nextcloud-s3-compatible-primary-storage-2026
 
 let
-    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
     hostname = "nextcloud.${infra.domain}";
+    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
 in {
 
     config = lib.mkIf (infralib.runsService "nextcloud")
@@ -66,7 +66,7 @@ in {
                 "opcache.save_comments" = 1;
             };
             settings = {
-                instanceid = builtins.readFile "${infra.secrets-path}/plain/nextcloud-instanceid";
+                instanceid = builtins.readFile "${infra.secretsPath}/plain/nextcloud-instanceid";
                 loglevel = 1;
                 log_type = "file";
                 maintenance_window_start = 0;
@@ -99,7 +99,7 @@ in {
                   region = "garage";
                   #autocreate = true;
                   verify_bucket_exists = true;
-                  key = builtins.readFile "${infra.secrets-path}/plain/tokens/nextcloud-nextcloud-s3-id.key"; #Key ID #TODO
+                  key = builtins.readFile "${infra.secretsPath}/plain/tokens/nextcloud-nextcloud-s3-id.key"; #Key ID #TODO
                   secretFile = config.sops.secrets."nextcloud-nextcloud-s3.key".path;
 
                   hostname = "s3.${infra.domain}";

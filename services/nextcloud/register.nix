@@ -1,8 +1,9 @@
 {inputs, infra, vmname, vmconf, config, lib, pkgs,...}:
 
 let
-    reg = import ../registry/lib/register.nix {inherit lib inputs infra vmname vmconf;};
-    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
+
+    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
+    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
     host = "nextcloud.${infra.domain}";
     endpoints = [{
                    host = host;
@@ -47,12 +48,10 @@ in {
                             {
                                 owner = "nextcloud";
                                 bucket="nextcloud";
-                                keyID=builtins.readFile "${infra.secrets-path}/plain/tokens/nextcloud-s3-id.key"; #TODO maybe rename bc the name suggest that this value is sensitive
                                 reload = ["phpfmp.service"];
 
                             })])
                     (reg.registerEndpoints "nextcloud" endpoints)
-                    #(reg.registerCertificate "nextcloud" "nginx" ["nginx.service"] "nextcloud.local.lphi.umontpellier.fr" )
                     ]);
 }
 

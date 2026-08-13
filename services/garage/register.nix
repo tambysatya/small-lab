@@ -1,8 +1,8 @@
 {lib, inputs, config, infra, vmname, vmconf, pkgs,...}:
 
 let 
-    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
-    reg = import ../registry/lib/register.nix {inherit inputs lib vmname infra vmconf;};
+    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
+    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
     secrets = {
 		/* Admin secrets */
 		"garage-rpc.key" = {path = "/var/lib/garage/garage-rpc.key";};

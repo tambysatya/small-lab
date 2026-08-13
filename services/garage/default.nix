@@ -1,8 +1,9 @@
 {lib, inputs, infra, registry, vmname, vmconf, pkgs, config,...}:
 
 let 
-    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
-    sec = import ../registry/lib/security.nix {inherit inputs lib vmconf vmname infra;};
+    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
+    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit inputs lib vmconf vmname infra;};
+
     s3lib = import ./lib.nix {inherit lib pkgs config;};
     servicenames = lib.concatMap (v: v.use-s3) (lib.attrValues registry.vms);
     accesses = lib.concatMap (v: registry.services.${v}.S3Accesses) servicenames;

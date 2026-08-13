@@ -4,7 +4,7 @@
 
 let
     
-    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
+    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
     servicevhost = "auth.${infra.domain}";
     serviceaddr = "127.0.0.1";
     serviceport = 8000;
@@ -14,7 +14,7 @@ in {
 
                 services.keycloak = {
                   enable = true;
-                  initialAdminPassword = builtins.readFile "${infra.secrets-path}/plain/keycloak-initial-admin";
+                  initialAdminPassword = builtins.readFile "${infra.secretsPath}/plain/keycloak-initial-admin";
 
                   database = {
                     passwordFile = config.sops.secrets."keycloak-keycloak-db.key".path;

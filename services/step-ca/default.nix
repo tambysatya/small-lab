@@ -1,6 +1,6 @@
 {lib, inputs, infra, vmname, vmconf,...}:
 let 
-  infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
+    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
 in {
 
     config = lib.mkIf 
@@ -12,7 +12,7 @@ in {
                             port = infra.caPort;
                             openFirewall = true;
                             intermediatePasswordFile = "/var/lib/step-ca/ca-password";
-                            settings = builtins.fromJSON (builtins.readFile "${infra.secrets-path}/plain/CA/config/ca.json"); 
+                            settings = builtins.fromJSON (builtins.readFile "${infra.secretsPath}/plain/CA/config/ca.json"); 
                         };
                     };
         

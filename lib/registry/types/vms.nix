@@ -1,9 +1,7 @@
-{lib,...}:
+{inputs, lib,...}:
 
-let libtypes = lib.types;
-    customtypes = import ../../../../lib/types.nix {inherit lib;};
-    types = libtypes // customtypes;
-    infratypes = import ../../../infra/types.nix {inherit lib;};
+let types = lib.types;
+    infratypes = import "${inputs.self.outPath}/lib/infra/types.nix" {inherit lib;};
 in
 
 {

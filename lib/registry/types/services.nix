@@ -1,6 +1,6 @@
 {lib,...}:
 let libtypes = lib.types;
-    customtypes = import ../../../../lib/types.nix {inherit lib;};
+    customtypes = import ./register.nix {inherit lib;};
     types = libtypes // customtypes;
     
 in
@@ -35,11 +35,11 @@ in
             default = [];
             type = types.listOf types.dbAccess;
         };
-        S3Accesses = lib.mkOption {
+        s3Accesses = lib.mkOption {
             internal = true;
             description  = "List of bucket/key to be created on the s3 server.";
             default = [];
-            type = types.listOf types.S3Access;
+            type = types.listOf types.s3Access;
         };
      };
   };

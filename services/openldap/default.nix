@@ -2,7 +2,8 @@
 {lib, inputs, infra, vmname, vmconf, pkgs, config, ...}:
 
 let
-    infralib = import ../infra/lib.nix {inherit lib vmconf vmname;};
+
+    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
     domainToLdapSuffix = domain:
         let parts = lib.reverseList (lib.splitString "." domain);
         in lib.concatStringsSep "," (lib.map (x: "dc=${x}") parts);
@@ -45,7 +46,7 @@ in {
                             ];
                             olcSuffix = suffix;
                             olcRootDN = "cn=admin,${suffix}";
-                            olcRootPW = builtins.readFile "${infra.secrets-path}/plain/ldap-adminpass.ssha";
+                            olcRootPW = builtins.readFile "${infra.secretsPath}/plain/ldap-adminpass.ssha";
                             olcDbDirectory = "/var/lib/openldap/data";  #TODO persistent
                                 olcDbIndex = [
                                 "objectClass eq"
