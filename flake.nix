@@ -52,7 +52,7 @@
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/infra
                   inventory];
-                specialArgs = extraArgs;
+                specialArgs = {inherit inputs; } // extraArgs;
                }).config.infra;
 
       compile-registry = infra:
@@ -116,6 +116,12 @@
         infra = compile-infra;
         registry = compile-registry;
       };
+
+      infra = compile-infra {
+                    inventory = ./examples/example.nix;
+                    extraArgs = {path="./examples/example.nix";};
+                };
+        
 
       #nixosConfigurations = configs;
       #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);

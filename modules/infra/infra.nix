@@ -1,11 +1,15 @@
-{ lib, config, ... }:
+{inputs, lib, config, ... }:
 
 let
-  types = import ./types.nix { inherit lib; };
+  types = import "${inputs.self.outPath}/lib/infra/types.nix" { inherit lib; };
 in
 {
   /* Options definitions */
   options.infra = {
+    flake-path = lib.mkOption {
+        description = "path to the root of the input flake";
+        type = types.str;
+    };
     secrets-path = lib.mkOption {
         description = "root repository of secrets";
         type = types.str;
@@ -25,7 +29,7 @@ in
         example = "infra.local";
     };
 
-    subnet = lib.mkOption {
+    vm-subnet = lib.mkOption {
         type = types.str;
         example = "10.0.1.0/24";
         description = "Subnet of the vlan";
