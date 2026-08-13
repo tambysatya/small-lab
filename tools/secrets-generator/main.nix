@@ -18,8 +18,22 @@ let
 
 
     # Gets the list of the register entries of all the services running natively (respect. within a container) on a vm
-    getAllServices = vmname: lib.map (service: registry.services.${service}) (infra.vms.${vmname}.services);
-    getAllContainers = vmname: lib.map (service: registry.services.${service}) (infra.vms.${vmname}.containers);
+    # VMName -> [ServiceEntry]
+    getNativeServices = vmname: lib.map (service: registry.services.${service}) (infra.vms.${vmname}.services);
+
+    # allServices : Map VMName [ServiceEntry]
+    allServices = lib.mapAttrs (vmname: _: getNativeServices vmname) infra.vms;
+
+    allContainers = utils.mergeAll 
+                        (lib.mapAttrsToList
+                            (vmname: vmconf:
+                                utils.mergeAll 
+                                    (lib.map 
+                                        (service: {${get-ct-id vmname service} = [registry.services.${service}];})
+                                        vmconf.containers))
+                            infra.vms);
+
+
 
     processSSLSecrets = recipient: serviceslist:
         let sslsecrets = 
@@ -44,8 +58,8 @@ let
     
 in
 {
-    test = lib.mapAttrs (vmname: _: processSSLSecrets vmname (getAllServices vmname)) (infra.vms);
     #test = lib.mapAttrs (vmname: _: processAllServices_ vmname (getAllServices vmname)) (infra.vms);
+    test = allContainers;
     main = pkgs.writeShellApplication {
             name = "gen-secrets";
             runtimeInputs = [
@@ -58,7 +72,16 @@ in
                     ${gen_all_ages}
 
                     #SSL Secrets
-                    ${lib.concatMapStringsSep "\n" (vmname: processSSLSecrets vmname (getAllServices vmname)) (builtins.attrNames infra.vms)}
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (vmname: serviceslist:
+                                processSSLSecrets vmname serviceslist)
+                            allServices)}
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (ctname: serviceslist:
+                                processSSLSecrets ctname serviceslist)
+                            allContainers)}
             '';
     };
 }
