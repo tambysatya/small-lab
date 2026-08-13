@@ -125,6 +125,35 @@ let
         fi
 
     '';
+
+    processSSLCertificates = recipient: serviceslist:
+        let sslcerts = utils.mergeAll (lib.map (srv: srv.sslCertificates) serviceslist);
+        in ''
+            ${lib.concatStringsSep "\n"
+                (lib.mapAttrsToList
+                    (crtname: certificate:
+                        ''
+                            PWD=$(pwd)
+                            export STEPPATH="$PWD/${infra.secretsPath}/plain/CA";
+
+                            TARGET_PATH="${infra.secretsPath}/plain"
+                            if [[ -f "$TARGET_PATH/${crtname}.key" ]]; then
+                                rm "$TARGET_PATH/${crtname}.key"
+                            fi
+                            if [[ -f "$TARGET_PATH/${crtname}.crt" ]]; then
+                                rm "$TARGET_PATH/${crtname}.crt"
+                            fi
+                            ${lib.getExe pkgs.step-cli} certificate create \
+                                ${crtname} "$TARGET_PATH/${crtname}.crt" "$TARGET_PATH/${crtname}.key" \
+                                --san ${crtname} \
+                                --ca "$STEPPATH/certs/intermediate_ca.crt" --ca-key "$STEPPATH/secrets/intermediate_ca_key" \
+                                --ca-password-file "$STEPPATH/ca-password" \
+                                --no-password --insecure
+                            ${gen.encrypt recipient "${crtname}.crt"}
+                            ${gen.encrypt recipient "${crtname}.key"}
+                        '')
+                    sslcerts)}
+        '';
    
 in
 {
@@ -180,6 +209,20 @@ in
                             (vmname: serviceslist:
                                 processDBSecrets vmname serviceslist)
                             allContainers)}
+
+                    #Certificates
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (vmname: serviceslist:
+                                processSSLCertificates vmname serviceslist)
+                            allServices)}
+                    ${lib.concatStringsSep "\n" 
+                        (lib.mapAttrsToList
+                            (vmname: serviceslist:
+                                processSSLCertificates vmname serviceslist)
+                            allContainers)}
+
+
 
 
 
