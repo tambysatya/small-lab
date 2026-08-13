@@ -19,7 +19,11 @@ let
         in ''
             # S3 Accesses for ${recipient}
             ${lib.concatMapStringsSep "\n" 
-                (access: pw.gen_password "s3-${access.bucket}_id" 64 "hex") s3access}
+                (access:
+                    ''
+                        ${pw.gen_password "s3-${access.bucket}_id" 64 "hex"}
+                        cp ${vars.plain}/s3-${access.bucket}_id ${vars.git}/
+                    '') s3access}
             ${lib.concatMapStringsSep "\n" 
                 (access: pw.gen_password "s3-${access.bucket}.key" 64 "hex") s3access}
             ${lib.concatMapStringsSep "\n"

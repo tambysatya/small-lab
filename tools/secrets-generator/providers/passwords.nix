@@ -9,7 +9,9 @@ let
             mkdir -p ${vars.plain}
             if [[ ! -f  "${vars.plain}/${lib.escapeShellArg name}" ]]; then
                 umask 077
-                ${lib.getExe pkgs.openssl} rand -${type} ${lib.toString size} > ${vars.plain}/${lib.escapeShellArg name}
+                ${lib.getExe pkgs.openssl} rand -${type} ${lib.toString size} | \
+                    tr -d '\n' \
+                    > ${vars.plain}/${lib.escapeShellArg name}
             fi
         '';
     provider_openssl = secret: 
