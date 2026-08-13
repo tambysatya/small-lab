@@ -105,6 +105,12 @@
                         extraArgs = {path=inputs.self.outPath;};
                      };
         test-registry = compile-registry test-infra;
+
+
+        gen-secrets = (import tools/secrets-generator/main.nix 
+                                {inherit inputs lib pkgs; infra=test-infra; registry=test-registry;}
+                          ).main;
+                            
     
 
             
@@ -117,6 +123,16 @@
         nixos = nixos-generator;
         infra = compile-infra;
         registry = compile-registry;
+      };
+
+      packages.${system} = {
+        inherit gen-secrets;
+      };
+      apps.${system} = {
+            gen-secrets = {
+                type = "app";
+                program = lib.getExe gen-secrets;
+            };
       };
 
       infra = test-infra;

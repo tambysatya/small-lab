@@ -3,7 +3,7 @@
   #imports = [inputs.small-lab.nixosModules.infra];
   config.infra = {
     flakePath = path;
-    secretsPath = "${path}/secrets";
+    secretsPath = ".secrets";
     caURL = "ca.local.fr";
     domain = "local.fr";
     vmSubnet = "192.168.1.0/24";
