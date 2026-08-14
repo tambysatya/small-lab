@@ -42,12 +42,13 @@ let
                             no-endpoints = true; #do not process endpoints
                         };
                         imports = [
-                            "${inputs.self.outPath}/modules/${servicename}"
+                            
+                            "${inputs.self.outPath}/services/${servicename}"
 
-                            "${inputs.self.outPath}/modules/step-renew"
+                            "${inputs.self.outPath}/services/step-renew"
                             "${inputs.self.outPath}/profiles/base.nix"
                             "${inputs.self.outPath}/modules/registry"
-                            "${inputs.self.outPath}/lib/registry/compiler/native.nix"
+                            "${inputs.self.outPath}/modules/registry/compiler/native.nix"
                             inputs.sops-nix.nixosModules.sops
                             
                         ]; 

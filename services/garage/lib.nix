@@ -20,9 +20,9 @@ let
                     fi
     '';
 
-    generateAccess = servicename: access@{bucket, keyID, ...}:
+    generateAccess = servicename: access@{bucket, ...}:
                     ''
-                if [ ! -f "/var/lib/garage/bootstrap-${keyID}" ]; then
+                if [ ! -f "/var/lib/garage/bootstrap-${bucket}" ]; then
                         if ! ${pkgs.garage_2}/bin/garage bucket info ${bucket}; then
                             echo "Creating bucket: ${bucket}"
                             ${pkgs.garage_2}/bin/garage bucket create ${bucket}
@@ -32,7 +32,7 @@ let
                         if ! ${pkgs.garage_2}/bin/garage key info ${servicename}; then
                             echo "Creating nextcloud key"
                                 ${pkgs.garage_2}/bin/garage key import --yes \
-                                $(cat  ${config.sops.secrets."${vars.s3_id access}".path}) \
+                                ${builtins.readFile "${infra.flakePath}/${vars.git}/${vars.s3_key_id access}"} \
                                 $(cat  ${config.sops.secrets."${vars.s3_key access}".path}) \
                                 -n ${servicename}
                                 ${pkgs.garage_2}/bin/garage bucket allow \
@@ -42,10 +42,10 @@ let
                                 ${bucket}\
                                 --key ${servicename}
                         else
-                            echo "Skipping creation ${servicename}:${keyID} [key already exists]"
+                            echo "Skipping creation ${servicename}:${bucket} [key already exists]"
                         fi
 
-                touch /var/lib/garage/bootstrap-${keyID}
+                touch /var/lib/garage/bootstrap-${bucket}
                 fi
                     '';
 

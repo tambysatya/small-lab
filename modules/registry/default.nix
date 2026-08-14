@@ -3,7 +3,6 @@ let
 
     services = vmconf.services;
     containers = vmconf.containers;
-
     modules = lib.map (name: "${inputs.self.outPath}/services/${name}/register.nix") (lib.unique (services ++ containers));
  
 
