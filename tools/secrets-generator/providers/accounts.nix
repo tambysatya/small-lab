@@ -13,7 +13,7 @@ let
 
     # list of the hosts running garage (the S3 service)
     s3hosts = registry.services."garage".hosts.vms
-           ++ (lib.map (vmname: utils.container-id vmname "garage") 
+           ++ (lib.map (vmname: vars.container-id vmname "garage") 
                     registry.services."garage".hosts.containers);
     processS3Secrets = recipient: serviceslist:
         let s3access = lib.concatMap (srv: srv.s3Accesses) serviceslist;
@@ -42,7 +42,7 @@ let
 
     # list of the hosts running postgres (the DB service)
     dbhosts = registry.services."postgres".hosts.vms
-           ++ (lib.map (vmname: utils.container-id vmname "postgres") 
+           ++ (lib.map (vmname: vars.container-id vmname "postgres") 
                     registry.services."postgres".hosts.containers);
 
     processDBSecrets = recipient: serviceslist:

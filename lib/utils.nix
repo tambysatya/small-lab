@@ -1,10 +1,5 @@
 {lib,...}:
 
-/* Basic utilities and functions */
-
-let
-    container-id = vmname: service: "ct-${vmname}-${service}"; #returns the containers ID
-in
   /* Merges two attrsets recursively (concatenates submodules, lists,...) */
 rec{
     merge = a: b:
@@ -23,5 +18,4 @@ rec{
         b;
 
     mergeAll = listOfAttrsets: lib.foldl' merge {} listOfAttrsets;
-    inherit container-id;
 }
