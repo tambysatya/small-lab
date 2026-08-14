@@ -49,8 +49,8 @@ in {
                 settings = {
                     password_encryption = "scram-sha-256";
                     ssl = true;
-                    ssl_cert_file = config.services.step-renew.certs."postgres.${infra.domain}".cert;
-                    ssl_key_file = config.services.step-renew.certs."postgres.${infra.domain}".key;
+                    ssl_cert_file = config.sops.secrets."postgres.${infra.domain}.crt".path;
+                    ssl_key_file = config.sops.secrets."postgres.${infra.domain}.key".path;
                     ssl_ca_file = "/etc/root_ca.crt";
                 };
             };

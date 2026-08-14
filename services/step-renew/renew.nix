@@ -10,14 +10,17 @@ let
       (name: cert: ''
         echo "Renewing ${name}"
 
-        old_hash=$(${pkgs.coreutils}/bin/sha256sum ${cert.cert} | cut -d' ' -f1)
+        CRT_PATH=/run/secrets/${name}.crt
+        KEY_PATH=/run/secrets/${name}.key
+
+        old_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
 
         ${pkgs.step-cli}/bin/step ca renew \
-          ${cert.cert} \
-          ${cert.key} \
+          "$CRT_PATH" \
+          "$CRT_KEY" \
           --force
 
-        new_hash=$(${pkgs.coreutils}/bin/sha256sum ${cert.cert} | cut -d' ' -f1)
+        new_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
 
         if [ "$old_hash" != "$new_hash" ]; then
           echo "${name} changed"
@@ -50,9 +53,8 @@ in
       serviceConfig = {
         Type = "oneshot";
         StateDirectory = "step";
-	Restart = "on-failure";
-	RestartSec = "30s";
-
+        Restart = "on-failure";
+        RestartSec = "30s";
       };
 
       environment = {

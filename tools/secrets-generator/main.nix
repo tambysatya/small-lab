@@ -64,6 +64,7 @@ in
             runtimeInputs = [
                 pkgs.age
                 pkgs.openssl
+                pkgs.openldap
                 pkgs.sops
                 pkgs.step-cli
             ];
@@ -73,6 +74,9 @@ in
 
                     ${pvds.bootstrap_step_ca}
                     ${pvds.bootstrap_ldap}
+                    
+                    echo "[RECALL: KEYCLOAK INITIAL ADMIN PASSWORD IS VERSIONNED. Login and change it !]"
+                    ${lib.getExe pkgs.openssl} rand -base64 64 > ${vars.git}/keycloak-initial-admin
 
                     # Password Secrets
                     ${applyProvider allServices allContainers pvds.processPasswordSecrets}

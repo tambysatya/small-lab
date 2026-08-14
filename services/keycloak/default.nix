@@ -4,6 +4,7 @@
 
 let
     
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra pkgs registry;};
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
     servicevhost = "auth.${infra.domain}";
     serviceaddr = "127.0.0.1";
@@ -14,10 +15,10 @@ in {
 
                 services.keycloak = {
                   enable = true;
-                  initialAdminPassword = builtins.readFile "${infra.secretsPath}/plain/keycloak-initial-admin";
+                  initialAdminPassword = builtins.readFile "${infra.flakePath}/${vars.git}/keycloak-initial-admin";
 
                   database = {
-                    passwordFile = config.sops.secrets."keycloak-keycloak-db.key".path;
+                    passwordFile = config.sops.secrets."db-keycloak-keycloak.key".path;
                     useSSL = true;
                     host = "postgres.${infra.domain}";
                     caCert = "/etc/intermediate_ca.crt";

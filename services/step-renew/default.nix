@@ -1,6 +1,6 @@
-{ lib, ... }:
+{ inputs, lib, ... }:
 
-let customtypes = import ../../lib/types.nix {inherit lib;};
+let customtypes = import ../../lib/registry/types {inherit lib inputs;};
 in {
   imports = [
     ./bootstrap.nix # bootstrap step-ca at the first launch

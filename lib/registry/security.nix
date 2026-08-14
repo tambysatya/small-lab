@@ -8,21 +8,24 @@ let
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra inputs;};
     # Generate the sops options for an attrset of secrets (same owner, same reloadUnit
     generateSecret = 
-      servicename: secretname: secret:
-          let secretFile = "${vars.enc}/${vmname}-${secretname}.enc";
-          in lib.mkMerge [
-          {
+      secret:
+          lib.mkMerge 
+            (lib.map
+                (name:
+                      let secretFile = "${infra.flakePath}/${vars.enc}/${vmname}-${name}.enc";
+                      in {
 
-            sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-            sops.secrets."${secretname}" = {
-                sopsFile = secretFile;
-                format = "binary";
-                owner = secret.owner or "root";
-                restartUnits = secret.reload;
-                mode = secret.mode or "0400";
-             };
-          }
-         ];
+                        sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+                        sops.secrets."${name}" = {
+                            sopsFile = secretFile;
+                            format = "binary";
+                            owner = secret.owner or "root";
+                            restartUnits = secret.reload;
+                            mode = secret.mode or "0400";
+                         };
+                      }
+                )
+                secret.names);
 
    /* Generates the secret and the auto-refresh service for a given certificate.
       registerCertificate : vmname -> owner -> serviceunit -> NixosConfig
@@ -38,21 +41,19 @@ let
     generateCertificate =
        servicename: certname: sslcert:
        let
-            secrets = {
-                "${certname}.crt" = {owner = sslcert.owner; reload=sslcert.reload;};
-                "${certname}.key" = {owner = sslcert.owner; reload=sslcert.reload;};
+            secret = {
+                names = ["${certname}.crt" "${certname}.key"];
+                inherit (sslcert) owner reload;
             };
        in
           lib.mkMerge [
-            (lib.mkMerge (lib.mapAttrsToList 
-                            (generateSecret servicename)
-                            secrets))
-          {
+           (generateSecret secret) 
+           {
                 services.step-renew = {
                     enable = true;
                     caURL = "${infra.caURL}:${lib.toString infra.caPort}";
-                    caFingerprint = builtins.readFile "${vars.git}/fingerprint";
-                    certs."${certname}" = {cert = "/run/secrets/${certname}.crt"; key="/run/secrets/${certname}.key";};
+                    caFingerprint = builtins.readFile "${infra.flakePath}/${vars.git}/fingerprint";
+                    certs."${certname}" = {inherit (sslcert) owner reload;};
                 };
            }];
 

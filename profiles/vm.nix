@@ -52,7 +52,7 @@ config = {
                                       };
                                 }) vmconf.additionalDisks);
               services.openssh.enable = true;
-              users.users.root.openssh.authorizedKeys.keys = infra.root_ssh_pubkeys;
+              users.users.root.openssh.authorizedKeys.keys = infra.rootSSHPublicKeys;
 
 
               networking.firewall = { #TODO

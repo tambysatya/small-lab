@@ -71,7 +71,8 @@ config = lib.mkIf (vmconf.containers != [])
                                     container_id = vars.container_id vmname servicename;
                                 in lib.mkMerge [
                                     (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.10";})
-                                    (sec.generateSecret container_id "${container_id}.key" {reload = ["container@ct-${servicename}.service"];})
+                                    (sec.generateSecret container_id 
+                                            {names = ["${container_id}.key"]; reload = ["container@ct-${servicename}.service"];})
                                     (lib.mkIf (lib.hasAttr servicename registry.services)
                                         (lib.mkMerge 
                                             (lib.map 
