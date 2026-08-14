@@ -6,8 +6,8 @@
 let
 
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra pkgs registry;};
     age = import ../age.nix {inherit inputs lib infra pkgs registry;};
-    vars = import ../vars.nix {inherit inputs lib infra pkgs registry;};
     bootstrap_step_ca = ''
         PWD=$(pwd)
         export STEPPATH="$PWD/${infra.secretsPath}/plain/CA";

@@ -3,15 +3,15 @@
 let
 
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra pkgs registry;};
     age = import ./age.nix {inherit inputs lib infra pkgs registry;};
-    vars = import ./vars.nix {inherit inputs lib infra pkgs registry;};
     pvds = import ./providers {inherit inputs lib infra pkgs registry;};
 
     #unique identifier for a container
     #all containers names (key = "ct-vmname-service")
     ctnames = lib.concatLists (
                     lib.mapAttrsToList (vmname: vmconf: 
-                        lib.map (service: vars.get-ct-id vmname service ) vmconf.containers) infra.vms);
+                        lib.map (service: utils.container-id vmname service ) vmconf.containers) infra.vms);
     
     # all vm + containers identities
     all_names = builtins.attrNames infra.vms ++ ctnames;
@@ -39,7 +39,7 @@ let
                             (vmname: vmconf:
                                 utils.mergeAll 
                                     (lib.map 
-                                        (service: {${vars.get-ct-id vmname service} = [registry.services.${service}];})
+                                        (service: {${utils.container-id vmname service} = [registry.services.${service}];})
                                         vmconf.containers))
                             infra.vms);
 

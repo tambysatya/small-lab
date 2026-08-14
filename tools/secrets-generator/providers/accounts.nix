@@ -5,14 +5,15 @@
 {inputs, lib, infra, registry, pkgs, ...}:
 
 let
+    utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra registry pkgs;};
     age = import ../age.nix {inherit inputs lib infra registry pkgs;};
-    vars = import ../vars.nix {inherit inputs lib infra registry pkgs;};
     pw = import ./passwords.nix {inherit inputs lib infra registry pkgs;};
 
 
     # list of the hosts running garage (the S3 service)
     s3hosts = registry.services."garage".hosts.vms
-           ++ (lib.map (vmname: vars.get-ct-id vmname "garage") 
+           ++ (lib.map (vmname: utils.container-id vmname "garage") 
                     registry.services."garage".hosts.containers);
     processS3Secrets = recipient: serviceslist:
         let s3access = lib.concatMap (srv: srv.s3Accesses) serviceslist;
@@ -41,7 +42,7 @@ let
 
     # list of the hosts running postgres (the DB service)
     dbhosts = registry.services."postgres".hosts.vms
-           ++ (lib.map (vmname: vars.get-ct-id vmname "postgres") 
+           ++ (lib.map (vmname: utils.container-id vmname "postgres") 
                     registry.services."postgres".hosts.containers);
 
     processDBSecrets = recipient: serviceslist:

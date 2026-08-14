@@ -3,7 +3,7 @@
 {inputs, lib, infra, registry, pkgs, ...}:
 let
     age = import ../age.nix {inherit inputs lib infra registry pkgs;};
-    vars = import ../vars.nix {inherit inputs lib infra registry pkgs;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra registry pkgs;};
     gen_password = name: size: type:
         ''
             mkdir -p ${vars.plain}

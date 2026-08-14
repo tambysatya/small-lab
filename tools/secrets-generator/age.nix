@@ -2,7 +2,7 @@
 {inputs, lib, pkgs, infra, registry, ...}:
 
 let
-    vars = import ./vars.nix {inherit inputs lib pkgs infra registry;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib pkgs infra registry;};
     gen_age = name:  #Generate an AGE keypair for a vm or a container
         ''
             TARGET=${vars.age}/${lib.escapeShellArg name}
