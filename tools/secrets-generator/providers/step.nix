@@ -8,9 +8,16 @@ let
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra pkgs registry;};
     age = import ../age.nix {inherit inputs lib infra pkgs registry;};
+
+
+    # identities hosting step-ca
+    stepcahosts = registry.services."step-ca".hosts.vms
+                ++ (lib.map (vmname: vars.container_id vmname "step-ca") 
+                    registry.services."step-ca".hosts.containers);
     bootstrap_step_ca = ''
         PWD=$(pwd)
-        export STEPPATH="$PWD/${infra.secretsPath}/plain/CA";
+        mkdir -p ${vars.plain}
+        export STEPPATH="$PWD/${vars.plain}/CA";
         CA_NAME="ca.${infra.domain}"
 
         if [[ ! -d $STEPPATH ]]; then
@@ -18,11 +25,11 @@ let
             umask 077
             ${lib.getExe pkgs.openssl} rand -base64 48 \
                 | tr -d '\n' \
-                > "$STEPPATH"/ca-password
+                > "$STEPPATH"/ca-password.key
             ${lib.getExe pkgs.step-cli} ca init \
                 --dns $CA_NAME \
                 --name $CA_NAME \
-                --password-file "$STEPPATH"/ca-password \
+                --password-file "$STEPPATH"/ca-password.key \
                 --deployment-type standalone \
                 --address :443 \
                 --provisioner=ca
@@ -36,6 +43,11 @@ let
                 | tr -d '\n' \
                 > "$STEPPATH/fingerprint" # step adds a \n at the end of the line
         fi
+
+        cp "$STEPPATH/ca-password.key" ${vars.plain}/
+
+        ${lib.concatStringsSep "\n" 
+            (lib.map (recipient: age.encrypt recipient  "ca-password.key") stepcahosts)}
         
         mkdir -p ${vars.git}
         cp "$STEPPATH/fingerprint" ${vars.git}
@@ -62,7 +74,7 @@ let
                     ${crtname} "$TARGET_PATH/${crtname}.crt" "$TARGET_PATH/${crtname}.key" \
                     --san ${crtname} \
                     --ca "$STEPPATH/certs/intermediate_ca.crt" --ca-key "$STEPPATH/secrets/intermediate_ca_key" \
-                    --ca-password-file "$STEPPATH/ca-password" \
+                    --ca-password-file "$STEPPATH/ca-password.key" \
                     --no-password --insecure
             '';
 

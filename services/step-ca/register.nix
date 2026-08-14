@@ -5,7 +5,7 @@ let
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
     reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
     secrets = {
-        names = ["ca-password.key" "intermediate_ca.key" "intermediate_ca.crt" "root_ca.crt"];
+        names = ["ca-password.key"];
         owner = "step-ca";
         kind = {provider = "step";};
     };
