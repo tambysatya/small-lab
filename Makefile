@@ -19,6 +19,10 @@ mount:
 	# mounts the vm-provisioning repo
 	sshfs vm-provisioning:git/secrets-provisioner/ssl secrets/plain/certs
 	sshfs vm-provisioning:git/secrets-provisioner/tokens tokens
+gen-secrets:
+	nix run .#gen-secrets
+terranix:
+	nix build --impure .#terranix -o test.tf.json
 deploy :
 
 	 ./scripts/bootstrap-secrets.sh

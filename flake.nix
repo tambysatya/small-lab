@@ -27,7 +27,7 @@
       lib = nixpkgs.lib;
       pkgs = nixpkgs.legacyPackages.${system};
 
-      terranix-generator_fun = (import ./lib/generators/terranix {inherit lib inputs;}).generator;
+      terranix-generator_fun = (import ./lib/terranix {inherit lib inputs;}).generator;
       terranix-generator  = 
         {inventory, extraArgs ? {}}:
         let 
@@ -52,7 +52,7 @@
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/infra
                   inventory];
-                specialArgs = extraArgs;
+                specialArgs = {inherit inputs; } // extraArgs;
                }).config.infra;
 
       compile-registry = infra:
@@ -64,14 +64,8 @@
                             specialArgs = {inherit inputs lib pkgs infra vmname vmconf;};
                             modules = [
                                 ./modules/registry
-                                ./modules/garage/register.nix
-                                ./modules/keycloak/register.nix
-                                ./modules/openldap/register.nix
-                                ./modules/postgres/register.nix
-                                ./modules/step-ca/register.nix
-                                ./modules/nextcloud/register.nix
                             ];
-                        }).config.infra-services.registry)
+                        }).config.registry)
                     infra.vms);
 
 
@@ -87,19 +81,18 @@
                                         inherit inputs infra registry vmname vmconf;
                                     };
                                     modules = [
-                                            ./modules/disko-vm.nix
                                             ./profiles/vm.nix
 
-                                            ./modules/registry
-                                            ./modules/registry/lib/processing
+                                            ./modules/registry/compiler
 
-                                            ./modules/step-renew
-                                            ./modules/step-ca
-                                            ./modules/openldap
-                                            ./modules/keycloak
-                                            ./modules/garage
-                                            ./modules/postgres
-                                            ./modules/nextcloud
+                                            ./services/disko-vm.nix
+                                            ./services/step-renew
+                                            ./services/step-ca
+                                            ./services/openldap
+                                            ./services/keycloak
+                                            ./services/garage
+                                            ./services/postgres
+                                            ./services/nextcloud
 
                                         ];
                                 })
@@ -107,15 +100,91 @@
 
         in configs;
 
+        extraArgs = {path=inputs.self.outPath;};
+        test-infra = compile-infra {
+                        inventory = ./examples/example.nix;
+                        inherit extraArgs;
+                     };
+        test-registry = compile-registry test-infra;
+        terranix-conf = terranix-generator_fun test-infra;
+
+
+        compile-gen-secrets = 
+            args@{infra, registry}:
+                let script =(import tools/secrets-generator/main.nix 
+                                {inherit inputs lib pkgs;
+                                 inherit (args) infra registry;}).main;
+                in {
+                    packages.${system}.gen-secrets = script;
+                    apps.${system}.gen-secrets = {
+                        type = "app";
+                        program = lib.getExe script;
+                    };
+                };
+                            
+
+    
+
+        gen-infra = 
+            file: 
+            flake-path:
+                compile-infra {
+                    inventory = file;
+                    extraArgs = {path=flake-path;};
+                };
+        gen-registry = 
+            file: flake-path: compile-registry (gen-infra file flake-path);
+        
+        gen-terranix = 
+            file: flake-path: terranix.lib.terranixConfiguration {
+                            inherit system;
+                            modules = [terranix-generator_fun (gen-infra file flake-path)];
+                        };
+        gen-secrets =
+            file: flake-path:
+                let infra = gen-infra file flake-path;
+                    registry = compile-registry infra;
+                in compile-gen-secrets {inherit infra registry;};
+
+        gen-nixos =
+            file: file-path: nixos-generator {inventory = file; extraArgs = {path=file-path;};};
+
+            
+
         
 
-    in {
-      generators = {
-        terranix = terranix-generator; 
-        nixos = nixos-generator;
-        infra = compile-infra;
-        registry = compile-registry;
+    in compile-gen-secrets {infra = test-infra; registry=test-registry;} //{
+     # generators = {
+     #   terranix = terranix-generator; 
+     #   nixos = nixos-generator;
+     #   infra = compile-infra;
+     #   registry = compile-registry;
+     # };
+      lib = {
+        inherit gen-infra gen-registry gen-terranix gen-secrets gen-nixos;
       };
+
+      /*
+      packages.${system} = {
+         gen-secrets = gen-secrets.main;
+      };
+      apps.${system} = {
+            gen-secrets = {
+                type = "app";
+                program = lib.getExe gen-secrets.main;
+            };
+      };
+      */
+
+      infra = test-infra;
+      registry = test-registry;
+      #terranix = terranix;
+      terranix = terranix.lib.terranixConfiguration {
+                                inherit system;
+                                modules = [{config=terranix-conf;}];
+                            };
+      nixosConfigurations = gen-nixos ./examples/example.nix inputs.self.outPath;
+                   
 
       #nixosConfigurations = configs;
       #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);

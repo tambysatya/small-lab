@@ -1,12 +1,16 @@
-{ lib, config, ... }:
+{inputs, lib, config, ... }:
 
 let
-  types = import ./types.nix { inherit lib; };
+  types = import "${inputs.self.outPath}/lib/infra/types.nix" { inherit lib; };
 in
 {
   /* Options definitions */
   options.infra = {
-    secrets-path = lib.mkOption {
+    flakePath = lib.mkOption {
+        description = "path to the root of the input flake";
+        type = types.str;
+    };
+    secretsPath = lib.mkOption {
         description = "root repository of secrets";
         type = types.str;
     };
@@ -25,7 +29,7 @@ in
         example = "infra.local";
     };
 
-    subnet = lib.mkOption {
+    vmSubnet = lib.mkOption {
         type = types.str;
         example = "10.0.1.0/24";
         description = "Subnet of the vlan";
@@ -39,7 +43,7 @@ in
       type = types.str;
       description = "Address of the gateway for the default route";
     };
-    root_ssh_pubkeys = lib.mkOption {
+    rootSSHPublicKeys = lib.mkOption {
       type = types.listOf types.str;
       description = "A list of SSH keys that will be allowed to connect as root";
     };

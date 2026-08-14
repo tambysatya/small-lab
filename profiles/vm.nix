@@ -43,16 +43,16 @@ config = {
               };
 
               /* Mounts additional disks */
-              fileSystems = utils.mergeAll (lib.map 
-                              (disk: {
-                                      "${disk.bind}" = {
+              fileSystems = utils.mergeAll (lib.mapAttrsToList
+                              (bind: disk: {
+                                      bind = {
                                           device = "/dev/${disk.dst}";   
                                           fsType = disk.fsType;
                                           options = disk.options;
                                       };
                                 }) vmconf.additionalDisks);
               services.openssh.enable = true;
-              users.users.root.openssh.authorizedKeys.keys = infra.root_ssh_pubkeys;
+              users.users.root.openssh.authorizedKeys.keys = infra.rootSSHPublicKeys;
 
 
               networking.firewall = { #TODO

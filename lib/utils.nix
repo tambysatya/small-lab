@@ -1,5 +1,5 @@
 {lib,...}:
-            
+
   /* Merges two attrsets recursively (concatenates submodules, lists,...) */
 rec{
     merge = a: b:
