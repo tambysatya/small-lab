@@ -37,6 +37,7 @@ let
                 > "$STEPPATH/fingerprint" # step adds a \n at the end of the line
         fi
         
+        mkdir -p ${vars.git}
         cp "$STEPPATH/fingerprint" ${vars.git}
         cp "$STEPPATH/config/ca.json" ${vars.git}
         cp "$STEPPATH/certs/root_ca.crt" ${vars.git}

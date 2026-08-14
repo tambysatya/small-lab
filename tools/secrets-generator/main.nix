@@ -43,6 +43,16 @@ let
                                         vmconf.containers))
                             infra.vms);
 
+    applyProvider =
+        natives: containers:
+        provider: 
+        ''
+            ${lib.concatStringsSep "\n" 
+                (lib.mapAttrsToList
+                    (vmname: serviceslist:
+                        provider vmname serviceslist)
+                    (utils.mergeAll [natives containers]))}
+        '';
 
 
 in
@@ -62,65 +72,22 @@ in
                     ${gen_all_ages}
                     ${pvds.bootstrap_step_ca}
 
-                    #Password Secrets
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (vmname: serviceslist:
-                                pvds.processPasswordSecrets vmname serviceslist)
-                            allServices)}
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (ctname: serviceslist:
-                                pvds.processPasswordSecrets ctname serviceslist)
-                            allContainers)}
+                    # Password Secrets
+                    ${applyProvider allServices allContainers pvds.processPasswordSecrets}
 
-                    #S3Secrets
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (vmname: serviceslist:
-                                pvds.processS3Secrets vmname serviceslist)
-                            allServices)}
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (vmname: serviceslist:
-                                pvds.processS3Secrets vmname serviceslist)
-                            allContainers)}
+                    # S3Secrets
+                    ${applyProvider allServices allContainers pvds.processS3Secrets}
 
-                    #DBSecrets
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (vmname: serviceslist:
-                                pvds.processDBSecrets vmname serviceslist)
-                            allServices)}
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (vmname: serviceslist:
-                                pvds.processDBSecrets vmname serviceslist)
-                            allContainers)}
+                    # DBSecrets
+                    ${applyProvider allServices allContainers pvds.processDBSecrets}
 
-                    #Certificates
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (vmname: serviceslist:
-                                pvds.processSSLCertificates vmname serviceslist)
-                            allServices)}
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (vmname: serviceslist:
-                                pvds.processSSLCertificates vmname serviceslist)
-                            allContainers)}
-                    #Endpoints
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (vmname: serviceslist:
-                                pvds.processHTTPEndpoints vmname serviceslist)
-                            allServices)}
-                    ${lib.concatStringsSep "\n" 
-                        (lib.mapAttrsToList
-                            (vmname: serviceslist:
-                                pvds.processHTTPEndpoints vmname serviceslist)
-                            allContainersInVM)}
+                    # Certificates
+                    ${applyProvider allServices allContainers pvds.processSSLCertificates}
 
+                    # Endpoints
+                    # Applied on allContainersInVM insted of allContainers because the certificate
+                    # is encrypted for the host and not for the container
+                    ${applyProvider allServices allContainersInVM pvds.processHTTPEndpoints} 
 
                     #Tokens generation for the secret provisionner
                     ${lib.concatStringsSep "\n"
