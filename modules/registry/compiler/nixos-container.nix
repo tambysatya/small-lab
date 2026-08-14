@@ -7,7 +7,7 @@
 let
 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs pkgs;};
-    sec = import ../security.nix {inherit lib inputs registry infra vmname;};
+    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
 
     initialize-host = {
           networking.nat = {
@@ -71,7 +71,7 @@ config = lib.mkIf (vmconf.containers != [])
                                     container_id = vars.container_id vmname servicename;
                                 in lib.mkMerge [
                                     (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.10";})
-                                    (sec.generateSecret container_id 
+                                    (sec.generateSecret 
                                             {names = ["${container_id}.key"]; reload = ["container@ct-${servicename}.service"];})
                                     (lib.mkIf (lib.hasAttr servicename registry.services)
                                         (lib.mkMerge 

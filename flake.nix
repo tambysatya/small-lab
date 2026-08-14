@@ -83,7 +83,7 @@
                                     modules = [
                                             ./profiles/vm.nix
 
-                                            ./lib/registry/compiler
+                                            ./modules/registry/compiler
 
                                             ./services/disko-vm.nix
                                             ./services/step-renew

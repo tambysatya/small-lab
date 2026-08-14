@@ -4,7 +4,7 @@
 
 let 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
-    sec = import ../security.nix {inherit lib inputs registry infra vmname;};
+    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
 
     processEndpoints = servicename: reg:
         let
