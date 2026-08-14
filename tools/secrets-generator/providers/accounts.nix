@@ -11,6 +11,17 @@ let
     pw = import ./passwords.nix {inherit inputs lib infra registry pkgs;};
 
 
+    bootstrap_ldap = # generates and hash a root password
+        if ! builtins.hasAttr "openldap" registry.services
+        then '' ''
+        else ''
+                ${pw.gen_password "ldap-adminpass" 64 "hex"}
+                cat ${vars.plain}/ldap-adminpass \
+                    | ${pkgs.openldap}/bin/slappasswd -s -- -h "{SSHA}" \
+                    > ${vars.git}/ldap-adminpass.ssha
+             '';
+
+
     # list of the hosts running garage (the S3 service)
     s3hosts = registry.services."garage".hosts.vms
            ++ (lib.map (vmname: vars.container_id vmname "garage") 
@@ -64,5 +75,5 @@ let
 
 in
 {
-    inherit processS3Secrets processDBSecrets;
+    inherit bootstrap_ldap processS3Secrets processDBSecrets;
 }

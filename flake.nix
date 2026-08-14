@@ -81,19 +81,19 @@
                                         inherit inputs infra registry vmname vmconf;
                                     };
                                     modules = [
-                                            ./modules/disko-vm.nix
                                             ./profiles/vm.nix
 
                                             ./modules/registry
-                                            ./modules/registry/lib/processing
+                                            ./lib/registry/compiler
 
-                                            ./modules/step-renew
-                                            ./modules/step-ca
-                                            ./modules/openldap
-                                            ./modules/keycloak
-                                            ./modules/garage
-                                            ./modules/postgres
-                                            ./modules/nextcloud
+                                            ./services/disko-vm.nix
+                                            ./services/step-renew
+                                            ./services/step-ca
+                                            ./services/openldap
+                                            ./services/keycloak
+                                            ./services/garage
+                                            ./services/postgres
+                                            ./services/nextcloud
 
                                         ];
                                 })
@@ -147,6 +147,9 @@
                     registry = compile-registry infra;
                 in compile-gen-secrets {inherit infra registry;};
 
+        gen-nixos =
+            file: file-path: nixos-generator {inventory = file; extraArgs = {path=file-path;};};
+
             
 
         
@@ -159,7 +162,7 @@
      #   registry = compile-registry;
      # };
       lib = {
-        inherit gen-infra gen-registry gen-terranix gen-secrets;
+        inherit gen-infra gen-registry gen-terranix gen-secrets gen-nixos;
       };
 
       /*
@@ -181,6 +184,7 @@
                                 inherit system;
                                 modules = [{config=terranix-conf;}];
                             };
+      nixosConfigurations = gen-nixos ./examples/example.nix inputs.self.outPath;
                    
 
       #nixosConfigurations = configs;

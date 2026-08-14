@@ -70,7 +70,9 @@ in
             # For each kind of secret, we generate for the services running natively AND running within a container
             text = ''
                     ${gen_all_ages}
+
                     ${pvds.bootstrap_step_ca}
+                    ${pvds.bootstrap_ldap}
 
                     # Password Secrets
                     ${applyProvider allServices allContainers pvds.processPasswordSecrets}

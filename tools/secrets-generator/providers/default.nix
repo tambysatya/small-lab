@@ -7,7 +7,7 @@ let
     step = import ./step.nix {inherit inputs lib infra registry pkgs;};
 in {
     inherit (pw) processPasswordSecrets;
-    inherit (accounts) processS3Secrets processDBSecrets;
+    inherit (accounts) bootstrap_ldap processS3Secrets processDBSecrets;
     inherit (step) bootstrap_step_ca processSSLCertificates processHTTPEndpoints;
 
 }

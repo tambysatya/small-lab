@@ -6,7 +6,9 @@
 
 let
 
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs pkgs;};
     sec = import ../security.nix {inherit lib inputs registry infra vmname;};
+
     initialize-host = {
           networking.nat = {
             enable = true;
@@ -19,8 +21,8 @@ let
     # creates an entry of containers= on the host
     mkContainer = {servicename, host-addr, local-addr}:  
         {
-           containers."ct-${servicename}" = 
-               let ct-name = "ct-${servicename}";
+           containers."${servicename}" = 
+               let ct-name = vars.container_id vmname servicename;
                    ct-conf = {
                         inherit (vmconf) host vcpu memory;
                         services = [servicename];
@@ -32,7 +34,7 @@ let
                     hostAddress = host-addr;
                     localAddress = local-addr;
                     bindMounts."/var/lib/sops-nix/key.txt" = { #mounting the age key of the volume
-                        hostPath = "/run/secrets/ct-${servicename}.key";
+                        hostPath = "/run/secrets/${ct-name}.key";
                         isReadOnly = true;
                     };
                     config = {...}:{
@@ -45,11 +47,11 @@ let
                             "${inputs.self.outPath}/modules/step-renew"
                             "${inputs.self.outPath}/profiles/base.nix"
                             "${inputs.self.outPath}/modules/registry"
-                            "${inputs.self.outPath}/modules/registry/lib/processing/baremetal.nix"
+                            "${inputs.self.outPath}/lib/registry/compiler/native.nix"
                             inputs.sops-nix.nixosModules.sops
                             
                         ]; 
-                        networking.hostName = "ct-${servicename}";
+                        networking.hostName = ct-name;
                         time.timeZone = "Europe/Paris";
                         i18n.defaultLocale = "fr_FR.UTF-8";
                     };
@@ -66,9 +68,10 @@ config = lib.mkIf (vmconf.containers != [])
                         (lib.imap
                             (i: servicename: 
                                 let local-addr = "192.168.100.${lib.toString (50+i)}";
+                                    container_id = vars.container_id vmname servicename;
                                 in lib.mkMerge [
                                     (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.10";})
-                                    (sec.generateSecret "ct-${servicename}" "ct-${servicename}.key" {reload = ["container@ct-${servicename}.service"];})
+                                    (sec.generateSecret container_id "${container_id}.key" {reload = ["container@ct-${servicename}.service"];})
                                     (lib.mkIf (lib.hasAttr servicename registry.services)
                                         (lib.mkMerge 
                                             (lib.map 

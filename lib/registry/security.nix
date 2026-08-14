@@ -5,18 +5,17 @@
 
 let 
 
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra inputs;};
     # Generate the sops options for an attrset of secrets (same owner, same reloadUnit
-
     generateSecret = 
       servicename: secretname: secret:
-          let secretFile = "${infra.secrets-path}/encrypted/${vmname}-${secretname}.enc";
+          let secretFile = "${vars.enc}/${vmname}-${secretname}.enc";
           in lib.mkMerge [
           {
 
             sops.age.keyFile = "/var/lib/sops-nix/key.txt";
             sops.secrets."${secretname}" = {
                 sopsFile = secretFile;
-                path = secret.path or "/run/secrets/${secretname}";
                 format = "binary";
                 owner = secret.owner or "root";
                 restartUnits = secret.reload;
@@ -40,8 +39,8 @@ let
        servicename: certname: sslcert:
        let
             secrets = {
-                "${certname}.crt" = {owner = sslcert.owner; path = sslcert.cert; reload=sslcert.reload;};
-                "${certname}.key" = {owner = sslcert.owner; path = sslcert.key; reload=sslcert.reload;};
+                "${certname}.crt" = {owner = sslcert.owner; reload=sslcert.reload;};
+                "${certname}.key" = {owner = sslcert.owner; reload=sslcert.reload;};
             };
        in
           lib.mkMerge [
@@ -52,8 +51,8 @@ let
                 services.step-renew = {
                     enable = true;
                     caURL = "${infra.caURL}:${lib.toString infra.caPort}";
-                    caFingerprint = builtins.readFile "${infra.secrets-path}/plain/CA/fingerprint";
-                    certs."${certname}" = sslcert;
+                    caFingerprint = builtins.readFile "${vars.git}/fingerprint";
+                    certs."${certname}" = {cert = "/run/secrets/${certname}.crt"; key="/run/secrets/${certname}.key";};
                 };
            }];
 
@@ -64,8 +63,6 @@ let
         in lib.mkMerge [
             (generateCertificate "nginx" fronthost 
                 {
-                    cert = "/run/secrets/${fronthost}.crt"; 
-                    key = "/run/secrets/${fronthost}.key";
                     reload = ["nginx.service"];
                     owner = "nginx";
                 })

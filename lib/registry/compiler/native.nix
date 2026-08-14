@@ -3,6 +3,7 @@
 /* Bare metal service managment */
 
 let 
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
     sec = import ../security.nix {inherit lib inputs registry infra vmname;};
 
     processEndpoints = servicename: reg:
@@ -13,7 +14,7 @@ let
                                                backhost = "http://127.0.0.1:${lib.toString port}";
                                                inherit extraNginxConfig;}
                 else {}; #TODO pnat
-        in lib.mkIf (! config.infra-compiler.no-endpoints)
+        in lib.mkIf (! config.registry-compiler.no-endpoints)
             (lib.mkMerge 
                 (lib.map processEndpoint (
                          lib.filter (endpoint: endpoint.is_http)
@@ -35,7 +36,7 @@ let
         lib.mkMerge 
             (lib.map
                 (access:
-                    let secretname = "${servicename}-${access.table}-db.key";
+                    let secretname = vars.db_key access;
                     in sec.generateSecret servicename secretname 
                         {inherit (access) owner reload;} )
                 (reg.dbAccesses or []));
@@ -45,13 +46,8 @@ let
         lib.mkMerge
             (lib.map 
                 (access:
-                    let secret-basename = "${servicename}-${access.bucket}-s3";
-                    in lib.mkMerge [
-                            (sec.generateSecret servicename "${secret-basename}-id.key"
-                                {inherit (access) owner reload;})
-                            (sec.generateSecret servicename "${secret-basename}.key"
-                                {inherit (access) owner reload;})
-                        ])
+                    (sec.generateSecret servicename (vars.s3_key access)
+                        {inherit (access) owner reload;}))
                 (reg.S3Accesses or []));
 
 

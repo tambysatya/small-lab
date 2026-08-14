@@ -6,8 +6,6 @@ in
 
     sslCertificate = types.submodule {
         options = {
-            cert = lib.mkOption {type=types.str;};
-            key = lib.mkOption {type = types.str;};
             reload = lib.mkOption {type = types.listOf types.str;};
             owner = lib.mkOption {type = types.str; default = "root";};
         };

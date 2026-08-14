@@ -1,6 +1,6 @@
 /* Standard definitions of names, paths... */
 
-{lib, infra, registry, inputs,...}:
+{lib, infra, inputs,...}:
 
 let
 

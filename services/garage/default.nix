@@ -6,7 +6,7 @@ let
 
     s3lib = import ./lib.nix {inherit lib pkgs config;};
     servicenames = lib.concatMap (v: v.use-s3) (lib.attrValues registry.vms);
-    accesses = lib.concatMap (v: registry.services.${v}.S3Accesses) servicenames;
+    accesses = lib.concatMap (v: registry.services.${v}.s3Accesses) servicenames;
     secrets = lib.map 
                     (args: let name = args.fst;
                                access = args.snd;

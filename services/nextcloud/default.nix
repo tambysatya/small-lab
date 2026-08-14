@@ -1,4 +1,4 @@
-{ config, lib, pkgs, infra, vmname, vmconf, ... }:
+{ inputs, config, lib, pkgs, infra, vmname, vmconf, ... }:
 
 # https://danubedata.ro/blog/nextcloud-s3-compatible-primary-storage-2026
 

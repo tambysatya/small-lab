@@ -4,7 +4,7 @@
 
 {
 	imports = [
-		   ../modules/packages.nix # default packages installed system-wide
+		   ../services/packages.nix # default packages installed system-wide
     ];
 
 	nix.settings.experimental-features = ["nix-command" "flakes"]; #enable flakes

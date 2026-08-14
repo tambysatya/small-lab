@@ -1,7 +1,7 @@
 {lib, infra, registry, config, vmname, inputs,...}:
 {
     imports = [
-               ./baremetal.nix
+               ./native.nix
                ./nixos-container.nix
               ];    
 }

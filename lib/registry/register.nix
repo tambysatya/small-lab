@@ -30,8 +30,6 @@ let
         lib.mkMerge [
                 {
                     registry.services."${servicename}".sslCertificates."${vhost}" = {
-                        cert = "/run/secrets/${vhost}.crt";
-                        key = "/run/secrets/${vhost}.key";
                         inherit owner reload;
                     };
                     
