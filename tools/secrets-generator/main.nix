@@ -11,7 +11,7 @@ let
     #all containers names (key = "ct-vmname-service")
     ctnames = lib.concatLists (
                     lib.mapAttrsToList (vmname: vmconf: 
-                        lib.map (service: vars.container-id vmname service ) vmconf.containers) infra.vms);
+                        lib.map (service: vars.container_id vmname service ) vmconf.containers) infra.vms);
     
     # all vm + containers identities
     all_names = builtins.attrNames infra.vms ++ ctnames;
@@ -39,7 +39,7 @@ let
                             (vmname: vmconf:
                                 utils.mergeAll 
                                     (lib.map 
-                                        (service: {${vars.container-id vmname service} = [registry.services.${service}];})
+                                        (service: {${vars.container_id vmname service} = [registry.services.${service}];})
                                         vmconf.containers))
                             infra.vms);
 

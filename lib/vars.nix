@@ -3,15 +3,23 @@
 {lib, infra, registry, inputs,...}:
 
 let
+
+    #paths 
     path = infra.secretsPath;
     age = lib.escapeShellArg "${lib.escapeShellArg infra.secretsPath}/age";
     plain = "${lib.escapeShellArg infra.secretsPath}/plain";
     git = "${lib.escapeShellArg infra.secretsPath}/git"; #everything that can be versionned
     enc = "${git}/enc";
 
-    container-id = vmname: service: "ct-${vmname}-${service}"; #returns the containers ID
+    #naming conventions
+    container_id = vmname: service: "ct-${vmname}-${service}"; #returns the containers ID
+    s3_key_id = access@{bucket,...}: "s3-${bucket}_id";
+    s3_key = access@{bucket,...}: "s3-${bucket}.key";
+
+    db_key = access@{role, table, ...}: "db-${role}-${table}.key";
 
 in {
     inherit path age plain git enc;
-    inherit container-id;
+    inherit container_id;
+    inherit s3_key s3_key_id db_key;
 }

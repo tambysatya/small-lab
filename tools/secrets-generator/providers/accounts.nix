@@ -13,7 +13,7 @@ let
 
     # list of the hosts running garage (the S3 service)
     s3hosts = registry.services."garage".hosts.vms
-           ++ (lib.map (vmname: vars.container-id vmname "garage") 
+           ++ (lib.map (vmname: vars.container_id vmname "garage") 
                     registry.services."garage".hosts.containers);
     processS3Secrets = recipient: serviceslist:
         let s3access = lib.concatMap (srv: srv.s3Accesses) serviceslist;
@@ -22,27 +22,27 @@ let
             ${lib.concatMapStringsSep "\n" 
                 (access:
                     ''
-                        ${pw.gen_password "s3-${access.bucket}_id" 64 "hex"}
-                        cp ${vars.plain}/s3-${access.bucket}_id ${vars.git}/
+                        ${pw.gen_password (vars.s3_key_id access) 64 "hex"}
+                        cp ${vars.plain}/${vars.s3_key_id access} ${vars.git}/
                     '') s3access}
             ${lib.concatMapStringsSep "\n" 
-                (access: pw.gen_password "s3-${access.bucket}.key" 64 "hex") s3access}
+                (access: pw.gen_password (vars.s3_key access) 64 "hex") s3access}
             ${lib.concatMapStringsSep "\n"
                 (age.encrypt recipient) 
-                (lib.map (access: "s3-${access.bucket}.key") s3access)}
+                (lib.map vars.s3_key s3access)}
             ${lib.concatMapStringsSep "\n"
                 (filename:
                     lib.concatMapStringsSep "\n"
                         (recipient: age.encrypt recipient filename) 
                         s3hosts)
-                (lib.map (access: "s3-${access.bucket}.key") s3access)}
+                (lib.map vars.s3_key s3access)}
 
 
         '';
 
     # list of the hosts running postgres (the DB service)
     dbhosts = registry.services."postgres".hosts.vms
-           ++ (lib.map (vmname: vars.container-id vmname "postgres") 
+           ++ (lib.map (vmname: vars.container_id vmname "postgres") 
                     registry.services."postgres".hosts.containers);
 
     processDBSecrets = recipient: serviceslist:
@@ -50,16 +50,16 @@ let
         in ''
             #DB Accesses for ${recipient}
             ${lib.concatMapStringsSep "\n" 
-                (access: pw.gen_password "db-${access.role}-${access.table}.key" 64 "base64") dbaccess}
+                (access: pw.gen_password (vars.db_key access) 64 "base64") dbaccess}
             ${lib.concatMapStringsSep "\n"
                 (age.encrypt recipient) 
-                (lib.map (access: "db-${access.role}-${access.table}.key") dbaccess)}
+                (lib.map vars.db_key dbaccess)}
             ${lib.concatMapStringsSep "\n"
                 (filename:
                     lib.concatMapStringsSep "\n"
                         (recipient: age.encrypt recipient filename) 
                         dbhosts)
-                (lib.map (access: "db-${access.role}-${access.table}.key") dbaccess)}
+                (lib.map vars.db_key dbaccess)}
         '';
 
 in
