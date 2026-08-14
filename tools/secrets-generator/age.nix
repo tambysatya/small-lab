@@ -33,7 +33,19 @@ let
                 encrypt --age "$KEY" "$SRC" \
                 > "$TARGET"
         '';
+    encrypt_key = recipient: keyname: 
+        ''
+           mkdir -p ${vars.enc} 
+           SRC=${vars.age}/${lib.escapeShellArg keyname}
+           KEY=$(cat ${vars.age}/${lib.escapeShellArg recipient}.pub)
+           TARGET=${vars.enc}/${lib.escapeShellArg "${recipient}-${keyname}.enc"}
+           ${lib.getExe pkgs.sops} --input-type binary --output-type binary \
+                encrypt --age "$KEY" "$SRC" \
+                > "$TARGET"
+        '';
+
+
 
 in {
-    inherit gen_age encrypt gen_age_token; 
+    inherit gen_age encrypt encrypt_key gen_age_token; 
 }

@@ -21,6 +21,14 @@ let
                             (name: age.gen_age name)
                             all_names;
 
+    encrypt_containers_age = lib.concatMapStringsSep "\n"
+                                (vmname:
+                                    lib.concatMapStringsSep "\n"
+                                        (servicename:
+                                            age.encrypt_key vmname "${vars.container_id vmname servicename}.key")
+                                        infra.vms.${vmname}.containers)
+                                (builtins.attrNames infra.vms);
+
 
 
     # Gets the list of the register entries of all the services running natively (respect. within a container) on a vm
@@ -71,6 +79,7 @@ in
             # For each kind of secret, we generate for the services running natively AND running within a container
             text = ''
                     ${gen_all_ages}
+                    ${encrypt_containers_age}
 
                     ${pvds.bootstrap_step_ca}
                     ${pvds.bootstrap_ldap}
