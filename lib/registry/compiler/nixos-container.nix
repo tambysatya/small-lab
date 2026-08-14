@@ -38,7 +38,7 @@ let
                         isReadOnly = true;
                     };
                     config = {...}:{
-                        infra-compiler = {
+                        registry-compiler = {
                             no-endpoints = true; #do not process endpoints
                         };
                         imports = [

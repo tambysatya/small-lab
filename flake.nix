@@ -83,7 +83,6 @@
                                     modules = [
                                             ./profiles/vm.nix
 
-                                            ./modules/registry
                                             ./lib/registry/compiler
 
                                             ./services/disko-vm.nix

@@ -1,6 +1,7 @@
-{lib,pkgs, config, ...}:
+{lib,pkgs, config, inputs, infra, ...}:
 
 let
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra;};
     bootstrapNode = ''
                     set -euo pipefail
 
@@ -31,8 +32,8 @@ let
                         if ! ${pkgs.garage_2}/bin/garage key info ${servicename}; then
                             echo "Creating nextcloud key"
                                 ${pkgs.garage_2}/bin/garage key import --yes \
-                                $(cat  ${config.sops.secrets."${servicename}-${bucket}-s3-id.key".path}) \
-                                $(cat  ${config.sops.secrets."${servicename}-${bucket}-s3.key".path}) \
+                                $(cat  ${config.sops.secrets."${vars.s3_id access}".path}) \
+                                $(cat  ${config.sops.secrets."${vars.s3_key access}".path}) \
                                 -n ${servicename}
                                 ${pkgs.garage_2}/bin/garage bucket allow \
                                 --read \

@@ -23,7 +23,7 @@ let
     processSecrets = servicename: reg:
         lib.mkMerge 
             (lib.mapAttrsToList
-                   (sec.generateSecret servicename)
+                   (_: secret: sec.generateSecret secret)
                    (reg.secrets or {}));
     processCertificates = servicename: reg:
         lib.mkMerge
@@ -37,8 +37,8 @@ let
             (lib.map
                 (access:
                     let secretname = vars.db_key access;
-                    in sec.generateSecret servicename secretname 
-                        {inherit (access) owner reload;} )
+                    in sec.generateSecret 
+                        { names=[secretname]; inherit (access) owner reload;} )
                 (reg.dbAccesses or []));
 
     # Generates the secrets for a service requesting S3 accesses
@@ -46,8 +46,8 @@ let
         lib.mkMerge
             (lib.map 
                 (access:
-                    (sec.generateSecret servicename (vars.s3_key access)
-                        {inherit (access) owner reload;}))
+                    (sec.generateSecret 
+                        {names = [vars.s3_key access]; inherit (access) owner reload;}))
                 (reg.S3Accesses or []));
 
 

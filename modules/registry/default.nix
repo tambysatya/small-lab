@@ -10,7 +10,7 @@ let
 in 
 
 {
- imports = [./options.nix] ++ modules;    
+imports = [./options.nix] ++ modules;    
 config = lib.mkMerge [
             (lib.mkMerge
                 (lib.map (name: {registry.services."${name}".hosts.vms = [vmname];}) services))

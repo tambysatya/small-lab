@@ -3,33 +3,24 @@
 let 
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
     sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit inputs lib vmconf vmname infra;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra;};
 
-    s3lib = import ./lib.nix {inherit lib pkgs config;};
+    s3lib = import ./lib.nix {inherit lib pkgs config infra registry inputs;};
     servicenames = lib.concatMap (v: v.use-s3) (lib.attrValues registry.vms);
     accesses = lib.concatMap (v: registry.services.${v}.s3Accesses) servicenames;
-    secrets = lib.map 
-                    (args: let name = args.fst;
-                               access = args.snd;
-                            in {
-                                "${name}-${access.bucket}-s3-id.key" = {
-                                    path = "/run/secrets/${name}-s3-id.key";
-                                    reload = ["garage.service"];
-                                    owner = "garage";
-                                };
-                                "${name}-${access.bucket}-s3.key" = {
-                                    path = "/run/secrets/${name}-s3.key";
-                                    reload = ["garage.service"];
-                                    owner = "garage";
-                                };
+    
+    secret = {
+            names = lib.map vars.s3_key accesses; #all access keys
+            reload = ["garage.service"];
+            owner = "garage";
+    };
 
-                            })
-                    (lib.lists.zipLists servicenames accesses);
 
 in {
 config = lib.mkIf 
             (infralib.runsService "garage")
             (lib.mkMerge [
-                    (lib.mkMerge (lib.mapAttrsToList (sec.generateSecret "garage") (lib.foldl' lib.recursiveUpdate {} secrets)))
+                    (sec.generateSecret secret)
                     { 
                         services.garage = 
                         {
