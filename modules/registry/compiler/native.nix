@@ -47,8 +47,8 @@ let
             (lib.map 
                 (access:
                     (sec.generateSecret 
-                        {names = [vars.s3_key access]; inherit (access) owner reload;}))
-                (reg.S3Accesses or []));
+                        {names = [(vars.s3_key access)]; inherit (access) owner reload;}))
+                (reg.s3Accesses or []));
 
 
 in{

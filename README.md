@@ -27,3 +27,4 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - persistence of datas
 
 - should the compiler be a separate module ?
+- TODO: clash between sops + step: certificates cannot be stored in /run/secrets/ (at least step cannot erase the file decrypted by sops)

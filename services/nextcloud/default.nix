@@ -1,8 +1,9 @@
-{ inputs, config, lib, pkgs, infra, vmname, vmconf, ... }:
+{ inputs, config, lib, pkgs, infra, registry, vmname, vmconf, ... }:
 
 # https://danubedata.ro/blog/nextcloud-s3-compatible-primary-storage-2026
 
 let
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
     hostname = "nextcloud.${infra.domain}";
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
 in {
@@ -47,7 +48,7 @@ in {
             config.dbtype = "pgsql";
             config.dbhost = "postgres.${infra.domain}:5432";
             config.dbuser = "nextcloud";
-            config.dbpassFile = config.sops.secrets."nextcloud-nextcloud-db.key".path;
+            config.dbpassFile = config.sops.secrets."db-nextcloud-nextcloud.key".path;
             
             occ = ["user:report"];
 
@@ -66,7 +67,7 @@ in {
                 "opcache.save_comments" = 1;
             };
             settings = {
-                instanceid = builtins.readFile "${infra.secretsPath}/plain/nextcloud-instanceid";
+                #instanceid = builtins.readFile "${infra.secretsPath}/plain/nextcloud-instanceid";
                 loglevel = 1;
                 log_type = "file";
                 maintenance_window_start = 0;
@@ -76,7 +77,7 @@ in {
                 ];
                 trusted_proxies = [
                     #"162.38.243.60"
-                    infra.subnet
+                    infra.vmSubnet
                     
                 ];
                 overwritehost = "nextcloud.${infra.domain}";	
@@ -99,8 +100,8 @@ in {
                   region = "garage";
                   #autocreate = true;
                   verify_bucket_exists = true;
-                  key = builtins.readFile "${infra.secretsPath}/plain/tokens/nextcloud-nextcloud-s3-id.key"; #Key ID #TODO
-                  secretFile = config.sops.secrets."nextcloud-nextcloud-s3.key".path;
+                  key = builtins.readFile "${infra.flakePath}/${vars.git}/s3-nextcloud_id"; #Key ID #TODO
+                  secretFile = config.sops.secrets."s3-nextcloud.key".path;
 
                   hostname = "s3.${infra.domain}";
                   useSsl = true;

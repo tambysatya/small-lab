@@ -26,6 +26,7 @@ let
                    ct-conf = {
                         inherit (vmconf) host vcpu memory;
                         services = [servicename];
+                        containers = [];
                    };
                in {
                     specialArgs = {inherit inputs infra registry; vmname=ct-name; vmconf=ct-conf;}; #TODO
