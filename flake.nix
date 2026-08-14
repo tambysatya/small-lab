@@ -110,24 +110,59 @@
         terranix-conf = terranix-generator_fun test-infra;
 
 
-        gen-secrets = (import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs; infra=test-infra; registry=test-registry;}
-                          );
+        compile-gen-secrets = 
+            args@{infra, registry}:
+                let script =(import tools/secrets-generator/main.nix 
+                                {inherit inputs lib pkgs;
+                                 inherit (args) infra registry;}).main;
+                in {
+                    packages.${system}.gen-secrets = script;
+                    apps.${system}.gen-secrets = {
+                        type = "app";
+                        program = lib.getExe script;
+                    };
+                };
                             
+
     
+
+        gen-infra = 
+            file: 
+            flake-path:
+                compile-infra {
+                    inventory = file;
+                    extraArgs = {path=flake-path;};
+                };
+        gen-registry = 
+            file: flake-path: compile-registry (gen-infra file flake-path);
+        
+        gen-terranix = 
+            file: flake-path: terranix.lib.terranixConfiguration {
+                            inherit system;
+                            modules = [terranix-generator_fun (gen-infra file flake-path)];
+                        };
+        gen-secrets =
+            file: flake-path:
+                let infra = gen-infra file flake-path;
+                    registry = compile-registry infra;
+                in compile-gen-secrets {inherit infra registry;};
 
             
 
         
 
-    in {
-      generators = {
-        terranix = terranix-generator; 
-        nixos = nixos-generator;
-        infra = compile-infra;
-        registry = compile-registry;
+    in compile-gen-secrets {infra = test-infra; registry=test-registry;} //{
+     # generators = {
+     #   terranix = terranix-generator; 
+     #   nixos = nixos-generator;
+     #   infra = compile-infra;
+     #   registry = compile-registry;
+     # };
+      lib = {
+        inherit gen-infra gen-registry gen-terranix gen-secrets;
       };
 
+      /*
       packages.${system} = {
          gen-secrets = gen-secrets.main;
       };
@@ -137,10 +172,10 @@
                 program = lib.getExe gen-secrets.main;
             };
       };
+      */
 
       infra = test-infra;
       registry = test-registry;
-      test = gen-secrets.test;
       #terranix = terranix;
       terranix = terranix.lib.terranixConfiguration {
                                 inherit system;
