@@ -25,3 +25,5 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - unify the source of truth for the IP addresses
 
 - persistence of datas
+
+- should the compiler be a separate module ?
