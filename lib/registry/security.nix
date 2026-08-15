@@ -73,8 +73,8 @@ let
                     {
                         enable = true;
                         virtualHosts."${fronthost}" ={
-                            sslCertificate = "/run/secrets/${fronthost}.crt";
-                            sslCertificateKey = "/run/secrets/${fronthost}.key";
+                            sslCertificate = vars.ssl_crt_path fronthost;
+                            sslCertificateKey = vars.ssl_key_path fronthost;
                             forceSSL = true;
 
                             locations."/" = {

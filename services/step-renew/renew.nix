@@ -10,8 +10,8 @@ let
       (name: cert: ''
         echo "Renewing ${name}"
 
-        CRT_PATH=/run/secrets/${name}.crt
-        KEY_PATH=/run/secrets/${name}.key
+        CRT_PATH=/var/lib/step/ssl/${name}.crt
+        KEY_PATH=/var/lib/step/ssl/${name}.key
 
         old_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
 
