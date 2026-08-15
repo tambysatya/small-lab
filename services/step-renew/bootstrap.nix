@@ -29,6 +29,7 @@ in
       wantedBy = [ "multi-user.target" ];
 
       before = [ "step-renew.service" ] ++ lib.concatLists (lib.mapAttrsToList (_: cert: cert.reload) cfg.certs);
+      requiredBy = [ "step-renew.service" ] ++ lib.concatLists (lib.mapAttrsToList (_: cert: cert.reload) cfg.certs);
       #depends on step-ca if installed locally
       after = ["network-online.target"] ++ lib.optional config.services.step-ca.enable "step-ca.service";
       requires = ["network-online.target"] ++ lib.optional config.services.step-ca.enable "step-ca.service";
