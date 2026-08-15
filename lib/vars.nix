@@ -12,8 +12,8 @@ let
     enc = "${git}/enc";
     ssl_root =  "/var/lib/ssl";
     ssl_basedir = name: "${ssl_root}/${name}";
-    ssl_crt_path = name: "${ssl_basedir name}/${name}/${name}.crt";
-    ssl_key_path = name: "${ssl_basedir name}/${name}/${name}.key";
+    ssl_crt_path = name: "${ssl_basedir name}/${name}.crt";
+    ssl_key_path = name: "${ssl_basedir name}/${name}.key";
 
     #naming conventions
     container_id = vmname: service: "ct-${vmname}-${service}"; #returns the containers ID
