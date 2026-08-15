@@ -8,7 +8,7 @@ let
     ''
         if [[ ! -d ${vars.ssl_basedir name} ]]; then
             echo "Installing certificate ${name}"
-            install -o ${cert.owner} -m 0700 \
+            install -d -o ${cert.owner} -m 0700 \
                 ${vars.ssl_basedir name}
             install -o ${cert.owner} -m 0600 \
                 /run/secrets/${name}.crt \
