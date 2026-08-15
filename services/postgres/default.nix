@@ -72,7 +72,7 @@ in {
                                            #         -c "GRANT ALL PRIVILEGES ON DATABASE ${access.table} TO ${access.role};"
                                            # '' 
                                             ''
-                                                  PASSWORD="$(< /run/secrets/${name}-${access.table}-db.key)"
+                                                  PASSWORD="$(< /run/secrets/db-${name}-${access.table}.key)"
                                                   ${pkgs.postgresql}/bin/psql -U postgres \
                                                     -c "ALTER ROLE ${access.role} WITH PASSWORD '$PASSWORD';"
                                             ''
