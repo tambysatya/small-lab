@@ -170,7 +170,7 @@
         
         args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
 
-    in compile-gen-secrets {infra = test-infra; registry=test-registry;} //{
+    in gen-secrets args //{
      # generators = {
      #   terranix = terranix-generator; 
      #   nixos = nixos-generator;
