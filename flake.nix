@@ -136,9 +136,12 @@
             file: flake-path: compile-registry (gen-infra file flake-path);
         
         gen-terranix = 
-            file: flake-path: terranix.lib.terranixConfiguration {
+            file: flake-path: 
+                terranix.lib.terranixConfiguration {
                             inherit system;
-                            modules = [terranix-generator_fun (gen-infra file flake-path)];
+                            modules = [
+                                {config = terranix-generator_fun (gen-infra file flake-path);}
+                            ];
                         };
         gen-secrets =
             file: flake-path:
@@ -176,13 +179,9 @@
       };
       */
 
-      infra = test-infra;
-      registry = test-registry;
-      #terranix = terranix;
-      terranix = terranix.lib.terranixConfiguration {
-                                inherit system;
-                                modules = [{config=terranix-conf;}];
-                            };
+      infra = gen-infra ./examples/example.nix inputs.self.outPath;
+      registry = gen-registry ./examples/example.nix inputs.self.outPath;
+      terranix = gen-terranix ./examples/example.nix inputs.self.outPath;
       nixosConfigurations = gen-nixos ./examples/example.nix inputs.self.outPath;
                    
 
