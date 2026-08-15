@@ -1,5 +1,5 @@
 
-{ config, lib, pkgs, ... }:
+{inputs, config, lib, pkgs, infra, ... }:
 
 let
 
@@ -11,8 +11,8 @@ let
       (name: cert: ''
         echo "Renewing ${name}"
 
-        CRT_PATH=${ssl_crt_path name}
-        KEY_PATH=${ssl_key_path name}
+        CRT_PATH=${vars.ssl_crt_path name}
+        KEY_PATH=${vars.ssl_key_path name}
 
         old_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
 
