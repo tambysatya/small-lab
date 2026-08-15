@@ -163,6 +163,13 @@
                 };
 
                 
+         gen-config-checks =
+            flake-inputs:
+                    builtins.mapAttrs
+                        (_: nixosConfig:
+                            nixosConfig.config.system.build.toplevel)
+                        flake-inputs.self.nixosConfigurations;
+                
             
 
             
@@ -179,6 +186,7 @@
      # };
       lib = {
         inherit gen-infra gen-registry gen-terranix gen-secrets gen-nixos gen-iso;
+        inherit gen-config-checks;
       };
 
       /*
@@ -197,6 +205,8 @@
       registry = gen-registry args;
       terranix = gen-terranix args;
       nixosConfigurations = gen-nixos args // {iso = gen-iso args;};
+
+      checks.${system} = gen-config-checks inputs;
                    
 
       #nixosConfigurations = configs;
