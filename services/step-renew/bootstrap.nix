@@ -60,7 +60,7 @@ in
           chmod go+rx ${cfg.stepPath}/certs
           chmod go+r ${cfg.stepPath}/certs/root_ca.crt
 
-          install -d -m 0601 ${cfg.stepPath}/ssl
+          install -d -m 0601 ${vars.ssl_root}
           ${lib.concatStringsSep "\n"
                 (lib.mapAttrsToList installCert cfg.certs)}
         fi
