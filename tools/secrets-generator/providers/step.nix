@@ -120,5 +120,5 @@ let
 in 
 
 {
-    inherit bootstrap_step_ca processSSLCertificates processHTTPEndpoints;
+    inherit bootstrap_step_ca processSSLCertificates processHTTPEndpoints gen_ssl_certificate;
 }

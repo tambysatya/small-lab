@@ -18,8 +18,8 @@ let
         ''
             TOKEN_NUMBER=$(${lib.getExe pkgs.openssl} rand -hex 32)
             TOKEN="${name}$TOKEN_NUMBER"
-            mkdir -p ${vars.path}/tokens
-            cp "${vars.age}/${lib.escapeShellArg name}.key" "${vars.path}/tokens/$TOKEN"
+            mkdir -p ${vars.path}/provisionner/tokens
+            cp "${vars.age}/${lib.escapeShellArg name}.key" "${vars.path}/provisionner/tokens/$TOKEN"
             echo "$TOKEN" > /tmp/${lib.escapeShellArg name}.token
             
         '';

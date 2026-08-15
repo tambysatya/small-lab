@@ -107,6 +107,10 @@ in
                     #Tokens generation for the secret provisionner
                     ${lib.concatStringsSep "\n"
                         (lib.map age.gen_age_token (builtins.attrNames infra.vms))}
+                    # Certificate for the secret-provisionner
+                    mkdir -p ${infra.secretsPath}/provisionner/ssl
+                    ${pvds.gen_ssl_certificate "vm-provisioning.${infra.domain}"}
+                    mv ${vars.plain}/vm-provisioning.${infra.domain}.* ${infra.secretsPath}/provisionner/ssl/
 
             '';
     };
