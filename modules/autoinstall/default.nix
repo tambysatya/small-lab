@@ -1,9 +1,10 @@
-{inputs, config, lib, pkgs,...}:
+{inputs, config, lib, pkgs, infra, ...}:
 
 /* Reads product_serial to identify which flakes to be deployed */
 
 
-let installer = pkgs.writeShellApplication {
+let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra inputs;};
+    installer = pkgs.writeShellApplication {
 			name = "autoinstall";
 			runtimeInputs = with pkgs; [
 						git nix util-linux nixos-install-tools
@@ -32,7 +33,7 @@ let installer = pkgs.writeShellApplication {
 				umask 077
 				mkdir -p /var/lib/sops-nix
 				mkdir -p /mnt/var/lib/sops-nix
-				curl --cacert /etc/nixos/secrets/plain/CA/certs/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$HOST$TOKEN" > /var/lib/sops-nix/key.txt
+				curl --cacert /etc/nixos/${vars.git}/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$HOST$TOKEN" > /var/lib/sops-nix/key.txt
 				cp /var/lib/sops-nix/key.txt /mnt/var/lib/sops-nix
 				set +x
 
