@@ -1,10 +1,11 @@
-{lib, infra, registry, config, vmname, vmconf, inputs,...}:
+{lib, infra, registry, config, vmname, vmconf, inputs, pkgs,...}:
 
 /* Bare metal service managment */
 
 let 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
     sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
+    deps = import "${inputs.self.outPath}/lib/registry/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
 
     processEndpoints = servicename: reg:
         let
@@ -37,8 +38,11 @@ let
             (lib.map
                 (access:
                     let secretname = vars.db_key access;
-                    in sec.generateSecret 
-                        { names=[secretname]; inherit (access) owner reload;} )
+                    in lib.mkMerge [
+                            (sec.generateSecret 
+                                { names=[secretname]; inherit (access) owner reload;} )
+                            (deps.mkDBDependencies access)
+                    ])
                 (reg.dbAccesses or []));
 
     # Generates the secrets for a service requesting S3 accesses
