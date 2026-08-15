@@ -33,7 +33,7 @@ let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra input
 				umask 077
 				mkdir -p /var/lib/sops-nix
 				mkdir -p /mnt/var/lib/sops-nix
-				curl --cacert /etc/nixos/${vars.git}/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$HOST$TOKEN" > /var/lib/sops-nix/key.txt
+				curl --cacert /etc/nixos/${vars.git}/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$TOKEN" > /var/lib/sops-nix/key.txt
 				cp /var/lib/sops-nix/key.txt /mnt/var/lib/sops-nix
 				set +x
 
