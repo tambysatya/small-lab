@@ -3,6 +3,7 @@
 
 let
 
+  vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra inputs;};
   cfg = config.services.step-renew;
 
   certEntries =
@@ -10,8 +11,8 @@ let
       (name: cert: ''
         echo "Renewing ${name}"
 
-        CRT_PATH=/var/lib/step/ssl/${name}.crt
-        KEY_PATH=/var/lib/step/ssl/${name}.key
+        CRT_PATH=${ssl_crt_path name}
+        KEY_PATH=${ssl_key_path name}
 
         old_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
 
