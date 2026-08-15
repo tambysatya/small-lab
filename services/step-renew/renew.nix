@@ -18,7 +18,7 @@ let
 
         ${pkgs.step-cli}/bin/step ca renew \
           "$CRT_PATH" \
-          "$CRT_KEY" \
+          "$KEY_PATH" \
           --force
 
         new_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
