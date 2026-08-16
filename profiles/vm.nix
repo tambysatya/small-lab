@@ -45,7 +45,7 @@ config = {
               /* Mounts additional disks */
               fileSystems = utils.mergeAll (lib.mapAttrsToList
                               (bind: disk: {
-                                      bind = {
+                                      "${bind}" = {
                                           device = "/dev/${disk.dst}";   
                                           fsType = disk.fsType;
                                           options = disk.options;
