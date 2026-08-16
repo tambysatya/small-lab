@@ -60,6 +60,9 @@ let
                     };
 
            };
+           systemd.services."containers@${servicename}" = {
+                serviceConfig.TimeoutStartSec = "5min"; #To avoid premature halting if the infra-deps are not satisfied immediately
+           };
         };
 
 in{ 
