@@ -63,7 +63,7 @@ let
 
                         networking.hostName = ct-name;
                         networking.useHostResolvConf = lib.mkForce false;
-                        #1services.resolved.enable = false;
+                        services.resolved.enable = false;
                         #networking.nameservers= infra.dns;
 
 
