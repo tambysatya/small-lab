@@ -20,7 +20,7 @@ in {
 		defaultEditor = true;
 	};
 
-    systemd.network.enable = true;
+    #systemd.network.enable = true;
     networking.useNetworkd = true;
 
 
