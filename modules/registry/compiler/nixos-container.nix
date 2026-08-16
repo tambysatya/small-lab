@@ -35,9 +35,15 @@ let
                     privateNetwork = true;
                     hostAddress = host-addr;
                     localAddress = local-addr;
-                    bindMounts."/var/lib/sops-nix/key.txt" = { #mounting the age key of the volume
-                        hostPath = "/run/secrets/${ct-name}.key";
-                        isReadOnly = true;
+                    bindMounts= {
+                        "/var/lib/sops-nix/key.txt" = { #mounting the age key of the volume
+                            hostPath = "/run/secrets/${ct-name}.key";
+                            isReadOnly = true;
+                        };
+                        "/etc/resolv.conf" = {
+                            hostPath = "/etc/resolv.conf";
+                            isReadOnly = true;
+                        };
                     };
                     config = {...}:{
                         registry-compiler = {
@@ -56,9 +62,10 @@ let
                         ]; 
 
                         networking.hostName = ct-name;
-                        #networking.useHostResolvConf = lib.mkForce false;
-                        services.resolved.enable = false;
+                        networking.useHostResolvConf = lib.mkForce false;
+                        #1services.resolved.enable = false;
                         #networking.nameservers= infra.dns;
+
 
                         time.timeZone = "Europe/Paris";
                         i18n.defaultLocale = "fr_FR.UTF-8";
