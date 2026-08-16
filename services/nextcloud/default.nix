@@ -35,7 +35,7 @@ in {
         services.nextcloud = {
             enable = true;	
 
-            #https = true; /*IMPORTANT IF HTTPS*/
+            https = true; /*IMPORTANT IF HTTPS*/
 
             home = "/var/lib/nextcloud";
             hostName = "nextcloud.${infra.domain}";
