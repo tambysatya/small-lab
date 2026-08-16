@@ -22,11 +22,13 @@ let
     # creates an entry of containers= on the host
     mkContainer = {servicename, host-addr, local-addr}:  
         {
+            /*
            networking.interfaces."ve-${servicename}" = { #Manually config the interface of the host
                 ipv4.addresses = [
                     {address = host-addr; prefixLength=24;}
                 ];
            };
+           */
            containers."${servicename}" = 
                let ct-name = vars.container_id vmname servicename;
                    ct-conf = {
