@@ -54,7 +54,11 @@ let
                             inputs.sops-nix.nixosModules.sops
                             
                         ]; 
+
                         networking.hostName = ct-name;
+                        networking.useHostResolvConf = lib.mkForce false;
+                        services.resolved.enable = true;
+
                         time.timeZone = "Europe/Paris";
                         i18n.defaultLocale = "fr_FR.UTF-8";
                     };
