@@ -4,19 +4,21 @@ let
   utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
 
   generateQcow = 
-    vmName: vmConfig:
+    size: vmName: vmConfig:
       let host = vmConfig.host;
       in {
         resource.libvirt_volume."disk_${vmName}"=
           {
             name = vmName;
             pool = "\${libvirt_pool.default_${host}.name}";
-            capacity = 20*1024*1024*1024;
+            capacity = size;
+            #capacity = 20*1024*1024*1024;
             provider = "libvirt.${host}";
           };
       };
 
-  generateQcows = infra: utils.mergeAll (lib.mapAttrsToList generateQcow infra.vms);
+  # generates the / volume for each VM
+  generateRootQcows = infra: utils.mergeAll (lib.mapAttrsToList (generateQcow (20*1024*1024*1024)) infra.vms);
 
   generateVMDomains = infra: utils.mergeAll 
     (lib.mapAttrsToList 
@@ -122,5 +124,5 @@ let
 
       };
 in {
-  inherit generateQcows generateVMDomains;
+  inherit generateRootQcows generateVMDomains;
 }
