@@ -43,8 +43,8 @@ in {
                     settings = {
                         password_encryption = "scram-sha-256";
                         ssl = true;
-                        ssl_cert_file = config.sops.secrets."postgres.${infra.domain}.crt".path;
-                        ssl_key_file = config.sops.secrets."postgres.${infra.domain}.key".path;
+                        ssl_cert_file = vars.ssl_crt_path "postgres.${infra.domain}";
+                        ssl_key_file = vars.ssl_key_path "postgres.${infra.domain}";
                         ssl_ca_file = "/etc/root_ca.crt";
                     };
                 };
@@ -72,7 +72,7 @@ in {
                                            #         -c "GRANT ALL PRIVILEGES ON DATABASE ${access.table} TO ${access.role};"
                                            # '' 
                                             ''
-                                                  PASSWORD="$(< /run/secrets/${name}-${access.table}-db.key)"
+                                                  PASSWORD="$(< /run/secrets/db-${name}-${access.table}.key)"
                                                   ${pkgs.postgresql}/bin/psql -U postgres \
                                                     -c "ALTER ROLE ${access.role} WITH PASSWORD '$PASSWORD';"
                                             ''

@@ -1,0 +1,46 @@
+{
+	"root": "/etc/root_ca.crt",
+	"federatedRoots": null,
+	"crt": "/etc/intermediate_ca.crt",
+	"key": "/run/secrets/intermediate_ca_key",
+	"address": ":443",
+	"insecureAddress": "",
+	"dnsNames": [
+		"ca.local.fr"
+	],
+	"logger": {
+		"format": "text"
+	},
+	"db": {
+		"type": "badgerv2",
+		"dataSource": "/var/lib/step-ca/db",
+		"badgerFileLoadingMode": ""
+	},
+	"authority": {
+		"provisioners": [
+			{
+				"type": "JWK",
+				"name": "ca",
+				"key": {
+					"use": "sig",
+					"kty": "EC",
+					"kid": "BWkElisnoWS2AbNp9H29Fu2CQ9u0myLbi_Db3qsEQzg",
+					"crv": "P-256",
+					"alg": "ES256",
+					"x": "7td5uE8AZoZbAPNBdBPDPxWNR1MpZEc8Ekax3CgH9mg",
+					"y": "yNkBdRcA9AumSHiaRUfwFyIEuD2WOOEhmzP0S1L4Ih4"
+				},
+				"encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjYwMDAwMCwicDJzIjoiYUk1VTdWZ2p4TlUxQ2dpNnRibDVUZyJ9.VcrnKMpPVJkrfDuTlkuq2JfpDySoOin-x71hjSh0fBWUxvhniAM6xQ.DrAcTRcPVJHAOiGA.tpCmINFX3sEsf0GZCTtZjQIOj8363jPATLJTK-yRr7rYWwZr9PyqgFURac_APgmy9dB7XhFkBjgurjrM4YL2cUC2GpYyTz0QIvf95BAXPgP6ytub0ybFAX-dZAEqvbOo6trh7hxgQGSrF2Mo-Pkr8Cc_9-cDyax5lF-ngVue-hPwuHplM1mVpWkKH29yHGJdx2NlgYiXsSv-X03LYb_3W4Dix-MHsBkjMlWn3O7vMVuJ81juBQN-7mVP0_0k_VIiG2XwyY0e4dJf4V52_7BY7E6pwgHTXCiUEfo_AIj16uo2TqThycUMN5jiqpcGlTFV__T6yW5PyCKCZmnj6zM.kekBaYX0nj0KBFZQlIjx_w"
+			}
+		]
+	},
+	"tls": {
+		"cipherSuites": [
+			"TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+			"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+		],
+		"minVersion": 1.2,
+		"maxVersion": 1.3,
+		"renegotiation": false
+	}
+}

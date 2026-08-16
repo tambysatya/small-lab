@@ -13,13 +13,11 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 
 - generates IP/hostname correspondance of each service in /etc/hosts  (for each vm)
 - custom service config should be decided in "infra.services" in order to avoid infinite recursion
-- the bootstrap script should be generated from the inventory
 
 - step-renew increase the refresh rate
 
 - network config in infra + regroup the options by theme 
 
-- build the iso from this module (using the path of the root directory of the private flake, passed in `infra`)
 
 - unify the sources of truth regarding the secrets paths (imho all the packages confs should refer to `sops.secrets.<name>.path`)
 - unify the source of truth for the IP addresses
@@ -27,4 +25,6 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - persistence of datas
 
 - should the compiler be a separate module ?
-- TODO: clash between sops + step: certificates cannot be stored in /run/secrets/ (at least step cannot erase the file decrypted by sops)
+
+- TODO tests (config works + secrets exists + secrets are properly encrypted)
+- TODO automatize the creation of a service that waits for postgres to be reachable for every service requesting a db access

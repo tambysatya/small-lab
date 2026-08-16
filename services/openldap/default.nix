@@ -25,8 +25,8 @@ in {
             settings = {
                 attrs = {
                     olcTLSCACertificateFile = "/etc/root_ca.crt";
-                    olcTLSCertificateFile = config.sops.secrets."openldap.${infra.domain}.crt".path;
-                    olcTLSCertificateKeyFile = config.sops.secrets."openldap.${infra.domain}.key".path;
+                    olcTLSCertificateFile = vars.ssl_crt_path "openldap.${infra.domain}";
+                    olcTLSCertificateKeyFile = vars.ssl_key_path "openldap.${infra.domain}";
 # facultatif
                     olcTLSProtocolMin = "3.1";      # TLS 1.2+
                         olcTLSVerifyClient = "never";

@@ -1,10 +1,11 @@
-{lib, infra, registry, config, vmname, vmconf, inputs,...}:
+{lib, infra, registry, config, vmname, vmconf, inputs, pkgs,...}:
 
 /* Bare metal service managment */
 
 let 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
     sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
+    deps = import "${inputs.self.outPath}/lib/registry/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
 
     processEndpoints = servicename: reg:
         let
@@ -37,8 +38,9 @@ let
             (lib.map
                 (access:
                     let secretname = vars.db_key access;
-                    in sec.generateSecret 
-                        { names=[secretname]; inherit (access) owner reload;} )
+                    in 
+                            (sec.generateSecret 
+                                { names=[secretname]; inherit (access) owner reload;} ))
                 (reg.dbAccesses or []));
 
     # Generates the secrets for a service requesting S3 accesses
@@ -50,6 +52,13 @@ let
                         {names = [(vars.s3_key access)]; inherit (access) owner reload;}))
                 (reg.s3Accesses or []));
 
+
+    allReloadsOfDBAccess = configuredservices:
+        let
+            accesses = builtins.concatLists
+                            (lib.mapAttrsToList (servicename: reg: (reg.dbAccesses or [])) configuredservices);
+            reloads = lib.concatMap (access: access.reload) accesses;
+        in deps.mkDBDependencies reloads;
 
 in{
    config = let 
@@ -71,6 +80,10 @@ in{
                             (lib.mapAttrsToList processCertificates (configuredservices // hostedservices)))
                         (lib.mkMerge
                             (lib.mapAttrsToList processDBAccessClient configuredservices))
+
+                        # Generates the dependencies for each service depending on an access TODO factorize ?
+                        (allReloadsOfDBAccess configuredservices)
+
                         (lib.mkMerge
                             (lib.mapAttrsToList processS3AccessClient configuredservices))
 

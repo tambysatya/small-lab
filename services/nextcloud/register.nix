@@ -46,7 +46,7 @@ in {
                             })
                         (reg.registerDBAccess "nextcloud" 
                             {
-                                owner="nextcloud"; role="nextcloud"; table="nextcloud"; reload=["phpfmp.service"];
+                                owner="nextcloud"; role="nextcloud"; table="nextcloud"; reload=["phpfmp.service" "nextcloud-setup.service"];
                             })
                         (reg.registerS3Access "nextcloud" 
                             {

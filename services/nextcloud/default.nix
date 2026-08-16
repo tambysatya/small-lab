@@ -115,19 +115,19 @@ in {
         };
 
         systemd.services.nextcloud-setup = {
-            wants = [
-                "network.target"
-            ];
-
-            after = [
-                "network.target"
-            ];
-            serviceConfig = { 
-                ExecStartPre = 
-                    "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
-                Restart = "on-failure";
-                RestartSec = "30s"; #TODO put a condition (like touch a file) to avoid running this at every startup
-            };
+#            wants = [
+#                "network.target"
+#            ];
+#
+#            after = [
+#                "network.target"
+#            ];
+#            serviceConfig = { 
+#                ExecStartPre = 
+#                    "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
+#                Restart = "on-failure";
+#                RestartSec = "30s"; #TODO put a condition (like touch a file) to avoid running this at every startup
+#            };
             environment = {
                 PGSSLMODE = "require";
             };

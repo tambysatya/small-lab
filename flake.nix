@@ -126,34 +126,58 @@
     
 
         gen-infra = 
-            file: 
-            flake-path:
+            {file, flake-path}:
                 compile-infra {
                     inventory = file;
                     extraArgs = {path=flake-path;};
                 };
         gen-registry = 
-            file: flake-path: compile-registry (gen-infra file flake-path);
+            args@{file, flake-path}: compile-registry (gen-infra args);
         
         gen-terranix = 
-            file: flake-path: terranix.lib.terranixConfiguration {
+            args@{file, flake-path}:
+                terranix.lib.terranixConfiguration {
                             inherit system;
-                            modules = [terranix-generator_fun (gen-infra file flake-path)];
+                            modules = [
+                                {config = terranix-generator_fun (gen-infra args);}
+                            ];
                         };
         gen-secrets =
-            file: flake-path:
-                let infra = gen-infra file flake-path;
+            args@{file, flake-path}:
+                let infra = gen-infra args;
                     registry = compile-registry infra;
                 in compile-gen-secrets {inherit infra registry;};
 
         gen-nixos =
-            file: file-path: nixos-generator {inventory = file; extraArgs = {path=file-path;};};
+            args@{file, flake-path}: nixos-generator {inventory = file; extraArgs = {path=flake-path;};};
+        gen-iso = 
+            args@{file, flake-path}:
+                let infra = gen-infra args;
+                in lib.nixosSystem {
+                    inherit system;
+                    specialArgs = {inherit inputs infra;};
+                    modules = [
+                        "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+                        ./profiles/iso.nix
+                    ];
+                };
+
+                
+         gen-config-checks =
+            flake-inputs:
+                    builtins.mapAttrs
+                        (_: nixosConfig:
+                            nixosConfig.config.system.build.toplevel)
+                        flake-inputs.self.nixosConfigurations;
+                
+            
 
             
 
         
+        args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
 
-    in compile-gen-secrets {infra = test-infra; registry=test-registry;} //{
+    in gen-secrets args //{
      # generators = {
      #   terranix = terranix-generator; 
      #   nixos = nixos-generator;
@@ -161,7 +185,8 @@
      #   registry = compile-registry;
      # };
       lib = {
-        inherit gen-infra gen-registry gen-terranix gen-secrets gen-nixos;
+        inherit gen-infra gen-registry gen-terranix gen-secrets gen-nixos gen-iso;
+        inherit gen-config-checks;
       };
 
       /*
@@ -176,14 +201,12 @@
       };
       */
 
-      infra = test-infra;
-      registry = test-registry;
-      #terranix = terranix;
-      terranix = terranix.lib.terranixConfiguration {
-                                inherit system;
-                                modules = [{config=terranix-conf;}];
-                            };
-      nixosConfigurations = gen-nixos ./examples/example.nix inputs.self.outPath;
+      infra = gen-infra args;
+      registry = gen-registry args;
+      terranix = gen-terranix args;
+      nixosConfigurations = gen-nixos args // {iso = gen-iso args;};
+
+      checks.${system} = gen-config-checks inputs;
                    
 
       #nixosConfigurations = configs;

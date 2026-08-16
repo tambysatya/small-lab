@@ -36,7 +36,7 @@ let
 
             # Patching STEPPATH
             sed -i "s+$STEPPATH/secrets+/run/secrets+" "$STEPPATH"/config/ca.json 
-            sed -i "s+$STEPPATH/certs+/run/secrets+" "$STEPPATH"/config/ca.json 
+            sed -i "s+$STEPPATH/certs+/etc+" "$STEPPATH"/config/ca.json 
             sed -i "s+$STEPPATH+/var/lib/step-ca+" "$STEPPATH"/config/ca.json 
 
             ${lib.getExe pkgs.step-cli} certificate fingerprint "$STEPPATH/certs/root_ca.crt" \
@@ -45,9 +45,13 @@ let
         fi
 
         cp "$STEPPATH/ca-password.key" ${vars.plain}/
+        cp "$STEPPATH/secrets/intermediate_ca_key" ${vars.plain}/
 
         ${lib.concatStringsSep "\n" 
             (lib.map (recipient: age.encrypt recipient  "ca-password.key") stepcahosts)}
+        ${lib.concatStringsSep "\n" 
+            (lib.map (recipient: age.encrypt recipient  "intermediate_ca_key") stepcahosts)}
+        
         
         mkdir -p ${vars.git}
         cp "$STEPPATH/fingerprint" ${vars.git}
@@ -120,5 +124,5 @@ let
 in 
 
 {
-    inherit bootstrap_step_ca processSSLCertificates processHTTPEndpoints;
+    inherit bootstrap_step_ca processSSLCertificates processHTTPEndpoints gen_ssl_certificate;
 }

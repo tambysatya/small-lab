@@ -104,9 +104,13 @@ in
                     # is encrypted for the host and not for the container
                     ${applyProvider allServices allContainersInVM pvds.processHTTPEndpoints} 
 
-                    #Tokens generation for the secret provisionner
+                    #Tokens generation for the secret provisioner
                     ${lib.concatStringsSep "\n"
                         (lib.map age.gen_age_token (builtins.attrNames infra.vms))}
+                    # Certificate for the secret-provisioner
+                    mkdir -p ${infra.secretsPath}/provisioner/ssl
+                    ${pvds.gen_ssl_certificate "vm-provisioning.${infra.domain}"}
+                    mv ${vars.plain}/vm-provisioning.${infra.domain}.* ${infra.secretsPath}/provisioner/ssl/
 
             '';
     };

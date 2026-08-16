@@ -8,6 +8,6 @@ let
 in {
     inherit (pw) processPasswordSecrets;
     inherit (accounts) bootstrap_ldap processS3Secrets processDBSecrets;
-    inherit (step) bootstrap_step_ca processSSLCertificates processHTTPEndpoints;
+    inherit (step) bootstrap_step_ca processSSLCertificates processHTTPEndpoints gen_ssl_certificate;
 
 }

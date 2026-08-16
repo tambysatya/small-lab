@@ -1,8 +1,9 @@
 
-{ config, lib, pkgs, ... }:
+{inputs, config, lib, pkgs, infra, ... }:
 
 let
 
+  vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra inputs;};
   cfg = config.services.step-renew;
 
   certEntries =
@@ -10,14 +11,14 @@ let
       (name: cert: ''
         echo "Renewing ${name}"
 
-        CRT_PATH=/run/secrets/${name}.crt
-        KEY_PATH=/run/secrets/${name}.key
+        CRT_PATH=${vars.ssl_crt_path name}
+        KEY_PATH=${vars.ssl_key_path name}
 
         old_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)
 
         ${pkgs.step-cli}/bin/step ca renew \
           "$CRT_PATH" \
-          "$CRT_KEY" \
+          "$KEY_PATH" \
           --force
 
         new_hash=$(${pkgs.coreutils}/bin/sha256sum "$CRT_PATH" | cut -d' ' -f1)

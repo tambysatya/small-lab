@@ -39,3 +39,12 @@ deploy :
 	 nix build --impure path:.#terranixConfigurations -o test.tf.json 
 
 
+iso:
+	 [ -f bootstrap.iso ] && rm -f bootstrap.iso
+	 nix build  .#nixosConfigurations.iso.config.system.build.isoImage
+	 cp result/iso/*.iso bootstrap.iso
+
+apps:
+	nix build .#nixosConfigurations.apps.config.system.build.toplevel
+
+

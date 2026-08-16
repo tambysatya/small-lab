@@ -13,7 +13,7 @@ in {
                             address = infra.caURL;
                             port = infra.caPort;
                             openFirewall = true;
-                            intermediatePasswordFile = "/var/lib/step-ca/ca-password";
+                            intermediatePasswordFile = "/run/secrets/ca-password.key";
                             settings = builtins.fromJSON (builtins.readFile "${infra.flakePath}/${vars.git}/ca.json"); 
                         };
                     };

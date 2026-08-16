@@ -8,6 +8,7 @@ let
 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs pkgs;};
     sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
+    deps = import "${inputs.self.outPath}/lib/registry/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
 
     initialize-host = {
           networking.nat = {
@@ -21,6 +22,11 @@ let
     # creates an entry of containers= on the host
     mkContainer = {servicename, host-addr, local-addr}:  
         {
+           networking.interfaces."ve-${servicename}" = { #Manually config the interface of the host
+                ipv4.addresses = [
+                    {address = host-addr; prefixLength=24;}
+                ];
+           };
            containers."${servicename}" = 
                let ct-name = vars.container_id vmname servicename;
                    ct-conf = {
@@ -33,10 +39,18 @@ let
                     autoStart = true;
                     privateNetwork = true;
                     hostAddress = host-addr;
-                    localAddress = local-addr;
-                    bindMounts."/var/lib/sops-nix/key.txt" = { #mounting the age key of the volume
-                        hostPath = "/run/secrets/${ct-name}.key";
-                        isReadOnly = true;
+                    #localAddress = local-addr;
+
+
+                    bindMounts= {
+                        "/var/lib/sops-nix/key.txt" = { #mounting the age key of the volume
+                            hostPath = "/run/secrets/${ct-name}.key";
+                            isReadOnly = true;
+                        };
+                        "/etc/resolv.conf" = {
+                            hostPath = "/etc/resolv.conf";
+                            isReadOnly = true;
+                        };
                     };
                     config = {...}:{
                         registry-compiler = {
@@ -53,11 +67,30 @@ let
                             inputs.sops-nix.nixosModules.sops
                             
                         ]; 
-                        networking.hostName = ct-name;
+
                         time.timeZone = "Europe/Paris";
                         i18n.defaultLocale = "fr_FR.UTF-8";
+
+                        networking = {
+                            hostName = ct-name;
+                            useHostResolvConf = lib.mkForce false;
+                            #services.resolved.enable = false;
+                            nameservers= infra.dns;
+
+                            # Manually config the interface of the container
+                            defaultGateway = host-addr;
+                            interfaces.eth0.ipv4.addresses = [
+                                { address = local-addr; prefixLength  = 24; }
+                            ];
+                        };
+
+
+
                     };
 
+           };
+           systemd.services."container@${servicename}" = {
+                serviceConfig.TimeoutStartSec = lib.mkForce "5min"; #To avoid premature halting if the infra-deps are not satisfied immediately
            };
         };
 
@@ -72,7 +105,7 @@ config = lib.mkIf (vmconf.containers != [])
                                 let local-addr = "192.168.100.${lib.toString (50+i)}";
                                     container_id = vars.container_id vmname servicename;
                                 in lib.mkMerge [
-                                    (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.10";})
+                                    (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.1";})
                                     (sec.generateSecret 
                                             {names = ["${container_id}.key"]; reload = ["container@ct-${servicename}.service"];})
                                     (lib.mkIf (lib.hasAttr servicename registry.services)
@@ -88,6 +121,15 @@ config = lib.mkIf (vmconf.containers != [])
                                                 registry.services.${servicename}.endpoints)))
                                 ])
                             vmconf.containers))
+
+                # Containers requesting a DBAccess cannot be launched before postgres is reachable
+                (deps.mkDBDependencies 
+                    (lib.map 
+                        (servicename: "container@${servicename}.service")
+                        (lib.filter 
+                            (servicename: builtins.hasAttr servicename registry.services &&
+                                          (registry.services."${servicename}".dbAccesses != [])) 
+                            vmconf.containers)))
             ]);
 
 }
