@@ -2,7 +2,29 @@
 
 {inputs, lib, pkgs, infra, ...}:
 let
+     mkDBDependencies = reload: 
+        lib.mkMerge 
+            (lib.map 
+                (service:
+                    {
+                        systemd.services."${service}" = {
+                            wants = [
+                                "network.target"
+                            ];
+                            after = [
+                                "network.target"
+                            ];
+                            serviceConfig = { 
+                                ExecStartPre = 
+                                    "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
+                                Restart = "on-failure";
+                                RestartSec = "30s"; 
+                            };
+                        };
+                    })
+            reload);
 
+    /*
     mkDBDependencies = access@{role, table, reload,...}: #TODO each tuple role/table should be unique 
         {
             systemd.services."postgres-wait-${role}-${table}" = {
@@ -24,6 +46,7 @@ let
                 };
             };
         };
+    */
 
 in {
     inherit mkDBDependencies;

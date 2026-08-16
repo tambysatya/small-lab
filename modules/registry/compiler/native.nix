@@ -38,11 +38,9 @@ let
             (lib.map
                 (access:
                     let secretname = vars.db_key access;
-                    in lib.mkMerge [
+                    in 
                             (sec.generateSecret 
-                                { names=[secretname]; inherit (access) owner reload;} )
-                            (deps.mkDBDependencies access)
-                    ])
+                                { names=[secretname]; inherit (access) owner reload;} ))
                 (reg.dbAccesses or []));
 
     # Generates the secrets for a service requesting S3 accesses
@@ -54,6 +52,13 @@ let
                         {names = [(vars.s3_key access)]; inherit (access) owner reload;}))
                 (reg.s3Accesses or []));
 
+
+    allReloadsOfDBAccess = configuredservices:
+        let
+            accesses = builtins.concatLists
+                            (lib.mapAttrsToList (servicename: reg: (reg.dbAccesses or [])) configuredservices);
+            reloads = lib.concatMap (access: access.reload) accesses;
+        in deps.mkDBDependencies reloads;
 
 in{
    config = let 
@@ -75,6 +80,10 @@ in{
                             (lib.mapAttrsToList processCertificates (configuredservices // hostedservices)))
                         (lib.mkMerge
                             (lib.mapAttrsToList processDBAccessClient configuredservices))
+
+                        # Generates the dependencies for each service depending on an access TODO factorize ?
+                        (allReloadsOfDBAccess configuredservices)
+
                         (lib.mkMerge
                             (lib.mapAttrsToList processS3AccessClient configuredservices))
 
