@@ -3,7 +3,7 @@
 {inputs, lib, pkgs, infra, ...}:
 let
      mkDBDependencies = reloads: 
-                    {
+                    lib.mkIf (reloads != []) {
                         systemd.services."postgres-wait" = {
                             description = "Waiting for postgres to be reachable [dependency of service]...";
                             wants = [

@@ -8,6 +8,7 @@ let
 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs pkgs;};
     sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
+    deps = import "${inputs.self.outPath}/lib/registry/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
 
     initialize-host = {
           networking.nat = {
@@ -88,6 +89,15 @@ config = lib.mkIf (vmconf.containers != [])
                                                 registry.services.${servicename}.endpoints)))
                                 ])
                             vmconf.containers))
+
+                # Containers requesting a DBAccess cannot be launched before postgres is reachable
+                (deps.mkDBDependencies 
+                    (lib.map 
+                        (servicename: "container@${servicename}.service")
+                        (lib.filter 
+                            (servicename: builtins.hasAttr servicename registry.services &&
+                                          (registry.services."${servicename}".dbAccesses != [])) 
+                            vmconf.containers)))
             ]);
 
 }
