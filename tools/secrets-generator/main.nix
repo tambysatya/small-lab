@@ -85,7 +85,9 @@ in
                     ${pvds.bootstrap_ldap}
                     
                     echo "[RECALL: KEYCLOAK INITIAL ADMIN PASSWORD IS VERSIONNED. Login and change it !]"
-                    ${lib.getExe pkgs.openssl} rand -base64 64 > ${vars.git}/keycloak-initial-admin
+                    ${lib.getExe pkgs.openssl} rand -base64 64 \
+                        | tr -d "\n" \
+                        > ${vars.git}/keycloak-initial-admin
 
                     # Password Secrets
                     ${applyProvider allServices allContainers pvds.processPasswordSecrets}
