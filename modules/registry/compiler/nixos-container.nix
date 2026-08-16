@@ -61,7 +61,7 @@ let
 
            };
            systemd.services."container@${servicename}" = {
-                serviceConfig.TimeoutStartSec = "5min"; #To avoid premature halting if the infra-deps are not satisfied immediately
+                serviceConfig.TimeoutStartSec = lib.mkForce "5min"; #To avoid premature halting if the infra-deps are not satisfied immediately
            };
         };
 
