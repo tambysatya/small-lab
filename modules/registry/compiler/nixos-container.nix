@@ -22,6 +22,11 @@ let
     # creates an entry of containers= on the host
     mkContainer = {servicename, host-addr, local-addr}:  
         {
+           networking.interfaces."ve-${servicename}" = { #Manually config the interface of the host
+                ipv4.addresses = [
+                    {address = host-addr; prefixLength=24;}
+                ];
+           };
            containers."${servicename}" = 
                let ct-name = vars.container_id vmname servicename;
                    ct-conf = {
@@ -34,7 +39,9 @@ let
                     autoStart = true;
                     privateNetwork = true;
                     hostAddress = host-addr;
-                    localAddress = local-addr;
+                    #localAddress = local-addr;
+
+
                     bindMounts= {
                         "/var/lib/sops-nix/key.txt" = { #mounting the age key of the volume
                             hostPath = "/run/secrets/${ct-name}.key";
@@ -61,14 +68,24 @@ let
                             
                         ]; 
 
-                        networking.hostName = ct-name;
-                        networking.useHostResolvConf = lib.mkForce false;
-                        #services.resolved.enable = false;
-                        networking.nameservers= infra.dns;
-
-
                         time.timeZone = "Europe/Paris";
                         i18n.defaultLocale = "fr_FR.UTF-8";
+
+                        networking = {
+                            hostName = ct-name;
+                            useHostResolvConf = lib.mkForce false;
+                            #services.resolved.enable = false;
+                            nameservers= infra.dns;
+
+                            # Manually config the interface of the container
+                            defaultGateway = host-addr;
+                            interfaces.eth0.ipv4.addresses = [
+                                { address = local-addr; prefixLength  = 24; }
+                            ];
+                        };
+
+
+
                     };
 
            };
