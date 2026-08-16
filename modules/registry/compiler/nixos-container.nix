@@ -56,9 +56,9 @@ let
                         ]; 
 
                         networking.hostName = ct-name;
-                        networking.useHostResolvConf = lib.mkForce false;
-                        services.resolved.enable = true;
-                        networking.nameservers= infra.dns;
+                        #networking.useHostResolvConf = lib.mkForce false;
+                        #services.resolved.enable = true;
+                        #networking.nameservers= infra.dns;
 
                         time.timeZone = "Europe/Paris";
                         i18n.defaultLocale = "fr_FR.UTF-8";
