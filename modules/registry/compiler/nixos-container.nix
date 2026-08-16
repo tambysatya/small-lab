@@ -38,7 +38,7 @@ let
                     specialArgs = {inherit inputs infra registry; vmname=ct-name; vmconf=ct-conf;}; #TODO
                     autoStart = true;
                     privateNetwork = true;
-                    #hostAddress = host-addr;
+                    hostAddress = host-addr;
                     #localAddress = local-addr;
 
 
