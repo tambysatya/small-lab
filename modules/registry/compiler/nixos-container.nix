@@ -57,7 +57,7 @@ let
 
                         networking.hostName = ct-name;
                         #networking.useHostResolvConf = lib.mkForce false;
-                        #services.resolved.enable = true;
+                        services.resolved.enable = false;
                         #networking.nameservers= infra.dns;
 
                         time.timeZone = "Europe/Paris";
