@@ -78,7 +78,7 @@ in {
                 trusted_proxies = [
                     #"162.38.243.60"
                     infra.vmSubnet
-                    192.168.100.0 #containers proxy TODO
+                    "192.168.100.0" #containers proxy TODO
                     
                 ];
                 overwritehost = "nextcloud.${infra.domain}";	
