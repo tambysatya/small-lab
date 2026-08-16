@@ -8,6 +8,7 @@ let
                 (service:
                     {
                         systemd.services."postgres-wait-${lib.removeSuffix ".service" service}" = {
+                            description = "Waiting for postgres to be reachable [dependency of service]...";
                             wants = [
                                 "network.target"
                             ];
@@ -17,6 +18,7 @@ let
                             before = [service];
                             requiredBy = [service];
                             serviceConfig = { 
+                                Type = "oneshot";
                                 ExecStart = 
                                     "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
                                 Restart = "on-failure";
