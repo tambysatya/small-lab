@@ -17,7 +17,7 @@ let
                 ];
 
                 serviceConfig = { 
-                    ExecStartPre = 
+                    ExecStart = 
                         "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
                     Restart = "on-failure";
                     RestartSec = "30s"; 
