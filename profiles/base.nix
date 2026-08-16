@@ -21,7 +21,7 @@ in {
 	};
 
     #systemd.network.enable = true;
-    networking.useNetworkd = true;
+    #networking.useNetworkd = true;
 
 
 }
