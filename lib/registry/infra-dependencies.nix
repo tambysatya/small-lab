@@ -2,12 +2,9 @@
 
 {inputs, lib, pkgs, infra, ...}:
 let
-     mkDBDependencies = reload: 
-        lib.mkMerge 
-            (lib.map 
-                (service:
+     mkDBDependencies = reloads: 
                     {
-                        systemd.services."postgres-wait-${lib.removeSuffix ".service" service}" = {
+                        systemd.services."postgres-wait" = {
                             description = "Waiting for postgres to be reachable [dependency of service]...";
                             wants = [
                                 "network.target"
@@ -15,18 +12,22 @@ let
                             after = [
                                 "network.target"
                             ];
-                            before = [service];
-                            requiredBy = [service];
+                            before = reloads;
+                            requiredBy = reloads;
                             serviceConfig = { 
                                 Type = "oneshot";
-                                ExecStart = 
-                                    "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
-                                Restart = "on-failure";
-                                RestartSec = "30s"; 
+
+                                    #"${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
+                                ExecStart = pkgs.writeShellScript "wait-for-postgres" '' 
+                                        until ${pkgs.postgresql}/bin/pg_isready -h postgres.${infra.domain} -p 5432; do
+                                            sleep 1
+                                        done
+                                    '';
+                                #Restart = "on-failure";
+                                #RestartSec = "30s"; 
                             };
                         };
-                    })
-            reload);
+                    };
 
     /*
     mkDBDependencies = access@{role, table, reload,...}: #TODO each tuple role/table should be unique 
