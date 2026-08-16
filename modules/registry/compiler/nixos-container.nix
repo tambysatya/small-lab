@@ -85,10 +85,10 @@ config = lib.mkIf (vmconf.containers != [])
                 (lib.mkMerge 
                         (lib.imap
                             (i: servicename: 
-                                let local-addr = "192.168.100.${lib.toString (50+i)}/24";
+                                let local-addr = "192.168.100.${lib.toString (50+i)}";
                                     container_id = vars.container_id vmname servicename;
                                 in lib.mkMerge [
-                                    (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.10/24";})
+                                    (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.1";})
                                     (sec.generateSecret 
                                             {names = ["${container_id}.key"]; reload = ["container@ct-${servicename}.service"];})
                                     (lib.mkIf (lib.hasAttr servicename registry.services)
