@@ -7,15 +7,17 @@ let
             (lib.map 
                 (service:
                     {
-                        systemd.services."${service}" = {
+                        systemd.services."postgres-wait-${lib.removeSuffix ".service" service}" = {
                             wants = [
                                 "network.target"
                             ];
                             after = [
                                 "network.target"
                             ];
+                            before = [service];
+                            requiredBy = [service];
                             serviceConfig = { 
-                                ExecStartPre = 
+                                ExecStart = 
                                     "${pkgs.netcat}/bin/nc -z postgres.${infra.domain} 5432"; # wait for the database to be up²
                                 Restart = "on-failure";
                                 RestartSec = "30s"; 
