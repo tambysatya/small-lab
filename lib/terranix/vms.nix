@@ -3,22 +3,23 @@
 let
   utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
 
-  generateQcow = 
-    size: vmName: vmConfig:
-      let host = vmConfig.host;
-      in {
-        resource.libvirt_volume."disk_${vmName}"=
-          {
-            name = vmName;
-            pool = "\${libvirt_pool.default_${host}.name}";
-            capacity = size;
-            #capacity = 20*1024*1024*1024;
-            provider = "libvirt.${host}";
-          };
-      };
+  generateQcow =
+    vmName: vmConf: 
+    {name, size, ...}:
+        let host = vmConf.host;
+        in {
+                resource.libvirt_volume."${vmName}_${name}"= {
+                    vname = "${vmName}_${name}";
+                    pool = "\${libvirt_pool.default_${host}.name";
+                    capacity = size;
+                    provider = "libvirt.${host}";
+                };
+            };
+  generateRootQcow=
+    vmName: vmConf: generateQcow vmName vmConf {name="root"; size=20*1024*1024*1024;};
 
   # generates the / volume for each VM
-  generateRootQcows = infra: utils.mergeAll (lib.mapAttrsToList (generateQcow (20*1024*1024*1024)) infra.vms);
+  generateRootQcows = infra: utils.mergeAll (lib.mapAttrsToList generateRootQcow infra.vms);
 
   generateVMDomains = infra: utils.mergeAll 
     (lib.mapAttrsToList 
@@ -26,15 +27,18 @@ let
         generateVMDomain vmName (generateInstanceFromConf infra vmName vmConf))
       infra.vms);
   generateInstanceFromConf = infra: vmName: vmConf: {token = builtins.readFile "/tmp/${vmName}.token"; config=vmConf;};
-  generateDisks = vmInstance: 
-    lib.mapAttrsToList (_: disk: 
+
+
+
+  declareDisks = vmInstance: 
+    lib.mapAttrsToList (_: {src,target}: 
         {
           source = {
               block = {
-                dev = disk.src;
+                dev = src;
               };
             };
-            target = {dev = disk.dst; bus="virtio";};
+            target = {dev = target.device; bus="virtio";};
             driver = {
               name = "qemu";
               type = "raw";
@@ -43,7 +47,7 @@ let
               discard = "unmap";
             };
 
-       })  vmInstance.config.additionalDisks;
+       })  vmInstance.config.persistentVolumes.disks;
     generateVMDomain = vmName: vmInstance:
       let token = vmInstance.token;
           vm = vmInstance.config;
@@ -67,7 +71,7 @@ let
                 };
                 target = {dev = "vda"; bus="virtio";};
               }
-          ] ++ generateDisks vmInstance;
+          ] ++ declareDisks vmInstance;
       in {
          resource.libvirt_domain."${vmName}" = {
             provider = "libvirt.${host}";

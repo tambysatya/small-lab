@@ -97,7 +97,7 @@ rec {
                 default = {};
                 example = {
                     "/srv/volume" = {
-                        src = "vm1-persistent"; 
+                        name = "vm1-persistent"; 
                         size = 1024*1024*100; #100 M
                         target = {
                             device = "vdb";
