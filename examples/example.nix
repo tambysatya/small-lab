@@ -78,7 +78,7 @@
         containers = ["nextcloud"]; 
         persistentVolumes.qcows = {
             "/srv/persistent" = {
-                name = "apps-persistent";
+                name = "persistent";
                 size = 100 * 1024*1024; # 100M
                 target = {
                     device = "vdb";
