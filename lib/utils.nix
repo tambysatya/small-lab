@@ -20,7 +20,7 @@ rec{
       if path == "/" then
         "-.mount"
       else
-        "${lib.removePrefix "/" (lib.replaceStrings [ "/" ] [ "-" ] path)}.mount";
+        "${(lib.replaceStrings [ "/" ] [ "-" ] (lib.removePrefix "/" path))}.mount";
 
     mergeAll = listOfAttrsets: lib.foldl' merge {} listOfAttrsets;
 }
