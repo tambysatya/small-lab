@@ -27,4 +27,4 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - should the compiler be a separate module ?
 
 - TODO tests (config works + secrets exists + secrets are properly encrypted)
-- TODO automatize the creation of a service that waits for postgres to be reachable for every service requesting a db access
+- logging

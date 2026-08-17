@@ -1,5 +1,8 @@
 {lib}:
-  let inherit (lib) types;
+let 
+    libtypes = lib.types;
+    voltypes = import ./volumes.nix {inherit lib;}; 
+    types = libtypes //voltypes;
 in
 types // rec {
 	serviceType = 
@@ -11,30 +14,6 @@ types // rec {
 			"postgres"
 			"nextcloud"
 		];
-  disk = lib.types.submodule {
-    options = {
-      src = lib.mkOption { 
-        type = lib.types.str;
-        description = "device of the host";
-        example = "/dev/sda";
-      };
-      dst = lib.mkOption {
-        type = types.str;
-        description = "mountpoint on the vm";
-        example = "vda";
-      };
-      options = lib.mkOption {
-        type = types.listOf types.str;
-        description = "Mounting options";
-        default = ["default"];
-      };
-      fsType = lib.mkOption {
-        type = types.str;
-        description = "Filesystem";
-      };
-    };
-  };
-
   /* Virtual machine description */
   vmConf = lib.types.submodule {
     options = {
@@ -52,11 +31,9 @@ types // rec {
           description = "The size of the memory (MiB) allocated to the VM";
           default = 1024;
         };
-        additionalDisks = lib.mkOption {
-          type = types.attrsOf disk;
-          description = "Additional disks that will be passed to the VM";
-          example = {"/srv/data" = {src = "/dev/sdb"; dst="vdb"; options=["noauto"]; fsType="ext4";};};
-          default = {};
+        persistentVolumes = lib.mkOption {
+          type = types.volumesList;
+          description = "Additional volumes that will be passed to the VM";
         };
         ipAddress = lib.mkOption { 
           type = types.str;

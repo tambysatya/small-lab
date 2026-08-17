@@ -28,8 +28,11 @@
         memory = 8000;
         ipAddress = "192.168.1.200";
         services = ["keycloak" "step-ca" "openldap"];
-        additionalDisks = {
-            "/var/lib/openldap/data" = {src="/dev/pvhdd/ldap"; dst="vdb"; fsType="xfs"; options = ["nofail"];};
+        persistentVolumes.disks = {
+            "/var/lib/openldap/data" = {
+                src="/dev/pvhdd/ldap"; 
+                target = {device="vdb"; fsType="xfs"; options = ["nofail"];};
+            };
         };
 
       };
@@ -37,9 +40,15 @@
         host = "cpuhost1";
         vcpu = 24;
         memory = 8000;
-        additionalDisks = {
-            "/srv/data" = {src="/dev/pvhdd/s3"; dst="vdb"; fsType="xfs"; options=["nofail"];};
-            "/srv/meta" = {src="/dev/ssd/s3_metadatas"; dst="vdc"; fsType="xfs"; options=["nofail"];};
+        persistentVolumes.disks = {
+            "/srv/data" = {
+                src="/dev/pvhdd/s3"; 
+                target = {device="vdb"; fsType="xfs"; options=["nofail"];};
+            };
+            "/srv/meta" = {
+                src="/dev/ssd/s3_metadatas";
+                target = {device="vdc"; fsType="xfs"; options=["nofail"];};
+            };
         };
 
         ipAddress = "192.168.1.201";
@@ -49,8 +58,11 @@
         host = "cpuhost1";
         vcpu = 4;
         memory = 8000;
-        additionalDisks = {
-            "/var/lib/postgresql" = {src="/dev/ssd/postgres"; dst="vdb"; fsType="xfs"; options=["nofail"];};
+        persistentVolumes.disks = {
+            "/var/lib/postgresql" = {
+                src="/dev/ssd/postgres";
+                target = {device="vdb"; fsType="xfs"; options=["nofail"];};
+            };
         };
 
         ipAddress = "192.168.1.202";
