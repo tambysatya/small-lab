@@ -35,7 +35,7 @@ let
             mountpoints = builtins.attrNames (qcows // disks);
             mountservices = lib.map utils.pathToMountUnit mountpoints;
         in{
-            "init-volumes.service" = {
+            "init-volumes" = {
                description = "If empty, initializes the volumes before bind-mounting the files and repositories.";
                after = mountservices;
                requires = mountservices;
