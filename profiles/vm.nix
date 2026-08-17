@@ -33,7 +33,7 @@ let
     generateSystemdMountInit =  
         let
             mountpoints = builtins.attrNames (qcows // disks);
-            mountservices = lib.map utils.pathToMountUnit mountpoints;
+            mountservices = builtins.trace mountpoints (lib.map utils.pathToMountUnit mountpoints);
         in{
             "init-volumes.service" = {
                description = "If empty, initializes the volumes before bind-mounting the files and repositories.";
