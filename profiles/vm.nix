@@ -41,7 +41,7 @@ let
                requires = mountservices;
                script = initializeMountsScript;
                serviceConfig = {
-                    type = "oneshot";
+                    Type = "oneshot";
                };
             };
         };
