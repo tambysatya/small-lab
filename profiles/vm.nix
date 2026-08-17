@@ -1,8 +1,74 @@
 {lib, infra, registry, vmname, vmconf, inputs, config, ...}:
 
 let
-  path = "${inputs.self.outPath}";
-  utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+    path = "${inputs.self.outPath}";
+    utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+
+    qcows = vmconf.persistentVolumes.qcows;
+    disks = vmconf.persistentVolumes.disks;
+    allMountsEntries =  # The list of the mount entries with the source directory properly built
+        builtins.concatLists 
+            (lib.mapAttrsToList
+                (dir: {target,...}:
+                    let mounts = target.mounts;
+                    in lib.map
+                            (entry: {
+                                    what = "${dir}/${entry.what}";
+                                    inherit (entry) where type owner mode;
+                            })
+                            mounts)
+                (qcows // disks));
+    
+    generateSystemdMounts = #bind-mounts the files
+        lib.map
+            (entry: {
+                inherit (entry) what where; 
+                options="bind"; 
+                type="none";
+                after = ["init-volumes.service"];
+                requires= ["init-volumes.service"];
+            })
+            allMountsEntries;
+
+    generateSystemdMountInit =  
+        let
+            mountpoints = builtins.attrNames (qcows // disks);
+            mountservices = lib.map utils.pathToMountUnit mountpoints;
+        in{
+            "init-volumes.service" = {
+               description = "If empty, initializes the volumes before bind-mounting the files and repositories.";
+               after = mountservices;
+               requires = mountservices;
+               script = initializeMountsScript;
+               serviceConfig = {
+                    type = "oneshot";
+               };
+            };
+        };
+
+    initializeMountsScript =  # A script that creates the files/directory to be bind-mounted if they does not exist.
+        lib.concatMapStringsSep "\n"
+            (entry:
+                if entry.type == "directory" then 
+                        ''
+                            if [[ ! -d ${entry.where} ]]; then
+                                mkdir -p ${entry.where}
+                                chown ${entry.owner} ${entry.where}
+                                chmod ${if entry.mode == null then "0700" else entry.mode} ${entry.where}
+                            fi
+                        ''
+                else
+                        ''
+                            if [[ ! -f ${entry.where} ]]; then
+                                touch ${entry.where}
+                                chown ${entry.owner} ${entry.where}
+                                chmod ${if entry.mode == null then "0600" else entry.mode} ${entry.where}
+                            fi
+                        ''
+                )
+            allMountsEntries;
+
+  
 
 in 
 {
@@ -43,14 +109,17 @@ config = {
               };
 
               /* Mounts additional disks */
-              fileSystems = utils.mergeAll (lib.mapAttrsToList
-                              (bind: disk: {
-                                      "${bind}" = {
-                                          device = "/dev/${disk.dst}";   
-                                          fsType = disk.fsType;
-                                          options = disk.options;
-                                      };
-                                }) vmconf.additionalDisks);
+              fileSystems = 
+                (utils.mergeAll (lib.mapAttrsToList
+                                  (bind: disk: {
+                                          "${bind}" = {
+                                              device = "/dev/${disk.target.device}";   
+                                              fsType = disk.target.fsType;
+                                              options = disk.target.options;
+                                          };
+                                    }) (disks // qcows)));
+              systemd.mounts = generateSystemdMounts;
+              systemd.services = generateSystemdMountInit;
               services.openssh.enable = true;
               users.users.root.openssh.authorizedKeys.keys = infra.rootSSHPublicKeys;
 

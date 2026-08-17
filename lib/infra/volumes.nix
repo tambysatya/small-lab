@@ -5,17 +5,27 @@ in
 rec {
   bindMount = lib.types.submodule { # Additional files/directory to be mounted
     options = {
-        src = lib.mkOption {
+        what = lib.mkOption {
             description = "Location of the file/directory in the module";
             type = types.str;
         };
-        dst = lib.mkOption {
+        where = lib.mkOption {
             description = "Mountpoint";
             type = types.str;
         };
         type = lib.mkOption {
-            descriont = "Type of mountpoint"; 
+            description = "Type of mountpoint"; 
             type = types.enum ["directory" "file"];
+        };
+        owner = lib.mkOption {
+            description = "Owner of the mountpoint";
+            type = types.str;
+            default = "root";
+        };
+        mode = lib.mkOption {
+            description = "Permissions of the mountpoint";
+            type = types.nullOr types.str;
+            default = null; #is 0700 if directory or 0600 if file
         };
     };
   };
