@@ -51,18 +51,18 @@ let
             (entry:
                 if entry.type == "directory" then 
                         ''
-                            if [[ ! -d ${entry.where} ]]; then
-                                mkdir -p ${entry.where}
-                                chown ${entry.owner} ${entry.where}
-                                chmod ${if entry.mode == null then "0700" else entry.mode} ${entry.where}
+                            if [[ ! -d ${entry.what} ]]; then
+                                mkdir -p ${entry.what}
+                                chown ${entry.owner} ${entry.what}
+                                chmod ${if entry.mode == null then "0700" else entry.mode} ${entry.what}
                             fi
                         ''
                 else
                         ''
-                            if [[ ! -f ${entry.where} ]]; then
-                                touch ${entry.where}
-                                chown ${entry.owner} ${entry.where}
-                                chmod ${if entry.mode == null then "0600" else entry.mode} ${entry.where}
+                            if [[ ! -f ${entry.what} ]]; then
+                                touch ${entry.what}
+                                chown ${entry.owner} ${entry.what}
+                                chmod ${if entry.mode == null then "0600" else entry.mode} ${entry.what}
                             fi
                         ''
                 )
