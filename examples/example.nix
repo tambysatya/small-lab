@@ -76,6 +76,20 @@
         ipAddress = "192.168.1.203";
         #services = ["nextcloud"]; 
         containers = ["nextcloud"]; 
+        persistentVolumes.qcows = {
+            "/srv/persistent" = {
+                name = "apps-persistent";
+                size = 100 * 1024*1024; # 100M
+                target = {
+                    device = "vdb";
+                    fsType = "ext4";
+                    options = ["default"];
+                    mounts = [ 
+                        {src = "config.php"; dst = "/var/lib/nextcloud/config/config.php"; type="file";}
+                    ];
+                };
+            };
+        };
       };
 
     };

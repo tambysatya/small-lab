@@ -10,7 +10,8 @@ let hostlib = import ./hosts.nix {inherit lib inputs;};
           };
         }
         (hostlib.generateHosts infra)
-        (vmlib.generateRootQcows infra)
+        (vmlib.generateAllRootQcows infra)
+        (vmlib.generateAllPersistentQcows infra)
         (vmlib.generateVMDomains infra)
       ];
 

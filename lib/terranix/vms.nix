@@ -20,7 +20,20 @@ let
     vmName: vmConf: generateQcow vmName vmConf {name="root"; size=20*1024*1024*1024;};
 
   # generates the / volume for each VM
-  generateRootQcows = infra: utils.mergeAll (lib.mapAttrsToList generateRootQcow infra.vms);
+  generateAllRootQcows = infra: utils.mergeAll (lib.mapAttrsToList generateRootQcow infra.vms);
+  
+  generateAllPersistentQcows =
+    infra: 
+        utils.mergeAll (
+            builtins.concatLists (
+                lib.mapAttrsToList
+                    (vmName: vmConf: 
+                        let qcows = vmConf.persistentVolumes.qcows;
+                        in lib.mapAttrsToList 
+                            (_: qcow: generateQcow vmName vmConf (qcow // {persistentP=true;}) )
+                            qcows)
+                    infra.vms)
+        );
 
   generateVMDomains = infra: utils.mergeAll 
     (lib.mapAttrsToList 
@@ -30,7 +43,7 @@ let
   generateInstanceFromConf = infra: vmName: vmConf: {token = builtins.readFile "/tmp/${vmName}.token"; config=vmConf;};
 
 
-  declareQCow = vmName: vmInstance:
+  declareQCows = vmName: vmInstance:
     lib.mapAttrsToList (_: {name, size, target}:
               { 
                 source = {
@@ -85,7 +98,7 @@ let
                 };
                 target = {dev = "vda"; bus="virtio";};
               }
-          ] ++ declareDisks vmInstance;
+          ] ++ declareDisks vmInstance ++ declareQCows vmName vmInstance;
       in {
          resource.libvirt_domain."${vmName}" = {
             provider = "libvirt.${host}";
@@ -142,5 +155,5 @@ let
 
       };
 in {
-  inherit generateRootQcows generateVMDomains;
+  inherit generateAllRootQcows generateAllPersistentQcows generateVMDomains;
 }
