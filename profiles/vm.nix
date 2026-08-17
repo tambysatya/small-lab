@@ -27,6 +27,7 @@ let
                 type="none";
                 after = ["init-volumes.service"];
                 requires= ["init-volumes.service"];
+                wantedBy = ["multi-user.target"];
             })
             allMountsEntries;
 

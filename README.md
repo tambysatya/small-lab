@@ -23,6 +23,7 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - unify the source of truth for the IP addresses
 
 - persistence of datas: Two independent tofu states: compute state (destroyable) and storage state (persistent)
+- persistence: TODO: handle the case where the file should be mounted in a container
 
 - should the compiler be a separate module ?
 
