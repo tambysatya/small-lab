@@ -5,14 +5,15 @@ let
 
   generateQcow =
     vmName: vmConf: 
-    {name, size, ...}:
+    {name, size, persistentP ? false, ...}:
         let host = vmConf.host;
         in {
                 resource.libvirt_volume."${vmName}_${name}"= {
-                    vname = "${vmName}_${name}";
-                    pool = "\${libvirt_pool.default_${host}.name";
+                    name = "${vmName}_${name}";
+                    pool = "\${libvirt_pool.default_${host}.name}";
                     capacity = size;
                     provider = "libvirt.${host}";
+                    lifecycle.prevent_destroy = persistentP;
                 };
             };
   generateRootQcow=
@@ -29,9 +30,22 @@ let
   generateInstanceFromConf = infra: vmName: vmConf: {token = builtins.readFile "/tmp/${vmName}.token"; config=vmConf;};
 
 
+  declareQCow = vmName: vmInstance:
+    lib.mapAttrsToList (_: {name, size, target}:
+              { 
+                source = {
+                  volume = {
+                    volume = "\${libvirt_volume.${vmName}_${name}.name}";	
+                    pool = "\${libvirt_pool.default_${vmInstance.config.host}.name}";
+                  };
+                    
+                };
+                target = {dev = target.device; bus="virtio";};
+              }
+        ) vmInstance.config.persistentVolumes.qcows;
 
   declareDisks = vmInstance: 
-    lib.mapAttrsToList (_: {src,target}: 
+    lib.mapAttrsToList (_: {src, target}: 
         {
           source = {
               block = {
@@ -64,7 +78,7 @@ let
               { /*Newly created volume */
                 source = {
                   volume = {
-                    volume = "\${libvirt_volume.disk_${vmName}.name}";	
+                    volume = "\${libvirt_volume.${vmName}_root.name}";	
                     pool = "\${libvirt_pool.default_${host}.name}";
                   };
                     
