@@ -14,7 +14,7 @@ let
                     in lib.map
                             (entry: {
                                     what = "${dir}/${entry.what}";
-                                    inherit (entry) where type owner mode;
+                                    inherit (entry) where owner mode;
                             })
                             mounts)
                 (qcows // disks));
@@ -37,7 +37,7 @@ let
             mountservices = lib.map utils.pathToMountUnit mountpoints;
         in{
             "init-volumes" = {
-               description = "If empty, initializes the volumes before bind-mounting the files and repositories.";
+               description = "If empty, initializes the volumes before bind-mounting the directories.";
                after = mountservices;
                requires = mountservices;
                script = initializeMountsScript;
@@ -47,25 +47,16 @@ let
             };
         };
 
-    initializeMountsScript =  # A script that creates the files/directory to be bind-mounted if they does not exist.
+    initializeMountsScript =  # A script that creates the directory to be bind-mounted if they does not exist.
         lib.concatMapStringsSep "\n"
             (entry:
-                if entry.type == "directory" then 
-                        ''
-                            if [[ ! -d ${entry.what} ]]; then
-                                mkdir -p ${entry.what}
-                                chown ${entry.owner} ${entry.what}
-                                chmod ${if entry.mode == null then "0700" else entry.mode} ${entry.what}
-                            fi
-                        ''
-                else
-                        ''
-                            if [[ ! -f ${entry.what} ]]; then
-                                touch ${entry.what}
-                                chown ${entry.owner} ${entry.what}
-                                chmod ${if entry.mode == null then "0600" else entry.mode} ${entry.what}
-                            fi
-                        ''
+                ''
+                    if [[ ! -d ${entry.what} ]]; then
+                        mkdir -p ${entry.what}
+                        chown ${entry.owner} ${entry.what}
+                        chmod ${if entry.mode == null then "0700" else entry.mode} ${entry.what}
+                    fi
+                ''
                 )
             allMountsEntries;
 

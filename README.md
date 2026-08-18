@@ -29,4 +29,4 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - TODO tests (config works + secrets exists + secrets are properly encrypted)
 - logging
 
-- TODO use only vmconf (do not inherit vmnames) to avoid clashes definitions in accesses (e.g. infra.vms.services instead of vmconf.services). This may be helpful to handle containers transparently, since the container is seen as a custom vmconf
+- TODO use only vmconf (do not inherit vmnames) to avoid clashes definitions in accesses (e.g. infra.vms.services instead of vmconf.services). This may be helpful to handle containers transparently, since the container is seen as a custom vmconf. => Maybe do not inherit from INFRA entirely (avoid passing the configurations of the other VMs).

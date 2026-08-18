@@ -57,9 +57,17 @@ let
                 registry.services."${servicename}".s3Accesses = [access];
             }
         ];
+
+    registerVolume = servicename: volume:
+        lib.mkMerge [
+            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".use-volumes = [volume];})
+            {
+                registry.services."${servicename}".volumes = [volume];
+            }
+        ];
  
         
 
 in {
-    inherit registerSecret registerCertificate registerEndpoints registerDBAccess registerS3Access;
+    inherit registerSecret registerCertificate registerEndpoints registerDBAccess registerS3Access registerVolume;
 }

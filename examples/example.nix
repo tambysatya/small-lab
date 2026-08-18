@@ -85,7 +85,7 @@
                     fsType = "ext4";
                     options = ["default"];
                     mounts = [ 
-                        {what = "config.php"; where = "/var/lib/nextcloud/config/config.php"; type="file";}
+                        {what = "config.php"; where = "/var/lib/nextcloud/config/config.php";}
                     ];
                 };
             };

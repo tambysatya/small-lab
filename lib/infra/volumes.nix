@@ -3,19 +3,15 @@ let inherit (lib) types;
 in
 
 rec {
-  bindMount = lib.types.submodule { # Additional files/directory to be mounted
+  bindMount = lib.types.submodule { # Additional directory to be mounted
     options = {
         what = lib.mkOption {
-            description = "Location of the file/directory in the module";
+            description = "Location of the directory in the module";
             type = types.str;
         };
         where = lib.mkOption {
             description = "Mountpoint";
             type = types.str;
-        };
-        type = lib.mkOption {
-            description = "Type of mountpoint"; 
-            type = types.enum ["directory" "file"];
         };
         owner = lib.mkOption {
             description = "Owner of the mountpoint";
@@ -46,7 +42,7 @@ rec {
         description = "Filesystem";
       };
       mounts = lib.mkOption {
-        description = "List of files / directory that should be mounted to specific locations using bind mounts";
+        description = "List of directory that should be mounted to specific locations using bind mounts";
         type = types.listOf bindMount;
         default = [];
       };

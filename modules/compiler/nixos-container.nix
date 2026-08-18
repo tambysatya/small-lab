@@ -7,8 +7,7 @@
 let
 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs pkgs;};
-    sec = import "${inputs.self.outPath}/lib/compiler/security.nix" {inherit lib inputs registry infra vmname;};
-    deps = import "${inputs.self.outPath}/lib/compiler/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
+    comp = import "${inputs.self.outPath}/lib/compiler" {inherit lib inputs pkgs registry infra vmname;};
 
     initialize-host = {
           networking.nat = {
@@ -108,13 +107,13 @@ config = lib.mkIf (vmconf.containers != [])
                                     container_id = vars.container_id vmname servicename;
                                 in lib.mkMerge [
                                     (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.1";})
-                                    (sec.generateSecret 
+                                    (comp.generateSecret 
                                             {names = ["${container_id}.key"]; reload = ["container@ct-${servicename}.service"];})
                                     (lib.mkIf (lib.hasAttr servicename registry.services)
                                         (lib.mkMerge 
                                             (lib.map 
                                                 (ep: if ep.is_http then
-                                                        sec.generateReverseProxy {
+                                                        comp.generateReverseProxy {
                                                             fronthost = ep.host;
                                                             backhost = "http://${local-addr}";
                                                             inherit (ep) extraNginxConfig;}
@@ -125,7 +124,7 @@ config = lib.mkIf (vmconf.containers != [])
                             vmconf.containers))
 
                 # Containers requesting a DBAccess cannot be launched before postgres is reachable
-                (deps.mkDBDependencies 
+                (comp.mkDBDependencies 
                     (lib.map 
                         (servicename: "container@${servicename}.service")
                         (lib.filter 

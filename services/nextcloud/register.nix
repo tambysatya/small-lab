@@ -56,6 +56,7 @@ in {
 
                             })])
                     (reg.registerEndpoints "nextcloud" endpoints)
+                    (reg.registerVolume "nextcloud" {owner="nextcloud"; path="/var/lib/nextcloud/config"; reload=["phpfmp.service" "nextcloud-setup.service"];})
                     ]);
 }
 

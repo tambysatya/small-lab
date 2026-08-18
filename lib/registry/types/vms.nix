@@ -2,6 +2,7 @@
 
 let types = lib.types;
     infratypes = import "${inputs.self.outPath}/lib/infra/types.nix" {inherit lib;};
+    regtypes = import "${inputs.self.outPath}/lib/registry/types/register.nix" {inherit lib;};
 in
 
 {
@@ -16,6 +17,11 @@ in
                 type = types.listOf infratypes.serviceType;
                 default = [];
                 description = "List of services requesting a S3 access";
+            };
+            use-volumes = lib.mkOption {
+                type = types.listOf regtypes.volume;
+                default = [];
+                description = "List of volumes required to be available on the VM.";
             };
         };
     };

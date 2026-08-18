@@ -124,6 +124,12 @@ in
                     type = types.str;
                     example = "/var/lib/docker/storage";
                 };
+                reload = lib.mkOption {
+                    description = "Services that requires the volume.";
+                    type = types.listOf types.str;
+                    default = [];
+                };
+
             };
         };
 
