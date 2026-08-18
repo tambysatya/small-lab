@@ -30,3 +30,6 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - logging
 
 - TODO use only vmconf (do not inherit vmnames) to avoid clashes definitions in accesses (e.g. infra.vms.services instead of vmconf.services). This may be helpful to handle containers transparently, since the container is seen as a custom vmconf. => Maybe do not inherit from INFRA entirely (avoid passing the configurations of the other VMs).
+
+- secret-generator: generates only the secrets for the services activated. It is mostly done but not for some strings e.g. keycloak-initial-admin
+- secret-generator: maybe rewrite: 1/ the secrets are generated depending on which service is activated IN THE INFRA. 2/ the secrets are encrypted depending on the VM running the service
