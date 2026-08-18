@@ -25,6 +25,7 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
+      utils = import ./lib/utils.nix {inherit lib;};
       pkgs = nixpkgs.legacyPackages.${system};
 
       terranix-generator_fun = (import ./lib/terranix {inherit lib inputs;}).generator;
@@ -56,8 +57,7 @@
                }).config.infra;
 
       compile-registry = infra:
-            lib.foldl' 
-                lib.recursiveUpdate {}
+            utils.mergeAll
                  (lib.mapAttrsToList 
                     (vmname: vmconf: 
                         (lib.evalModules {
