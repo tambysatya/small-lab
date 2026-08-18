@@ -5,7 +5,7 @@ let
 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra;};
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit inputs lib vmconf vmname infra;};
+    sec = import "${inputs.self.outPath}/lib/compiler/security.nix" {inherit inputs lib vmconf vmname infra;};
     servicenames = lib.concatMap (v: v.use-db) (lib.attrValues registry.vms); #list of services requesting a db access
     dbaccesses = lib.concatMap (v: registry.services.${v}.dbAccesses) servicenames; #list of dbAccesses in the infrastructure
     users = lib.map (access: 

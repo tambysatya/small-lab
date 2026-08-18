@@ -2,7 +2,7 @@
 
 let 
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit inputs lib vmconf vmname infra;};
+    sec = import "${inputs.self.outPath}/lib/compiler/security.nix" {inherit inputs lib vmconf vmname infra;};
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra;};
 
     s3lib = import ./lib.nix {inherit lib pkgs config infra registry inputs;};

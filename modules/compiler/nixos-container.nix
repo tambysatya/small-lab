@@ -7,8 +7,8 @@
 let
 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs pkgs;};
-    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
-    deps = import "${inputs.self.outPath}/lib/registry/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
+    sec = import "${inputs.self.outPath}/lib/compiler/security.nix" {inherit lib inputs registry infra vmname;};
+    deps = import "${inputs.self.outPath}/lib/compiler/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
 
     initialize-host = {
           networking.nat = {
@@ -53,8 +53,8 @@ let
                         };
                     };
                     config = {...}:{
-                        registry-compiler = {
-                            no-endpoints = true; #do not process endpoints
+                        compiler = {
+                            noEndpoints = true; #do not process endpoints
                         };
                         imports = [
                             
@@ -63,7 +63,9 @@ let
                             "${inputs.self.outPath}/services/step-renew"
                             "${inputs.self.outPath}/profiles/base.nix"
                             "${inputs.self.outPath}/modules/registry"
-                            "${inputs.self.outPath}/modules/registry/compiler/native.nix"
+
+                            "${inputs.self.outPath}/modules/compiler/options.nix"
+                            "${inputs.self.outPath}/modules/compiler/native.nix"
                             inputs.sops-nix.nixosModules.sops
                             
                         ]; 

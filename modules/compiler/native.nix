@@ -4,8 +4,8 @@
 
 let 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
-    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
-    deps = import "${inputs.self.outPath}/lib/registry/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
+    sec = import "${inputs.self.outPath}/lib/compiler/security.nix" {inherit lib inputs registry infra vmname;};
+    deps = import "${inputs.self.outPath}/lib/compiler/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
 
     processEndpoints = servicename: reg:
         let
@@ -15,7 +15,7 @@ let
                                                backhost = "http://127.0.0.1:${lib.toString port}";
                                                inherit extraNginxConfig;}
                 else {}; #TODO pnat
-        in lib.mkIf (! config.registry-compiler.no-endpoints)
+        in lib.mkIf (! config.compiler.noEndpoints)
             (lib.mkMerge 
                 (lib.map processEndpoint (
                          lib.filter (endpoint: endpoint.is_http)
