@@ -52,7 +52,7 @@ let
                         };
                     };
                     config = {...}:{
-                        compiler = {
+                        compiler.options = {
                             noEndpoints = true; #do not process endpoints
                         };
                         imports = [

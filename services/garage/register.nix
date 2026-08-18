@@ -52,7 +52,9 @@ in {
     config = 
                 lib.mkMerge [
                     (reg.registerSecret "garage" "garage-keys" secret)
-                    (reg.registerEndpoints "garage" endpoints)];
+                    (reg.registerEndpoints "garage" endpoints)
+                    (reg.registerUser "garage" "garage" 10001)
+                ];
 }
 
 

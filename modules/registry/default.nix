@@ -1,12 +1,13 @@
-{lib, infra, registry, config, vmname, vmconf, inputs,...}:
+{lib, infra, config, vmname, vmconf, inputs,...}:
 let
 
+    utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
     infratypes = import "${inputs.self.outPath}/lib/infra/types.nix" {inherit lib;};
     services = vmconf.services;
     containers = vmconf.containers;
     modules = lib.map (name: "${inputs.self.outPath}/services/${name}/register.nix") infratypes.serviceNames;
     #modules = lib.map (name: "${inputs.self.outPath}/services/${name}/register.nix") (lib.unique (services ++ containers)); #enables only the services activated by the infra
- 
+
 
 in 
 

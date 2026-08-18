@@ -65,9 +65,15 @@ let
                 registry.services."${servicename}".volumes = [volume];
             }
         ];
+
+    registerUser = servicename: username: userid:
+        lib.mkMerge [
+            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".users."${username}" = userid;})
+            { registry.services."${servicename}".users.${username} = userid;}
+        ];
  
         
 
 in {
-    inherit registerSecret registerCertificate registerEndpoints registerDBAccess registerS3Access registerVolume;
+    inherit registerSecret registerCertificate registerEndpoints registerDBAccess registerS3Access registerVolume registerUser;
 }

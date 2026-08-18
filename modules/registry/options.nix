@@ -19,20 +19,6 @@ in
                         description = "Resources required by the vms (generated during phase 1)";
                         default = {};
                     };
-                    global = lib.mkOption {
-                        description = "Global informations of the desired state."; #MUST BE CHECKED BEFORE VALIDATING MIGRATIONS TODO
-                        type = types.submodule {
-                            options = {
-                                users = lib.mkOption { #UID mappings
-                                    internal = true;
-                                    description = "Unique UID/GID across the entire infrastructure";
-                                    type = types.attrs;
-                                    default = {};
-                                    example = {postgres= {uid=10001; gid=10001;}; nextcloud={uid=10002; gid=10002;};};
-                                };
-                            };
-                        };
-                    };
                 };
             };
     };

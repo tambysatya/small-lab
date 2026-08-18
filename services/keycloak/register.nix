@@ -14,6 +14,8 @@ in
                      (lib.mkMerge [
                          (reg.registerDBAccess "keycloak" 
                                 {role = "keycloak"; table="keycloak"; reload= ["keycloak.service"]; owner="root";})
-                         (reg.registerEndpoints "keycloak" [{host=servicevhost; port=serviceport;}])]);
+                         (reg.registerEndpoints "keycloak" [{host=servicevhost; port=serviceport;}])
+                         (reg.registerUser "keycloak" "keycloak" 10002)
+                     ]);
 }
 

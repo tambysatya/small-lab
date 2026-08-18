@@ -47,6 +47,13 @@ in
             default = [];
             type = types.listOf types.volume;
         };
+        users = lib.mkOption {
+            internal = true;
+            description = "UserIDs of the Service Users";
+            default = {};
+            type = types.attrsOf types.userID;
+
+        };
         hosts = lib.mkOption {
             type = types.submodule {
                 options = {

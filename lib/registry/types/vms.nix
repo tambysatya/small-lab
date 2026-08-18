@@ -23,6 +23,11 @@ in
                 default = [];
                 description = "List of volumes required to be available on the VM.";
             };
+            users = lib.mkOption {
+                type = types.attrsOf regtypes.userid;
+                default = {};
+                description = "Mapping User-UserID of the Services users of the VM";
+            };
         };
     };
 }

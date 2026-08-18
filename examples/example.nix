@@ -27,8 +27,8 @@
         vcpu = 4;
         memory = 8000;
         ipAddress = "192.168.1.200";
-        services = ["step-ca" "openldap"];
-        #services = ["keycloak" "step-ca" "openldap"];
+        #services = ["step-ca" "openldap"];
+        services = ["keycloak" "step-ca" "openldap"];
         persistentVolumes.disks = {
             "/var/lib/openldap/data" = {
                 src="/dev/pvhdd/ldap"; 

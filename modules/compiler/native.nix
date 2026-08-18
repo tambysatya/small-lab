@@ -14,7 +14,7 @@ let
                                                backhost = "http://127.0.0.1:${lib.toString port}";
                                                inherit extraNginxConfig;}
                 else {}; #TODO pnat
-        in lib.mkIf (! config.compiler.noEndpoints)
+        in lib.mkIf (! config.compiler.options.noEndpoints)
             (lib.mkMerge 
                 (lib.map processEndpoint (
                          lib.filter (endpoint: endpoint.is_http)

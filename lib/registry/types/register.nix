@@ -129,9 +129,9 @@ in
                     type = types.listOf types.str;
                     default = [];
                 };
-
             };
         };
+        userID = types.ints.positive;
 
 
 

@@ -162,6 +162,10 @@
                     ];
                 };
 
+         gen-state = args:
+            let confs = gen-nixos args;
+                fst_conf = builtins.head (builtins.attrNames confs);
+            in confs."${fst_conf}".config.compiler.state;
                 
          gen-config-checks =
             flake-inputs:
@@ -205,6 +209,7 @@
       registry = gen-registry args;
       terranix = gen-terranix args;
       nixosConfigurations = gen-nixos args // {iso = gen-iso args;};
+      state = gen-state args;
 
       checks.${system} = gen-config-checks inputs;
                    

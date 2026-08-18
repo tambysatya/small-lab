@@ -22,6 +22,8 @@ in {
                 (lib.mkMerge [ 
                     #(reg.registerSecrets "postgres" "postgres" ["postgres.service"] secrets)
                     (reg.registerCertificate "postgres" "postgres" ["postgresql.service"] "postgres.${infra.domain}")
-                    (reg.registerEndpoints "postgres" endpoints)]);
+                    (reg.registerEndpoints "postgres" endpoints)
+                    (reg.registerUser "postgres" "postgres" 10005)
+                ]);
 }
 
