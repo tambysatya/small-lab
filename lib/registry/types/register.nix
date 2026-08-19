@@ -129,7 +129,7 @@ in
                     type = types.listOf types.str;
                     default = [];
                 };
-                modes = lib.mkOption {
+                mode = lib.mkOption {
                     description = "Permissions of the directory";
                     type = types.str;
                     default = "0700";

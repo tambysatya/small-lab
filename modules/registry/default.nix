@@ -11,20 +11,22 @@ let
         vmname: vmconf:
         servicename:
         let
-           volumes = registry.services.${servicename}.volumes;
+           volumes = config.registry.services.${servicename}.volumes;
+           #volumes = [ { mode = "0700"; owner = "nextcloud"; path = "/var/lib/nextcloud/config"; reload = [ "phpfmp.service" "nextcloud-setup.service" ]; } ];
+
            processDir = dir@{mode, owner, path, reload}:
                 let
                    locations = lib.filter
                                     ({mapping,...}:
                                         builtins.elem path (map (builtins.getAttr "sys") mapping))
-                                    (vmconf.persistentVolumes.qcow ++ vmconf.persistentVolumes.disks);
+                                    (vmconf.persistentVolumes.qcows ++ vmconf.persistentVolumes.disks);
                    location = lib.head locations;
-                   vollocation = lib.head (lib.filter ({vol,sys}: sys == path) location.mappings).vol;
+                   vollocation = (lib.head (lib.filter ({vol,sys}: sys == path) location.mapping)).vol;
                 in
                 assert (locations != []) || throw "Required persistent directory ${path} by ${servicename} not found on ${vmname}";
-                assert (lib.length locations > 1) || throw "Persistent directory ${path} by ${servicename} found multiple times on ${vmname}";
+                assert (lib.length locations == 1) || throw "Persistent directory ${path} by ${servicename} found multiple times on ${vmname}";
                 {
-                    registry.persistentDirectory."${path}" = {
+                    "${vmname}".persistentDirectories."${path}" = {
                        srcPath = "${location.mount.dir}/${lib.removePrefix "/" vollocation}";
                        inherit owner mode reload;
                     };
@@ -39,7 +41,7 @@ let
            mntdir = mount.dir;
         in
         {
-            registry.vms.${vmname}.attachedVolumes."${mntdir}" = {
+            ${vmname}.attachedVolumes."${mntdir}" = {
                 hostDevice = "${vmname}_${name}.qcow";
                 vmDevice = "vd${letter}";
                 inherit (mount) options fsType;
@@ -52,7 +54,7 @@ let
         letter:
         let mntdir = mount.dir;
         in {
-            registry.vms.${vmname}.attachedVolumes."${mntdir}" = {
+            ${vmname}.attachedVolumes."${mntdir}" = {
                 hostDevice = src;
                 vmDevice = "sd${letter}";
                 inherit (mount) options fsType;
@@ -76,25 +78,36 @@ let
                     (lib.stringToCharacters "abcdefghijklmnopqrstuvwxyz")))
             ];
 
-    compileVMs =
+    compileVMsHosts = 
         vmname: vmconf:
             let 
                 services = vmconf.services;
                 containers = vmconf.containers;
             in lib.mkMerge [
                 (lib.mkMerge
-                    (lib.map (name: {registry.services."${name}".hosts.vms = [vmname];}) services))
+                   (lib.map (name: {"${name}".hosts.vms = [vmname];}) services))
                 (lib.mkMerge 
-                    (lib.map(name: {registry.services."${name}".hosts.containers = [vmname];}) containers))
-                (lib.mkIf (vmconf.persistentVolumes != []) (processVolumes vmname vmconf))
+                    (lib.map(name: {"${name}".hosts.containers = [vmname];}) containers))
+            ];
+
+
+    compileVMsFiles =
+        vmname: vmconf:
+            let 
+                services = vmconf.services;
+                containers = vmconf.containers;
+            in lib.mkMerge [
                 (lib.mkMerge 
                     (map (processDirs vmname vmconf) (vmconf.services ++ vmconf.containers)))
+                (processVolumes vmname vmconf)
+
             ];
 
 
 in 
 
 {
-imports = [./options.nix] ++ modules;    
-config = lib.mkMerge (lib.mapAttrsToList compileVMs infra.vms);
+imports = [./options.nix]++ modules;    
+config.registry.services = lib.mkMerge (lib.mapAttrsToList compileVMsHosts infra.vms);
+config.registry.vms = lib.mkMerge (lib.mapAttrsToList compileVMsFiles infra.vms);
 }
