@@ -1,9 +1,8 @@
-{lib, inputs, infra, vmname, vmconf, pkgs, config, ...}:
+{lib, inputs, infra, pkgs, config, ...}:
 
 let 
 
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
+    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
 in {
     config = 
                       (lib.mkMerge [

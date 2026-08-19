@@ -57,6 +57,13 @@
                }).config.infra;
 
       compile-registry = infra:
+        (lib.evalModules {
+            specialArgs = {inherit inputs lib pkgs infra;};
+            modules = [ ./modules/registry];
+        }).config.registry;
+
+      /*
+      compile-registry = infra:
             utils.mergeAll
                  (lib.mapAttrsToList 
                     (vmname: vmconf: 
@@ -67,6 +74,7 @@
                             ];
                         }).config.registry)
                     infra.vms);
+      */
 
 
       nixos-generator = args@{inventory, extraArgs ?{}}: 

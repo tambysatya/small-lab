@@ -14,11 +14,6 @@ in
                         description = "Resources required by the services (generated during phase1)";
                         default = {};
                     };
-                    vms = lib.mkOption {
-                        type = types.attrsOf types.vmConfig;
-                        description = "Resources required by the vms (generated during phase 1)";
-                        default = {};
-                    };
                 };
             };
     };

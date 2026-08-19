@@ -64,6 +64,7 @@ let
                             "${inputs.self.outPath}/modules/registry"
 
                             "${inputs.self.outPath}/modules/compiler/options.nix"
+                            "${inputs.self.outPath}/modules/compiler/base.nix"
                             "${inputs.self.outPath}/modules/compiler/native.nix"
                             inputs.sops-nix.nixosModules.sops
                             

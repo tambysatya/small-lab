@@ -9,6 +9,7 @@ let
 in {
     imports = [
                ./options.nix
+               ./base.nix
                ./native.nix
                ./nixos-container.nix
               ];    

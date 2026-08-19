@@ -1,9 +1,8 @@
-{inputs, infra, vmname, vmconf, config, lib, pkgs,...}:
+{inputs, infra, config, lib, pkgs,...}:
 
 let
 
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
+    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
 
 #    secrets = {
 #        /* User passwords */

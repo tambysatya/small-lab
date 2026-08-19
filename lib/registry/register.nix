@@ -1,9 +1,8 @@
-{inputs, lib, infra, vmname, vmconf,  ...}:
+{inputs, lib, infra,  ...}:
 
 /* Called by the modules to register services properties*/
 
 let 
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit inputs lib vmname vmconf;};
     registerSecret = servicename: secretname: secret: let
         provider = secret.kind.provider;
         providerargs = secret.kind.providerArgs or {};
@@ -45,14 +44,12 @@ let
 
     registerDBAccess = servicename: access:
         lib.mkMerge [
-            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".use-db = [servicename];})
             {
                 registry.services."${servicename}".dbAccesses = [access];
             }
         ];
     registerS3Access = servicename: access:
         lib.mkMerge [
-            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".use-s3 = [servicename];})
             {
                 registry.services."${servicename}".s3Accesses = [access];
             }
@@ -60,7 +57,6 @@ let
 
     registerVolume = servicename: volume:
         lib.mkMerge [
-            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".use-volumes = [volume];})
             {
                 registry.services."${servicename}".volumes = [volume];
             }
@@ -68,7 +64,6 @@ let
 
     registerUser = servicename: username: userid:
         lib.mkMerge [
-            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".users."${username}" = userid;})
             { registry.services."${servicename}".users.${username} = userid;}
         ];
  

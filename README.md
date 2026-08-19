@@ -34,3 +34,5 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 
 - secret-generator: generates only the secrets for the services activated. It is mostly done but not for some strings e.g. keycloak-initial-admin
 - secret-generator: maybe rewrite: 1/ the secrets are generated depending on which service is activated IN THE INFRA. 2/ the secrets are encrypted depending on the VM running the service
+
+- users: some usersID are set by their own service. Now we FORCE it to a new value (our) but not sure if this is a good approach TODO

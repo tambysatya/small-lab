@@ -1,9 +1,8 @@
-{lib, inputs, infra, vmname, vmconf,...}:
+{lib, inputs, infra,...}:
 
 # TODO: patch the config file to use /run/secrets/ instead of /var/lib/step-ca in the path of the secrets
 let 
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
+    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
     secrets = {
         names = ["ca-password.key"  "intermediate_ca_key"];
         owner = "step-ca";

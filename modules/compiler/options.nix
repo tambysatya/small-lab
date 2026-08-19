@@ -8,7 +8,11 @@ let
                 description = "Do not compiles endpoints";
                 type = types.bool;
                 default = false;
-
+            };
+            noBindMounts = lib.mkOption {
+                description = "Do not bind-mount the volumes";
+                type = types.bool;
+                default = false;
             };
         };
     };
