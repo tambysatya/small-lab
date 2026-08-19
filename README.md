@@ -36,3 +36,5 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - secret-generator: maybe rewrite: 1/ the secrets are generated depending on which service is activated IN THE INFRA. 2/ the secrets are encrypted depending on the VM running the service
 
 - users: some usersID are set by their own service. Now we FORCE it to a new value (our) but not sure if this is a good approach TODO
+
+- Move functions process* in modules/compiler into lib/
