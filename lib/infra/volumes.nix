@@ -96,18 +96,6 @@ rec {
                 description = "Mapping between mountpoints (on the vm) and qcow volumes (on the host). Useful for small files (e.g. config states). The volumes will be created or resized by libvirt dynamically. Please note that in case of resizing, the VM will NOT see the change until you apply manually the resizing procedure of the corresponding filesystem type, e.g. resize2fs or xfs_growfs";
                 type = types.listOf qcow;
                 default = [];
-                example = {
-                    "/srv/volume" = {
-                        name = "vm1-persistent"; 
-                        size = 1024*1024*100; #100 M
-                        target = {
-                            device = "vdb";
-                            options = ["nofail"];
-                            fstType = "xfs";
-                            mounts = [{src = "config.php"; dst = "/var/lib/nextcloud/config/config.php"; type="file";}];
-                        };
-                    };
-                };
             };
         };
   };

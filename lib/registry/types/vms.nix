@@ -3,30 +3,72 @@
 let types = lib.types;
     infratypes = import "${inputs.self.outPath}/lib/infra/types.nix" {inherit lib;};
     regtypes = import "${inputs.self.outPath}/lib/registry/types/register.nix" {inherit lib;};
+
+    mountOptions = types.submodule {
+        options = {
+            hostDevice = lib.mkOption {
+                description = "Device on the host (bare-metal) server";
+                type = types.str;
+                example = "/dev/sda1";
+            };
+            vmDevice = lib.mkOption {
+                description = "Device on the vm.";
+                type = types.str;
+                example = "vdb";
+            };
+            options = lib.mkOption {
+                description = "List of mounting options";
+                type = types.listOf types.str;
+                default = [];
+                example = ["nofail"];
+            };
+            fsType = lib.mkOption {
+                description = "Filesystem";
+                type = types.enum ["xfs" "ext4"]; #TODO factorize with lib.infra.volumes/fsType
+            };
+            deviceType = lib.mkOption {
+                description = "Type of device";
+                type = types.enum ["disk" "qcow"];
+            };
+        };
+    };
+    persistentDir = types.submodule {
+        options = {
+            srcPath = lib.mkOption {
+                description = "Location on the volume";
+                type = types.str;
+            };
+            owner = lib.mkOption {
+                description = "Owner of the directory";
+                type = types.str;
+            };
+            mode = lib.mkOption {
+                description = "Mounting permissions";
+                type = types.str;
+                default = "0700";
+            };
+            reload = lib.mkOption {
+                description = "List of services using this directory";
+                type = types.listOf types.str;
+                default = [];
+            };
+        };
+    };
 in
 
 {
     vmConfig = types.submodule {
         options = {
-            use-db = lib.mkOption {
-                type = types.listOf infratypes.serviceType;
-                default = [];
-                description = "List of services requesting a POSTGRESQL access";
-            };
-            use-s3 = lib.mkOption {
-                type = types.listOf infratypes.serviceType;
-                default = [];
-                description = "List of services requesting a S3 access";
-            };
-            use-volumes = lib.mkOption {
-                type = types.listOf regtypes.volume;
-                default = [];
-                description = "List of volumes required to be available on the VM.";
-            };
-            users = lib.mkOption {
-                type = types.attrsOf regtypes.userid;
+            attachedVolumes = lib.mkOption {
+                description = "Disks attached to the VM";
+                type = types.attrsOf mountOptions; # mountpoints -> mountoptions
+                example = {"/srv/data" = {hostDevice = "/dev/sda1"; vmDevice = "vdb"; options = ["nofail"];};};
                 default = {};
-                description = "Mapping User-UserID of the Services users of the VM";
+            };
+            persistentDirectories = lib.mkOption {
+                description = "Directory stored on an external volume";
+                type = types.attrsOf persistentDir; # requestedFile => Informations
+                default = {};
             };
         };
     };
