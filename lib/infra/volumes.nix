@@ -3,34 +3,24 @@ let inherit (lib) types;
 in
 
 rec {
-  bindMount = lib.types.submodule { # Additional directory to be mounted
+  mapping= lib.types.submodule { # Additional directory to be mounted
     options = {
-        what = lib.mkOption {
-            description = "Location of the directory in the module";
+        vol = lib.mkOption {
+            description = "Location of the directory in the volume";
             type = types.str;
         };
-        where = lib.mkOption {
-            description = "Mountpoint";
+        sys = lib.mkOption {
+            description = "Mountpoint in the system";
             type = types.str;
-        };
-        owner = lib.mkOption {
-            description = "Owner of the mountpoint";
-            type = types.str;
-            default = "root";
-        };
-        mode = lib.mkOption {
-            description = "Permissions of the mountpoint";
-            type = types.nullOr types.str;
-            default = null; #is 0700 if directory or 0600 if file
         };
     };
   };
   fsMount = lib.types.submodule { # VM-side mounting options of a volume
     options = {
-      device = lib.mkOption { #TODO: dst can be inferred compile time
+      dir = lib.mkOption { 
         type = types.str;
         description = "mountpoint on the vm";
-        example = "vda";
+        example = "/medias/storage";
       };
       options = lib.mkOption {
         type = types.listOf types.str;
@@ -41,11 +31,6 @@ rec {
         type = types.enum ["xfs" "ext4"]; #TODO
         description = "Filesystem";
       };
-      mounts = lib.mkOption {
-        description = "List of directory that should be mounted to specific locations using bind mounts";
-        type = types.listOf bindMount;
-        default = [];
-      };
     };
   };
   disk = lib.types.submodule { # A raw disk to be mounted in the VM
@@ -55,9 +40,14 @@ rec {
         description = "device of the host";
         example = "/dev/sda";
       };
-      target = lib.mkOption {
+      mount = lib.mkOption {
         description = "Mounting point configuration";
         type = fsMount;
+      };
+      mapping = lib.mkOption {
+        description = "List of directories to be bind-mounted";
+        type = types.listOf mapping;
+        default = [];
       };
     };
   };
@@ -74,9 +64,14 @@ rec {
             example = 1024*1024*1024; #1G
             default = 100*1024*1024; #100 Mo
         };
-        target = lib.mkOption {
+        mount = lib.mkOption {
             description = "Mounting point configuration";
             type = fsMount;
+        };
+        mapping = lib.mkOption {
+            description = "List of directories to be bind-mounted";
+            type = types.listOf mapping;
+            default = [];
         };
      };
     };
@@ -84,23 +79,23 @@ rec {
         options = {
             disks = lib.mkOption {
                 description = "Mapping between mountpoints (on the vm) and raw disks (on the host). The devices need to exist on the host. Useful for large files (e.g. databases)";
-                type = types.attrsOf disk;
-                default = {};
-                example = {
-                    "/srv/data" = {
+                type = types.listOf disk;
+                default = [];
+                example = [
+                    {
                         src = "/dev/sdb"; 
                         target = {
                             device = "vdb";
                             options = ["nofail"];
                             fstType = "xfs";
                         };
-                    };
-                };
+                    }
+                ];
             };
             qcows = lib.mkOption {
                 description = "Mapping between mountpoints (on the vm) and qcow volumes (on the host). Useful for small files (e.g. config states). The volumes will be created or resized by libvirt dynamically. Please note that in case of resizing, the VM will NOT see the change until you apply manually the resizing procedure of the corresponding filesystem type, e.g. resize2fs or xfs_growfs";
-                type = types.attrsOf qcow;
-                default = {};
+                type = types.listOf qcow;
+                default = [];
                 example = {
                     "/srv/volume" = {
                         name = "vm1-persistent"; 

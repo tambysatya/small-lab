@@ -6,7 +6,7 @@ let
 
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
     /* Mounts a directory in sourcedir into the where destination */
-    generateSystemdMount = 
+    generateSystemdBindMount = 
         sourcedir:
         mount@{what, where, owner, mode}:
         {
@@ -49,5 +49,5 @@ let
                 };
             };
 in {
-    inherit generateSystemdMount generateInitSourceDir;
+    inherit generateSystemdBindMount generateInitSourceDir;
 }

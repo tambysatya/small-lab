@@ -59,6 +59,15 @@ let
             reloads = lib.concatMap (access: access.reload) accesses;
         in comp.mkDBDependencies reloads;
 
+/*
+    processVolume = servicename: reg:
+        let
+            regvolumes = reg.volumes; #requested by the service {owner, path, reload}
+        in 
+        {
+
+        };
+*/
 in{
    config = let 
                 configuredservices = if builtins.hasAttr "services" vmconf

@@ -129,6 +129,11 @@ in
                     type = types.listOf types.str;
                     default = [];
                 };
+                modes = lib.mkOption {
+                    description = "Permissions of the directory";
+                    type = types.str;
+                    default = "0700";
+                };
             };
         };
         userID = types.ints.positive;
