@@ -28,25 +28,12 @@ let
       utils = import ./lib/utils.nix {inherit lib;};
       pkgs = nixpkgs.legacyPackages.${system};
 
-      terranix-generator_fun = (import ./lib/terranix {inherit lib inputs;}).generator;
-      terranix-generator  = 
-        {inventory, extraArgs ? {}}:
-        let 
-               infra-config = (lib.evalModules 
-                          {
-                            modules = [
-                              "${nixpkgs}/nixos/modules/misc/assertions.nix"
-                              ./modules/infra
-                              inventory];
-                            specialArgs = {inherit lib;} // extraArgs;
-                           }).config;
-
-        in {inherit system; 
-            modules = [{config = (terranix-generator_fun infra-config.infra);}];};
-
+    terranix-generator_fun = args:
+        let conf = compileModule args;
+        in (import ./lib/terranix {inherit lib inputs; inherit (conf) infra registry; }).generator;
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
         {inventory, extraArgs ? {}}:
-           lib.evalModules {
+           (lib.evalModules {
                specialArgs = {inherit inputs;} // extraArgs;
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
@@ -54,7 +41,7 @@ let
                   ./modules/registry
                   inventory
                 ];
-           }; 
+           }).config; 
 
     compileInfra = args: (compileModule args).config.infra;
     compileRegistry = args: (compileModule args).config.registry;
@@ -76,15 +63,14 @@ let
 
 
       nixos-generator = args@{inventory, extraArgs ?{}}: 
-        let infraConf = compileModule args; 
-            infra = infraConf.config.infra;
-            registry = infraConf.config.registry;
+        let conf = compileModule args; 
             configs = lib.mapAttrs
                             (vmname: vmconf:
                                 lib.nixosSystem {
                                     inherit system; 
                                     specialArgs = {
-                                        inherit inputs infra registry vmname vmconf;
+                                        inherit inputs vmname vmconf;
+                                        inherit (conf) infra registry;
                                     };
                                     modules = [
                                             ./profiles/vm.nix
@@ -102,7 +88,7 @@ let
 
                                         ];
                                 })
-                            infra.vms;
+                            conf.infra.vms;
 
         in configs;
 
@@ -127,26 +113,28 @@ let
 
         
         gen-terranix = 
-            args@{file, flake-path}:
-                terranix.lib.terranixConfiguration {
+            args:
+                let conf = compileModule args;
+                in terranix.lib.terranixConfiguration {
                             inherit system;
                             modules = [
-                                {config = terranix-generator_fun (compileInfra args);}
+                               ./modules/compiler/terranix 
                             ];
+                            extraArgs = {inherit inputs lib; inherit (conf) infra registry;};
                         };
         gen-secrets =
             args@{inventory, extraArgs}:
-                let conf = (compileModule args).config;
+                let conf = compileModule args;
                 in compile-gen-secrets {inherit (conf) infra registry;};
 
         gen-nixos =
             args: nixos-generator args;
         gen-iso = 
             args:
-                let infra = compileInfra args;
+                let conf = compileModule args;
                 in lib.nixosSystem {
                     inherit system;
-                    specialArgs = {inherit inputs infra;};
+                    specialArgs = {inherit inputs lib; inherit (conf) infra registry;};
                     modules = [
                         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
                         ./profiles/iso.nix
@@ -192,7 +180,7 @@ let
       registry = compileRegistry args;
       #infra = gen-infra args;
       #registry = gen-registry args;
-      #terranix = gen-terranix args;
+      terranix = gen-terranix args;
       nixosConfigurations = gen-nixos args // {iso = gen-iso args;};
 
       checks.${system} = gen-config-checks inputs;

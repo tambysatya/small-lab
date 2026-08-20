@@ -72,12 +72,12 @@ let
                 (lib.zipListsWith
                     (processQcow vmname vmconf)
                     (vmconf.persistentVolumes.qcows)
-                    (lib.stringToCharacters "bcdefghijklmnopqrstuvwxyz")))
+                    (lib.stringToCharacters "bcdefghijklmnopqrstuvwxyz"))) #vda is for "/"
              (lib.mkMerge 
                 (lib.zipListsWith
                     (processDisk vmname vmconf)
                     (vmconf.persistentVolumes.disks)
-                    (lib.stringToCharacters "abcdefghijklmnopqrstuvwxyz")))
+                    (lib.stringToCharacters "bcdefghijklmnopqrstuvwxyz"))) #sda is the iso
             ];
 
     compileVMsHosts = 

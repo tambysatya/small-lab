@@ -1,8 +1,8 @@
-{lib,inputs,...}:
+{lib,inputs, infra, registry, ...}:
 
 let hostlib = import ./hosts.nix {inherit lib inputs;};
-    vmlib = import ./vms.nix {inherit lib inputs;};
-    generateConfig = infra:
+    vmlib = import ./vms.nix {inherit lib inputs infra registry;};
+    generateConfig = 
       lib.mkMerge [
         {
           terraform.required_providers.libvirt = {
@@ -10,8 +10,6 @@ let hostlib = import ./hosts.nix {inherit lib inputs;};
           };
         }
         (hostlib.generateHosts infra)
-        (vmlib.generateAllRootQcows infra)
-        (vmlib.generateAllPersistentQcows infra)
         (vmlib.generateVMDomains infra)
       ];
 
