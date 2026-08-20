@@ -88,6 +88,7 @@
                 };
                 mapping = [ 
                         {vol = "config"; sys = "/var/lib/nextcloud/config";}
+                        {vol = "data"; sys = "/var/lib/nextcloud/data";}
                 ];
             }
         ];
