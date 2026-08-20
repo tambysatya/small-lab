@@ -23,10 +23,10 @@
   outputs = inputs@{nixpkgs, terranix, ...}:
 
 let
-      system = "x86_64-linux";
-      lib = nixpkgs.lib;
-      utils = import ./lib/utils.nix {inherit lib;};
-      pkgs = nixpkgs.legacyPackages.${system};
+    system = "x86_64-linux";
+    lib = nixpkgs.lib;
+    utils = import ./lib/utils.nix {inherit lib;};
+    pkgs = nixpkgs.legacyPackages.${system};
 
     terranix-generator_fun = args:
         let conf = compileModule args;
@@ -43,26 +43,10 @@ let
                 ];
            }).config; 
 
-    compileInfra = args: (compileModule args).config.infra;
-    compileRegistry = args: (compileModule args).config.registry;
+    compileInfra = args: (compileModule args).infra;
+    compileRegistry = args: (compileModule args).registry;
 
-
-      /*
-      compile-registry = infra:
-            utils.mergeAll
-                 (lib.mapAttrsToList 
-                    (vmname: vmconf: 
-                        (lib.evalModules {
-                            specialArgs = {inherit inputs lib pkgs infra vmname vmconf;};
-                            modules = [
-                                ./modules/registry
-                            ];
-                        }).config.registry)
-                    infra.vms);
-      */
-
-
-      nixos-generator = args@{inventory, extraArgs ?{}}: 
+    nixos-generator = args@{inventory, extraArgs ?{}}: 
         let conf = compileModule args; 
             configs = lib.mapAttrs
                             (vmname: vmconf:
@@ -95,11 +79,12 @@ let
         extraArgs = {path=inputs.self.outPath;};
 
 
-        compile-gen-secrets = 
-            args@{infra, registry}:
-                let script =(import tools/secrets-generator/main.nix 
+        compileGenSecrets = 
+            args:
+                let conf = compileModule args;
+                    script =(import tools/secrets-generator/main.nix 
                                 {inherit inputs lib pkgs;
-                                 inherit (args) infra registry;}).main;
+                                 inherit (conf) infra registry;}).main;
                 in {
                     packages.${system}.gen-secrets = script;
                     apps.${system}.gen-secrets = {
@@ -112,7 +97,7 @@ let
     
 
         
-        gen-terranix = 
+        compileTerranix = 
             args:
                 let conf = compileModule args;
                 in terranix.lib.terranixConfiguration {
@@ -122,14 +107,9 @@ let
                             ];
                             extraArgs = {inherit inputs lib; inherit (conf) infra registry;};
                         };
-        gen-secrets =
-            args@{inventory, extraArgs}:
-                let conf = compileModule args;
-                in compile-gen-secrets {inherit (conf) infra registry;};
-
-        gen-nixos =
+        compileNixos =
             args: nixos-generator args;
-        gen-iso = 
+        compileIso = 
             args:
                 let conf = compileModule args;
                 in lib.nixosSystem {
@@ -148,7 +128,6 @@ let
                             nixosConfig.config.system.build.toplevel)
                         flake-inputs.self.nixosConfigurations;
                 
-            
 
             
 
@@ -156,11 +135,11 @@ let
         #args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
         args = {inventory = ./examples/example.nix; extraArgs = {path=inputs.self.outPath;};};
 
-    in gen-secrets args //{
+    in compileGenSecrets args //{
       
 
       lib = {
-        inherit compileInfra compileRegistry gen-terranix gen-secrets gen-nixos gen-iso;
+        inherit compileInfra compileRegistry compileTerranix compileGenSecrets compileNixos compileIso;
         inherit gen-config-checks;
       };
 
@@ -180,8 +159,8 @@ let
       registry = compileRegistry args;
       #infra = gen-infra args;
       #registry = gen-registry args;
-      terranix = gen-terranix args;
-      nixosConfigurations = gen-nixos args // {iso = gen-iso args;};
+      terranix = compileTerranix args;
+      nixosConfigurations = compileNixos args // {iso = compileIso args;};
 
       checks.${system} = gen-config-checks inputs;
                    
