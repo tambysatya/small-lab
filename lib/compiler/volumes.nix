@@ -37,7 +37,7 @@ let
                         hostPath = srcPath;
                         isReadOnly = false;
                     };
-                    systemd.services."containers@${service}.service" = {
+                    systemd.services."containers@${service}" = {
                         after = ["init-volumes.service"];
                         requires = ["init-volumes.service"];
                     };
