@@ -58,7 +58,7 @@ let
         in {
             ${vmname}.attachedVolumes."${mntdir}" = {
                 hostDevice = src;
-                vmDevice = "sd${letter}";
+                vmDevice = "vd${letter}";
                 inherit (mount) options fsType;
                 deviceType = "disk";
             };
@@ -66,19 +66,11 @@ let
     processVolumes = 
         vmname: vmconf:
         let
+            # [Letter -> Volume]
+            mkVolumeFromLetter = map (processQcow vmname vmconf) (vmconf.persistentVolumes.qcows)
+                               ++ map (processDisk vmname vmconf) (vmconf.persistentVolumes.disks);
         
-        in lib.mkMerge [
-            (lib.mkMerge 
-                (lib.zipListsWith
-                    (processQcow vmname vmconf)
-                    (vmconf.persistentVolumes.qcows)
-                    (lib.stringToCharacters "bcdefghijklmnopqrstuvwxyz"))) #vda is for "/"
-             (lib.mkMerge 
-                (lib.zipListsWith
-                    (processDisk vmname vmconf)
-                    (vmconf.persistentVolumes.disks)
-                    (lib.stringToCharacters "bcdefghijklmnopqrstuvwxyz"))) #sda is the iso
-            ];
+        in lib.mkMerge (lib.zipListsWith (f: x: f x) mkVolumeFromLetter (lib.stringToCharacters "bcdefghijklmnopqrstuvwxyz"));
 
     compileVMsHosts = 
         vmname: vmconf:
