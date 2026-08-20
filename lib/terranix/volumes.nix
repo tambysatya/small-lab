@@ -32,7 +32,7 @@ let
             in utils.mergeAll 
                     (map 
                         ({name, size,...}: 
-                            generateQcow vmname vmconf {inherit name size; persistentP = false;}) #TODO persistent=False to check
+                            generateQcow vmname vmconf {inherit name size; persistentP = true;})
                         qcows);
 
     attachVolumes = 
