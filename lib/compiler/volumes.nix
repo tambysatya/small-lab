@@ -62,7 +62,7 @@ let
                                     fi
                                 '')
                             (builtins.attrValues dirs);
-            dependencies = map ({srcMountDir,...}: "${utils.pathToMountUnit srcMountDir}.service") (builtins.attrValues dirs);
+            dependencies = map ({srcMountDir,...}: "${utils.pathToMountUnit srcMountDir}") (builtins.attrValues dirs);
         in  
             {
                 systemd.services."init-volumes" = {
