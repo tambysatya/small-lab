@@ -1,4 +1,4 @@
-{lib, infra, registry, config, vmname, vmconf, inputs,pkgs,...}:
+{lib, config, inputs,pkgs, infra, registry, vmname, vmconf, ...}:
 
 /* Deployement of services behind a container */
 
@@ -65,9 +65,11 @@ let
                             "${inputs.self.outPath}/profiles/base.nix"
                             "${inputs.self.outPath}/modules/registry"
 
-                            "${inputs.self.outPath}/modules/compiler/options.nix"
-                            "${inputs.self.outPath}/modules/compiler/base.nix"
-                            "${inputs.self.outPath}/modules/compiler/native.nix"
+                            "${inputs.self.outPath}/modules/compiler"
+
+                            #"${inputs.self.outPath}/modules/compiler/options.nix"
+                            #"${inputs.self.outPath}/modules/compiler/base.nix"
+                            #"${inputs.self.outPath}/modules/compiler/native.nix"
                             inputs.sops-nix.nixosModules.sops
                             
                         ]; 

@@ -1,6 +1,7 @@
-{lib, inputs, config, pkgs, infra,...}:
+{lib, inputs, config, pkgs, ...}:
 
 let 
+    infra = config.infra;
     reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
     secret = {
         names = ["garage-rpc.key" "garage-admin.key" "garage-metrics.key"];
@@ -48,7 +49,7 @@ let
     ];
 
 in {
-    config = 
+    config.registry = 
                 lib.mkMerge [
                     (reg.registerSecret "garage" "garage-keys" secret)
                     (reg.registerEndpoints "garage" endpoints)

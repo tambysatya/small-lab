@@ -1,10 +1,11 @@
-{lib, inputs, infra, pkgs, config, ...}:
+{lib, inputs,  pkgs, config, ...}:
 
 let 
 
+    infra = config.infra;
     reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
 in {
-    config = 
+    config.registry = 
                       (lib.mkMerge [
                             (reg.registerCertificate "openldap" "openldap" ["openldap.service"] "openldap.${infra.domain}")
                             (reg.registerEndpoints "openldap" [

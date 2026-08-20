@@ -1,5 +1,5 @@
 
-{inputs, infra, config, lib, pkgs, ... }:
+{inputs, config, lib, pkgs, infra, ... }:
 
 let
   vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra inputs;};

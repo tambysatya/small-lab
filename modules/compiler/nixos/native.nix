@@ -1,4 +1,4 @@
-{lib, infra, registry, config, vmname, vmconf, inputs, pkgs,...}:
+{lib, config, inputs, pkgs, infra, registry, vmname, vmconf,...}:
 
 /* Bare metal service managment */
 

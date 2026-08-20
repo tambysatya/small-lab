@@ -22,13 +22,13 @@ let
             };
         };
     in{
-        registry.services."${servicename}".secrets."${secretname}" = addDefault secret;
+        services."${servicename}".secrets."${secretname}" = addDefault secret;
     };
 
     registerCertificate = servicename: owner: reload: vhost:
         lib.mkMerge [
                 {
-                    registry.services."${servicename}".sslCertificates."${vhost}" = {
+                    services."${servicename}".sslCertificates."${vhost}" = {
                         inherit owner reload;
                     };
                     
@@ -38,33 +38,33 @@ let
     registerEndpoints = servicename: endpoints:
         lib.mkMerge [
             {
-                registry.services."${servicename}".endpoints = endpoints;
+                services."${servicename}".endpoints = endpoints;
             }
         ];
 
     registerDBAccess = servicename: access:
         lib.mkMerge [
             {
-                registry.services."${servicename}".dbAccesses = [access];
+                services."${servicename}".dbAccesses = [access];
             }
         ];
     registerS3Access = servicename: access:
         lib.mkMerge [
             {
-                registry.services."${servicename}".s3Accesses = [access];
+                services."${servicename}".s3Accesses = [access];
             }
         ];
 
     registerVolume = servicename: volume:
         lib.mkMerge [
             {
-                registry.services."${servicename}".volumes = [volume];
+                services."${servicename}".volumes = [volume];
             }
         ];
 
     registerUser = servicename: username: userid:
         lib.mkMerge [
-            { registry.services."${servicename}".users.${username} = userid;}
+            { services."${servicename}".users.${username} = userid;}
         ];
  
         

@@ -1,7 +1,8 @@
-{inputs, infra, config, lib, pkgs,...}:
+{inputs, config, lib, pkgs,...}:
 
 let
 
+    infra = config.infra;
     reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
 
 #    secrets = {
@@ -17,7 +18,7 @@ let
                  }];
 in {
 
-    config = 
+    config.registry = 
                 (lib.mkMerge [ 
                     #(reg.registerSecrets "postgres" "postgres" ["postgres.service"] secrets)
                     (reg.registerCertificate "postgres" "postgres" ["postgresql.service"] "postgres.${infra.domain}")

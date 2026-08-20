@@ -22,7 +22,7 @@
 
   outputs = inputs@{nixpkgs, terranix, ...}:
 
-    let
+let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
       utils = import ./lib/utils.nix {inherit lib;};
@@ -44,23 +44,21 @@
         in {inherit system; 
             modules = [{config = (terranix-generator_fun infra-config.infra);}];};
 
-      # Generates the infrastructure 
-      compile-infra = 
-        {inventory, extraArgs ?{}}:
-         (lib.evalModules 
-              {
-                modules = [
+    compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
+        {inventory, extraArgs ? {}}:
+           lib.evalModules {
+               specialArgs = {inherit inputs;} // extraArgs;
+               modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/infra
-                  inventory];
-                specialArgs = {inherit inputs; } // extraArgs;
-               }).config.infra;
+                  ./modules/registry
+                  inventory
+                ];
+           }; 
 
-      compile-registry = infra:
-        (lib.evalModules {
-            specialArgs = {inherit inputs lib pkgs infra;};
-            modules = [ ./modules/registry];
-        }).config.registry;
+    compileInfra = args: (compileModule args).config.infra;
+    compileRegistry = args: (compileModule args).config.registry;
+
 
       /*
       compile-registry = infra:
@@ -78,9 +76,9 @@
 
 
       nixos-generator = args@{inventory, extraArgs ?{}}: 
-        let infra = compile-infra args; 
-            registry = compile-registry infra;
-                                    
+        let infraConf = compileModule args; 
+            infra = infraConf.config.infra;
+            registry = infraConf.config.registry;
             configs = lib.mapAttrs
                             (vmname: vmconf:
                                 lib.nixosSystem {
@@ -109,12 +107,6 @@
         in configs;
 
         extraArgs = {path=inputs.self.outPath;};
-        test-infra = compile-infra {
-                        inventory = ./examples/example.nix;
-                        inherit extraArgs;
-                     };
-        test-registry = compile-registry test-infra;
-        terranix-conf = terranix-generator_fun test-infra;
 
 
         compile-gen-secrets = 
@@ -133,34 +125,25 @@
 
     
 
-        gen-infra = 
-            {file, flake-path}:
-                compile-infra {
-                    inventory = file;
-                    extraArgs = {path=flake-path;};
-                };
-        gen-registry = 
-            args@{file, flake-path}: compile-registry (gen-infra args);
         
         gen-terranix = 
             args@{file, flake-path}:
                 terranix.lib.terranixConfiguration {
                             inherit system;
                             modules = [
-                                {config = terranix-generator_fun (gen-infra args);}
+                                {config = terranix-generator_fun (compileInfra args);}
                             ];
                         };
         gen-secrets =
-            args@{file, flake-path}:
-                let infra = gen-infra args;
-                    registry = compile-registry infra;
-                in compile-gen-secrets {inherit infra registry;};
+            args@{inventory, extraArgs}:
+                let conf = (compileModule args).config;
+                in compile-gen-secrets {inherit (conf) infra registry;};
 
         gen-nixos =
-            args@{file, flake-path}: nixos-generator {inventory = file; extraArgs = {path=flake-path;};};
+            args: nixos-generator args;
         gen-iso = 
-            args@{file, flake-path}:
-                let infra = gen-infra args;
+            args:
+                let infra = compileInfra args;
                 in lib.nixosSystem {
                     inherit system;
                     specialArgs = {inherit inputs infra;};
@@ -182,12 +165,14 @@
             
 
         
-        args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
+        #args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
+        args = {inventory = ./examples/example.nix; extraArgs = {path=inputs.self.outPath;};};
 
     in gen-secrets args //{
+      
 
       lib = {
-        inherit gen-infra gen-registry gen-terranix gen-secrets gen-nixos gen-iso;
+        inherit compileInfra compileRegistry gen-terranix gen-secrets gen-nixos gen-iso;
         inherit gen-config-checks;
       };
 
@@ -203,9 +188,11 @@
       };
       */
 
-      infra = gen-infra args;
-      registry = gen-registry args;
-      terranix = gen-terranix args;
+      infra = compileInfra args;
+      registry = compileRegistry args;
+      #infra = gen-infra args;
+      #registry = gen-registry args;
+      #terranix = gen-terranix args;
       nixosConfigurations = gen-nixos args // {iso = gen-iso args;};
 
       checks.${system} = gen-config-checks inputs;

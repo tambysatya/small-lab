@@ -1,7 +1,7 @@
 /* Compilations steps that are performed on all backends (containers or native) */
 
 
-{lib, infra, registry, vmname, vmconf, config, inputs, pkgs,...}:
+{lib, config, inputs, pkgs, infra, registry, vmname, vmconf, ...}:
 let 
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;}; 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};

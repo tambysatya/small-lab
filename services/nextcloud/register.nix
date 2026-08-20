@@ -1,7 +1,8 @@
-{inputs, infra, config, lib, pkgs,...}:
+{inputs, config, lib, pkgs,...}:
 
 let
-
+ 
+    infra = config.infra;
     reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
     host = "nextcloud.${infra.domain}";
     endpoints = [{
@@ -33,7 +34,7 @@ let
     secret = {names = ["nextcloud-admin.key"]; owner="nextcloud"; reload=["phpfmp.service"]; kind = {provider="openssl";};};
 in {
 
-    config = 
+    config.registry = 
                 (lib.mkMerge [ 
                     (lib.mkMerge [
                         (reg.registerSecret "nextcloud" "nextcloud-keys" 

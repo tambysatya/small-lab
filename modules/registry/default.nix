@@ -1,6 +1,7 @@
-{lib, infra, config, inputs,...}:
+{lib, config, inputs,...}:
 let
 
+    infra = config.infra;
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
     infratypes = import "${inputs.self.outPath}/lib/infra/types.nix" {inherit lib;};
     modules = lib.map (name: "${inputs.self.outPath}/services/${name}/register.nix") infratypes.serviceNames;

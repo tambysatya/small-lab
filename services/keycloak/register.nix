@@ -1,6 +1,7 @@
-{lib, inputs, infra, pkgs, config, ...}:
+{lib, inputs, pkgs, config, ...}:
 
 let 
+    infra = config.infra;
     reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
 
     servicevhost = "auth.${infra.domain}";
@@ -9,7 +10,7 @@ let
 
 in 
 {
-   config = 
+   config.registry = 
                      (lib.mkMerge [
                          (reg.registerDBAccess "keycloak" 
                                 {role = "keycloak"; table="keycloak"; reload= ["keycloak.service"]; owner="root";})

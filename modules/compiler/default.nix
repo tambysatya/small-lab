@@ -1,4 +1,4 @@
-{inputs, lib, config, pkgs, infra, registry, vmname,...}:
+{inputs, lib, config, infra, registry, pkgs, vmname,...}:
 
 let
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
@@ -9,8 +9,8 @@ let
 in {
     imports = [
                ./options.nix
-               ./base.nix
-               ./native.nix
-               ./nixos-container.nix
+               ./nixos/base.nix
+               ./nixos/native.nix
+               ./nixos/nixos-container.nix
               ];    
 }
