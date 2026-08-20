@@ -40,3 +40,7 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - Move functions process* in modules/compiler into lib/
 
 - Factorize the basic types (with constructors, e.g mkFStypeOption, mkDirOption, ...)
+- Sanitize the code:
+	+ avoid configs = in order to avoid infinite recursions 
+	+ do everything in one step instead of having multiple evalModules
+	+ move and regroup the code in order to never have a function editing multiple root fields of config (eg config.users and config.services)
