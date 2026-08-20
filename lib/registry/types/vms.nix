@@ -34,9 +34,15 @@ let types = lib.types;
     };
     persistentDir = types.submodule {
         options = {
+            srcMountDir = lib.mkOption {
+                description = "Mountpoint";
+                type = types.str;
+                example = "/mnt/volume";
+            };
             srcPath = lib.mkOption {
                 description = "Location on the volume";
                 type = types.str;
+                example = "/mnt/volume/dir";
             };
             owner = lib.mkOption {
                 description = "Owner of the directory";
@@ -51,6 +57,14 @@ let types = lib.types;
                 description = "List of services using this directory";
                 type = types.listOf types.str;
                 default = [];
+            };
+            deployement = lib.mkOption {
+                description = "Describes how the directory should be deployed";
+                type = types.enum ["container" "native"];
+            };
+            service = lib.mkOption {
+                description = "Name of the service requesting this resource";
+                type = infratypes.serviceType;
             };
         };
     };

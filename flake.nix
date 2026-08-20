@@ -169,11 +169,6 @@
                         ./profiles/iso.nix
                     ];
                 };
-
-         gen-state = args:
-            let confs = gen-nixos args;
-                fst_conf = builtins.head (builtins.attrNames confs);
-            in confs."${fst_conf}".config.compiler.state;
                 
          gen-config-checks =
             flake-inputs:
@@ -190,12 +185,7 @@
         args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
 
     in gen-secrets args //{
-     # generators = {
-     #   terranix = terranix-generator; 
-     #   nixos = nixos-generator;
-     #   infra = compile-infra;
-     #   registry = compile-registry;
-     # };
+
       lib = {
         inherit gen-infra gen-registry gen-terranix gen-secrets gen-nixos gen-iso;
         inherit gen-config-checks;
@@ -217,7 +207,6 @@
       registry = gen-registry args;
       terranix = gen-terranix args;
       nixosConfigurations = gen-nixos args // {iso = gen-iso args;};
-      state = gen-state args;
 
       checks.${system} = gen-config-checks inputs;
                    

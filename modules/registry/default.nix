@@ -9,11 +9,10 @@ let
 
     processDirs = 
         vmname: vmconf:
+        deployement:
         servicename:
         let
            volumes = config.registry.services.${servicename}.volumes;
-           #volumes = [ { mode = "0700"; owner = "nextcloud"; path = "/var/lib/nextcloud/config"; reload = [ "phpfmp.service" "nextcloud-setup.service" ]; } ];
-
            processDir = dir@{mode, owner, path, reload}:
                 let
                    locations = lib.filter
@@ -28,7 +27,9 @@ let
                 {
                     "${vmname}".persistentDirectories."${path}" = {
                        srcPath = "${location.mount.dir}/${lib.removePrefix "/" vollocation}";
-                       inherit owner mode reload;
+                       srcMountDir = location.mount.dir;
+                       inherit owner mode reload deployement;
+                       service = servicename;
                     };
                 };
             
@@ -98,7 +99,9 @@ let
                 containers = vmconf.containers;
             in lib.mkMerge [
                 (lib.mkMerge 
-                    (map (processDirs vmname vmconf) (vmconf.services ++ vmconf.containers)))
+                    (map (processDirs vmname vmconf "native") (vmconf.services))) 
+                (lib.mkMerge 
+                    (map (processDirs vmname vmconf "container") (vmconf.containers))) 
                 (processVolumes vmname vmconf)
 
             ];

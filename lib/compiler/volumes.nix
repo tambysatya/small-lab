@@ -5,49 +5,84 @@
 let
 
     utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+    vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib pkgs infra registry;};
+
+    compileVolumes = vmname:
+        let
+            ops = [
+                        (mountVolumes vmname)
+                        (generateInitSourceDir vmname)
+                        (generateSystemdBindMount vmname)
+                  ];
+        in lib.mkMerge ops;
+
     /* Mounts a directory in sourcedir into the where destination */
-    generateSystemdBindMount = 
-        sourcedir:
-        mount@{what, where, owner, mode}:
-        {
-            systemd.mounts = [
-                {
-                    what = "${sourcedir}/${lib.removePrefix "/" what}";
-                    where = mount.where;
-                    options = "bind"; 
-                    type = "none"; #no filesystem
-                    after = ["init-${utils.pathToMountUnit sourcedir}.service"]; # initialization of the sourcedir (first creation of the directories)
-                    requires = ["init-${utils.pathToMountUnit sourcedir}.service"];
-                    wantedBy = ["multi-user.target"];
-                }
-            ];
-        };
-    # Initializes a sourcedirectory
-    generateInitSourceDir =
-        sourcedir:
-        mounts: #list of directories to create
-            let script = lib.concatMapStringsSep "\n"
-                (mount@{what, where, owner, mode}:
-                    let sourcepath = "${sourcedir}/${lib.removePrefix "/" what}"
-                    in ''
-                        if [[ ! -d ${sourcepath} ]]; then
-                            mkdir -p ${sourcepath}
-                            chown ${owner} ${sourcepath}
-                            chmod ${mode} ${sourcepath}
-                        fi
-                    '')
-                mounts;
-            in {
-                systemd.services."init-${utils.pathToMountUnit sourcedir}" = {
-                    description = "Initialize the mountpoint ${sourcedir} with a list of directories";
-                    after = ["${utils.pathToMountUnit sourcdir}.service"];
-                    requires = ["${utils.pathToMountUnit sourcdir}.service"];
-                    serviceConfig = {
-                        Type = "oneshot";
+    generateSystemdBindMount = vmname:
+        let dirs = registry.vms.${vmname}.persistentDirectories;
+            genNativeMount =
+                where: {srcPath, reload, ...}:
+                    {
+                        inherit where;
+                        what = srcPath;
+                        options = "bind";
+                        type = "none";
+                        after = ["init-volumes.service"];
+                        requires = ["init-volumes.service"];
+                        before = reload;
+                        requiredBy = reload;
                     };
+            genContainerMount =     
+                where: {srcPath, service,...}: {
+                    containers.${service}.bindMounts.${where} = {
+                        hostPath = srcPath;
+                        isReadOnly = false;
+                    };
+                };
+            processDir =
+                where: args@{deployement,...}:
+                    if deployement == "native"
+                        then genNativeMount where args
+                        else genContainerMount where args;
+        in lib.mkMerge (lib.mapAttrsToList processDir dirs);
+                        
+    # Initializes the persistent volumes if they are empty
+    generateInitSourceDir = vmname:
+        let dirs = registry.vms.${vmname}.persistentDirectories;
+            script = lib.concatMapStringsSep "\n"
+                            ({srcPath, mode, owner,...}:
+                                ''
+                                    if [[ ! -d ${srcPath} ]]; then
+                                        mkdir -p ${srcPath}
+                                        #chown ${owner} ${srcPath}
+                                        #cmod ${mode} ${srcPath}
+                                    fi
+                                '')
+                            (builtins.attrValues dirs);
+            dependencies = map ({srcMountDir,...}: "${utils.pathToMountUnit srcMountDir}.service") (builtins.attrValues dirs);
+        in  
+            {
+                systemd.services."init-volumes" = {
+                    description = "Initializes empty persistent volumes before bind-mounting files";
+                    after = dependencies;
+                    requires = dependencies;
+                    serviceConfig.Type = "oneshot";
                     inherit script;
                 };
             };
+    # Generates a fstab
+    mountVolume = 
+        mountpoint:
+        vol@{deviceType, fsType, options, vmDevice,...}:
+            {
+                fileSystems = {
+                    "${mountpoint}" = {
+                        device = "/dev/${vmDevice}";
+                        inherit options fsType;
+                    };
+                };
+            };
+    mountVolumes = vmname:
+        lib.mkMerge (lib.mapAttrsToList mountVolume registry.vms.${vmname}.attachedVolumes);
 in {
-    inherit generateSystemdBindMount generateInitSourceDir;
+    inherit compileVolumes;
 }

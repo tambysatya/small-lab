@@ -7,5 +7,5 @@ in
 {
     inherit (dependencies) mkDBDependencies;
     inherit (security) generateSecret generateCertificate generateReverseProxy;
-    inherit (volumes) generateSystemdBindMount generateInitSourceDir;
+    inherit (volumes) compileVolumes;
 }

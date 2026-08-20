@@ -33,8 +33,9 @@ let
                         services = [servicename];
                         containers = [];
                    };
+                   ct-registry = registry // {vms.${ct-name} = {attachedVolumes = {}; persistentDirectories = {};}; };
                in {
-                    specialArgs = {inherit inputs infra registry; vmname=ct-name; vmconf=ct-conf;}; #TODO
+                    specialArgs = {inherit inputs infra; registry=ct-registry; vmname=ct-name; vmconf=ct-conf;}; #TODO
                     autoStart = true;
                     privateNetwork = true;
                     hostAddress = host-addr;
@@ -54,6 +55,7 @@ let
                     config = {...}:{
                         compiler.options = {
                             noEndpoints = true; #do not process endpoints
+                            noMounts = true;
                         };
                         imports = [
                             

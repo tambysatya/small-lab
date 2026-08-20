@@ -13,7 +13,4 @@ in {
                ./native.nix
                ./nixos-container.nix
               ];    
-    config.compiler.state = {
-        users = allUsers; # TODO check if all IDs are differents
-    };
 }

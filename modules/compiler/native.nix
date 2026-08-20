@@ -59,15 +59,14 @@ let
             reloads = lib.concatMap (access: access.reload) accesses;
         in comp.mkDBDependencies reloads;
 
-/*
-    processVolume = servicename: reg:
+    processVolumes = 
         let
-            regvolumes = reg.volumes; #requested by the service {owner, path, reload}
-        in 
-        {
+            vm = registry.vms."${vmname}";
+            volumes = vm.attachedVolumes;
+            dirs = vm.persistentDirectories;
+            mountVolumes = lib.mapAttrsToList comp.mountVolumes volumes;
 
-        };
-*/
+        in comp.compileVolumes vmname;
 in{
    config = let 
                 configuredservices = if builtins.hasAttr "services" vmconf
@@ -94,6 +93,6 @@ in{
 
                         (lib.mkMerge
                             (lib.mapAttrsToList processS3AccessClient configuredservices))
-
+                        (lib.mkIf (!config.compiler.options.noMounts) processVolumes)
                     ]);
 }

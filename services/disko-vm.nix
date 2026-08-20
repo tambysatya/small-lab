@@ -1,5 +1,5 @@
 /* Disk partitionning */
-{lib, inputs,infra, vmname, vmconf,...}:
+{lib, inputs, infra, registry, vmname, vmconf,...}:
 let
     root = {
         type = "disk";
@@ -50,6 +50,20 @@ let
                 };
             };
         };
+    volumes = registry.vms.${vmname}.attachedVolumes;
+    processVolumes = lib.mapAttrs processVolume volumes;
+    processVolume =
+        mountpoint:
+        vol@{fsType, options, vmDevice, ...}:
+        {
+            device = "/dev/${vmDevice}";
+            type = "disk";
+            content = {
+                type  = "filesystem";
+                format = fsType;
+                inherit mountpoint;
+            };
+        };
 
 in
 {
@@ -62,7 +76,8 @@ in
             {
                 vda = root;
             }
-            (lib.mkMerge 
-                (lib.mapAttrsToList processQcow vmconf.persistentVolumes.qcows))
+            processVolumes
+            #(lib.mkMerge 
+            #    (lib.mapAttrsToList processQcow vmconf.persistentVolumes.qcows))
         ];
 }

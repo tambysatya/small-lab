@@ -9,8 +9,8 @@ let
                 type = types.bool;
                 default = false;
             };
-            noBindMounts = lib.mkOption {
-                description = "Do not bind-mount the volumes";
+            noMounts = lib.mkOption {
+                description = "Do not mount the volumes";
                 type = types.bool;
                 default = false;
             };
@@ -31,10 +31,6 @@ in {
         compiler = {
             options = lib.mkOption {
                 type = compilerOptions;
-            };
-            state = lib.mkOption {
-                description = "Desired state of the infrastructure. Need to be checked prior to any migration";
-                type = compilerState;
             };
         };
     };

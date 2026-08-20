@@ -13,11 +13,11 @@ let
                     utils.mergeAll
                         (map (name: registry.services."${name}".users) (services ++ containers));
             in {
-               users.users = lib.mapAttrs (name: id: {uid=lib.mkForce id; group=name; isSystemUser=true;}) allUsers;
-               users.groups = lib.mapAttrs (name: id: {gid=lib.mkForce id;}) allUsers;
+               users = lib.mapAttrs (name: id: {uid=lib.mkForce id; group=name; isSystemUser=true;}) allUsers;
+               groups = lib.mapAttrs (name: id: {gid=lib.mkForce id;}) allUsers;
             };
 in {
-    config = generateUsers vmconf;
+    config.users = generateUsers vmconf;
 }
 
 
