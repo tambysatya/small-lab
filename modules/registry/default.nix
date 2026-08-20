@@ -44,7 +44,7 @@ let
         in
         {
             ${vmname}.attachedVolumes."${mntdir}" = {
-                hostDevice = "${vmname}_${name}.qcow";
+                hostDevice = "${vmname}_${name}";
                 vmDevice = "vd${letter}";
                 inherit (mount) options fsType;
                 deviceType = "qcow";

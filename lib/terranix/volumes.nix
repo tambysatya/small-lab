@@ -8,7 +8,7 @@ let
         vmname: vmconf:
             {
                 resource.libvirt_volume = generateRootQcow vmname vmconf // generateAdditionalQcow vmname vmconf;
-                resource.libvirt_domain."${vmname}".disks = attachVolumes vmname vmconf;
+                resource.libvirt_domain."${vmname}".devices.disks = attachVolumes vmname vmconf;
             };
 
     generateQcow =
