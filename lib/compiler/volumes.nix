@@ -37,6 +37,10 @@ let
                         hostPath = srcPath;
                         isReadOnly = false;
                     };
+                    systemd.services."containers@${service}.service" = {
+                        after = ["init-volumes.service"];
+                        requires = ["init-volumes.service"];
+                    };
                 };
             processDir =
                 where: args@{deployement,...}:
