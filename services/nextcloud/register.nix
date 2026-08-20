@@ -1,9 +1,9 @@
-{inputs, infra, vmname, vmconf, config, lib, pkgs,...}:
+{inputs, config, lib, pkgs,...}:
 
 let
-
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
+ 
+    infra = config.infra;
+    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
     host = "nextcloud.${infra.domain}";
     endpoints = [{
                    host = host;
@@ -34,7 +34,7 @@ let
     secret = {names = ["nextcloud-admin.key"]; owner="nextcloud"; reload=["phpfmp.service"]; kind = {provider="openssl";};};
 in {
 
-    config = 
+    config.registry = 
                 (lib.mkMerge [ 
                     (lib.mkMerge [
                         (reg.registerSecret "nextcloud" "nextcloud-keys" 
@@ -56,6 +56,9 @@ in {
 
                             })])
                     (reg.registerEndpoints "nextcloud" endpoints)
+                    (reg.registerVolume "nextcloud" {owner="nextcloud"; path="/var/lib/nextcloud/config"; reload=["phpfmp.service" "nextcloud-setup.service"];})
+                    (reg.registerVolume "nextcloud" {owner="nextcloud"; path="/var/lib/nextcloud/data"; reload=["phpfmp.service" "nextcloud-setup.service"];})
+                    (reg.registerUser "nextcloud" "nextcloud" 10003)
                     ]);
 }
 

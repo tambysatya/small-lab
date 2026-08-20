@@ -1,8 +1,9 @@
 {lib, infra, registry, vmname, vmconf, inputs, config, ...}:
 
 let
-  path = "${inputs.self.outPath}";
-  utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+    path = "${inputs.self.outPath}";
+    utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+ 
 
 in 
 {
@@ -42,15 +43,6 @@ config = {
                 nameservers = infra.dns;
               };
 
-              /* Mounts additional disks */
-              fileSystems = utils.mergeAll (lib.mapAttrsToList
-                              (bind: disk: {
-                                      bind = {
-                                          device = "/dev/${disk.dst}";   
-                                          fsType = disk.fsType;
-                                          options = disk.options;
-                                      };
-                                }) vmconf.additionalDisks);
               services.openssh.enable = true;
               users.users.root.openssh.authorizedKeys.keys = infra.rootSSHPublicKeys;
 

@@ -1,8 +1,8 @@
-{lib, inputs, config, infra, vmname, vmconf, pkgs,...}:
+{lib, inputs, config, pkgs, ...}:
 
 let 
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
+    infra = config.infra;
+    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
     secret = {
         names = ["garage-rpc.key" "garage-admin.key" "garage-metrics.key"];
         owner = "garage";
@@ -49,10 +49,12 @@ let
     ];
 
 in {
-    config = 
+    config.registry = 
                 lib.mkMerge [
                     (reg.registerSecret "garage" "garage-keys" secret)
-                    (reg.registerEndpoints "garage" endpoints)];
+                    (reg.registerEndpoints "garage" endpoints)
+                    (reg.registerUser "garage" "garage" 10001)
+                ];
 }
 
 

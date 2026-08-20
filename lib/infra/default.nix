@@ -1,4 +1,4 @@
-{lib, vmconf, vmname,...}:
+{lib,vmconf,...}: 
 
 let hostsService = service:
         builtins.elem service (vmconf.services ++ vmconf.containers);

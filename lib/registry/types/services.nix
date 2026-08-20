@@ -41,6 +41,19 @@ in
             default = [];
             type = types.listOf types.s3Access;
         };
+        volumes = lib.mkOption {
+            internal = true;
+            description = "List of directories containing persistent data.";
+            default = [];
+            type = types.listOf types.volume;
+        };
+        users = lib.mkOption {
+            internal = true;
+            description = "UserIDs of the Service Users";
+            default = {};
+            type = types.attrsOf types.userID;
+
+        };
         hosts = lib.mkOption {
             type = types.submodule {
                 options = {

@@ -24,8 +24,9 @@ let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra input
 
 				set -x
 				
-				printf 'yes\n' | disko --mode destroy  --flake "/etc/nixos#$HOST"
-				disko --mode destroy,format,mount --yes-wipe-all-disks --flake "/etc/nixos#$HOST"
+				#printf 'yes\n' | disko --mode destroy  --flake "/etc/nixos#$HOST"
+				disko --mode format,mount --yes-wipe-all-disks --flake "/etc/nixos#$HOST"
+				#disko --mode destroy,format,mount --yes-wipe-all-disks --flake "/etc/nixos#$HOST"
 				set +x
 
 				echo "Downloading the age key"

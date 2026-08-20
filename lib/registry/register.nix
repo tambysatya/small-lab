@@ -1,9 +1,8 @@
-{inputs, lib, infra, vmname, vmconf,  ...}:
+{inputs, lib, infra,  ...}:
 
 /* Called by the modules to register services properties*/
 
 let 
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit inputs lib vmname vmconf;};
     registerSecret = servicename: secretname: secret: let
         provider = secret.kind.provider;
         providerargs = secret.kind.providerArgs or {};
@@ -23,13 +22,13 @@ let
             };
         };
     in{
-        registry.services."${servicename}".secrets."${secretname}" = addDefault secret;
+        services."${servicename}".secrets."${secretname}" = addDefault secret;
     };
 
     registerCertificate = servicename: owner: reload: vhost:
         lib.mkMerge [
                 {
-                    registry.services."${servicename}".sslCertificates."${vhost}" = {
+                    services."${servicename}".sslCertificates."${vhost}" = {
                         inherit owner reload;
                     };
                     
@@ -39,27 +38,37 @@ let
     registerEndpoints = servicename: endpoints:
         lib.mkMerge [
             {
-                registry.services."${servicename}".endpoints = endpoints;
+                services."${servicename}".endpoints = endpoints;
             }
         ];
 
     registerDBAccess = servicename: access:
         lib.mkMerge [
-            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".use-db = [servicename];})
             {
-                registry.services."${servicename}".dbAccesses = [access];
+                services."${servicename}".dbAccesses = [access];
             }
         ];
     registerS3Access = servicename: access:
         lib.mkMerge [
-            (lib.mkIf (infralib.hostsService servicename) {registry.vms."${vmname}".use-s3 = [servicename];})
             {
-                registry.services."${servicename}".s3Accesses = [access];
+                services."${servicename}".s3Accesses = [access];
             }
+        ];
+
+    registerVolume = servicename: volume:
+        lib.mkMerge [
+            {
+                services."${servicename}".volumes = [volume];
+            }
+        ];
+
+    registerUser = servicename: username: userid:
+        lib.mkMerge [
+            { services."${servicename}".users.${username} = userid;}
         ];
  
         
 
 in {
-    inherit registerSecret registerCertificate registerEndpoints registerDBAccess registerS3Access;
+    inherit registerSecret registerCertificate registerEndpoints registerDBAccess registerS3Access registerVolume registerUser;
 }

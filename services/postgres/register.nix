@@ -1,9 +1,9 @@
-{inputs, infra, vmname, vmconf, config, lib, pkgs,...}:
+{inputs, config, lib, pkgs,...}:
 
 let
 
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
+    infra = config.infra;
+    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
 
 #    secrets = {
 #        /* User passwords */
@@ -18,10 +18,12 @@ let
                  }];
 in {
 
-    config = 
+    config.registry = 
                 (lib.mkMerge [ 
                     #(reg.registerSecrets "postgres" "postgres" ["postgres.service"] secrets)
                     (reg.registerCertificate "postgres" "postgres" ["postgresql.service"] "postgres.${infra.domain}")
-                    (reg.registerEndpoints "postgres" endpoints)]);
+                    (reg.registerEndpoints "postgres" endpoints)
+                    (reg.registerUser "postgres" "postgres" 10005)
+                ]);
 }
 

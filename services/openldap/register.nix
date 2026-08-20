@@ -1,16 +1,18 @@
-{lib, inputs, infra, vmname, vmconf, pkgs, config, ...}:
+{lib, inputs,  pkgs, config, ...}:
 
 let 
 
-    infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib vmname infra vmconf;};
+    infra = config.infra;
+    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
 in {
-    config = 
+    config.registry = 
                       (lib.mkMerge [
                             (reg.registerCertificate "openldap" "openldap" ["openldap.service"] "openldap.${infra.domain}")
                             (reg.registerEndpoints "openldap" [
                                         {host = "openldap.${infra.domain}"; port=389; is_http=false;} #ldap
                                         {host = "openldap.${infra.domain}"; port=636; is_http=false;} #ldaps
-                                ])]);
+                                ])
+                            (reg.registerUser "openldap" "openldap" 10004)
+                    ]);
 }
 

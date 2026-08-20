@@ -16,6 +16,11 @@ rec{
         // (builtins.removeAttrs b (builtins.attrNames a)) # we concat to b since the fields shared by a and b are now in the term.
       else 
         b;
+    pathToMountUnit = path:
+      if path == "/" then
+        "-.mount"
+      else
+        "${(lib.replaceStrings [ "/" ] [ "-" ] (lib.removePrefix "/" path))}.mount";
 
     mergeAll = listOfAttrsets: lib.foldl' merge {} listOfAttrsets;
 }

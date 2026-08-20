@@ -1,21 +1,20 @@
-{lib, infra, registry, config, vmname, vmconf, inputs, pkgs,...}:
+{lib, config, inputs, pkgs, infra, registry, vmname, vmconf,...}:
 
 /* Bare metal service managment */
 
 let 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs;};
-    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
-    deps = import "${inputs.self.outPath}/lib/registry/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
+    comp = import "${inputs.self.outPath}/lib/compiler" {inherit lib inputs pkgs registry infra vmname;};
 
     processEndpoints = servicename: reg:
         let
             processEndpoint = {host, is_http, port, extraNginxConfig ? "",...}: #creates an nginx reverse proxy if needed
                 if is_http
-                then sec.generateReverseProxy {fronthost = host; 
+                then comp.generateReverseProxy {fronthost = host; 
                                                backhost = "http://127.0.0.1:${lib.toString port}";
                                                inherit extraNginxConfig;}
                 else {}; #TODO pnat
-        in lib.mkIf (! config.registry-compiler.no-endpoints)
+        in lib.mkIf (! config.compiler.options.noEndpoints)
             (lib.mkMerge 
                 (lib.map processEndpoint (
                          lib.filter (endpoint: endpoint.is_http)
@@ -24,12 +23,12 @@ let
     processSecrets = servicename: reg:
         lib.mkMerge 
             (lib.mapAttrsToList
-                   (_: secret: sec.generateSecret secret)
+                   (_: secret: comp.generateSecret secret)
                    (reg.secrets or {}));
     processCertificates = servicename: reg:
         lib.mkMerge
             (lib.mapAttrsToList
-                (sec.generateCertificate servicename)
+                (comp.generateCertificate servicename)
                 (reg.sslCertificates or {}));
 
     # Generates the secrets for a service requesting database accesses
@@ -39,7 +38,7 @@ let
                 (access:
                     let secretname = vars.db_key access;
                     in 
-                            (sec.generateSecret 
+                            (comp.generateSecret 
                                 { names=[secretname]; inherit (access) owner reload;} ))
                 (reg.dbAccesses or []));
 
@@ -48,7 +47,7 @@ let
         lib.mkMerge
             (lib.map 
                 (access:
-                    (sec.generateSecret 
+                    (comp.generateSecret 
                         {names = [(vars.s3_key access)]; inherit (access) owner reload;}))
                 (reg.s3Accesses or []));
 
@@ -58,8 +57,16 @@ let
             accesses = builtins.concatLists
                             (lib.mapAttrsToList (servicename: reg: (reg.dbAccesses or [])) configuredservices);
             reloads = lib.concatMap (access: access.reload) accesses;
-        in deps.mkDBDependencies reloads;
+        in comp.mkDBDependencies reloads;
 
+    processVolumes = 
+        let
+            vm = registry.vms."${vmname}";
+            volumes = vm.attachedVolumes;
+            dirs = vm.persistentDirectories;
+            mountVolumes = lib.mapAttrsToList comp.mountVolumes volumes;
+
+        in comp.compileVolumes vmname;
 in{
    config = let 
                 configuredservices = if builtins.hasAttr "services" vmconf
@@ -86,6 +93,6 @@ in{
 
                         (lib.mkMerge
                             (lib.mapAttrsToList processS3AccessClient configuredservices))
-
+                        (lib.mkIf (!config.compiler.options.noMounts) processVolumes)
                     ]);
 }

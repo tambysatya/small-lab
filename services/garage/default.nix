@@ -2,11 +2,16 @@
 
 let 
     infralib = import "${inputs.self.outPath}/lib/infra" {inherit lib vmconf vmname;};
-    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit inputs lib vmconf vmname infra;};
+    sec = import "${inputs.self.outPath}/lib/compiler/security.nix" {inherit inputs lib vmconf vmname infra;};
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra;};
 
     s3lib = import ./lib.nix {inherit lib pkgs config infra registry inputs;};
-    servicenames = lib.concatMap (v: v.use-s3) (lib.attrValues registry.vms);
+    #servicenames = lib.concatMap (v: v.use-s3) (lib.attrValues registry.vms);
+    servicenames =  lib.filter (srv: 
+                                  let srvconf = registry.services.${srv};
+                                  in (srvconf.s3Accesses != []) #the service requests S3
+                                  && !((srvconf.hosts.containers == []) && srvconf.hosts.vms == [])) # the services is actually hosted
+                        (builtins.attrNames registry.services);
     accesses = lib.concatMap (v: registry.services.${v}.s3Accesses) servicenames;
     
     secret = {

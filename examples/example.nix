@@ -27,20 +27,30 @@
         vcpu = 4;
         memory = 8000;
         ipAddress = "192.168.1.200";
+        #services = ["step-ca" "openldap"];
         services = ["keycloak" "step-ca" "openldap"];
-        additionalDisks = {
-            "/var/lib/openldap/data" = {src="/dev/pvhdd/ldap"; dst="vdb"; fsType="xfs"; options = ["nofail"];};
-        };
+        persistentVolumes.disks = [
+            {
+                src="/dev/pvhdd/ldap"; 
+                mount = {dir="/var/lib/openldap/data"; fsType="xfs"; options = ["nofail"];};
+            }
+        ];
 
       };
       storage = {
         host = "cpuhost1";
         vcpu = 24;
         memory = 8000;
-        additionalDisks = {
-            "/srv/data" = {src="/dev/pvhdd/s3"; dst="vdb"; fsType="xfs"; options=["nofail"];};
-            "/srv/meta" = {src="/dev/ssd/s3_metadatas"; dst="vdc"; fsType="xfs"; options=["nofail"];};
-        };
+        persistentVolumes.disks = [
+            {
+                src="/dev/pvhdd/s3"; 
+                mount = {dir="/srv/data"; fsType="xfs"; options=["nofail"];};
+            }
+            {
+                src="/dev/ssd/s3_metadatas";
+                mount = {dir="/srv/meta"; fsType="xfs"; options=["nofail"];};
+            }
+        ];
 
         ipAddress = "192.168.1.201";
         services = ["garage"]; 
@@ -49,9 +59,12 @@
         host = "cpuhost1";
         vcpu = 4;
         memory = 8000;
-        additionalDisks = {
-            "/var/lib/postgresql" = {src="/dev/ssd/postgres"; dst="vdb"; fsType="xfs"; options=["nofail"];};
-        };
+        persistentVolumes.disks = [
+            {
+                src="/dev/ssd/postgres";
+                mount = {dir="/var/lib/postgresql"; fsType="xfs"; options=["nofail"];};
+            }
+        ];
 
         ipAddress = "192.168.1.202";
         services = ["postgres"]; 
@@ -64,6 +77,21 @@
         ipAddress = "192.168.1.203";
         #services = ["nextcloud"]; 
         containers = ["nextcloud"]; 
+        persistentVolumes.qcows = [
+            {
+                name = "persistent";
+                size = 100 * 1024*1024; # 100M
+                mount = {
+                    dir = "/srv/persistent";
+                    fsType = "ext4";
+                    options = ["default"];
+                };
+                mapping = [ 
+                        {vol = "config"; sys = "/var/lib/nextcloud/config";}
+                        {vol = "data"; sys = "/var/lib/nextcloud/data";}
+                ];
+            }
+        ];
       };
 
     };

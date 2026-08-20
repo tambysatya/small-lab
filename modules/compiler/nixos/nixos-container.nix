@@ -1,4 +1,4 @@
-{lib, infra, registry, config, vmname, vmconf, inputs,pkgs,...}:
+{lib, config, inputs,pkgs, infra, registry, vmname, vmconf, ...}:
 
 /* Deployement of services behind a container */
 
@@ -7,8 +7,7 @@
 let
 
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra registry inputs pkgs;};
-    sec = import "${inputs.self.outPath}/lib/registry/security.nix" {inherit lib inputs registry infra vmname;};
-    deps = import "${inputs.self.outPath}/lib/registry/infra-dependencies.nix" {inherit lib inputs registry infra vmname pkgs;};
+    comp = import "${inputs.self.outPath}/lib/compiler" {inherit lib inputs pkgs registry infra vmname;};
 
     initialize-host = {
           networking.nat = {
@@ -34,8 +33,9 @@ let
                         services = [servicename];
                         containers = [];
                    };
+                   ct-registry = registry // {vms.${ct-name} = {attachedVolumes = {}; persistentDirectories = {};}; };
                in {
-                    specialArgs = {inherit inputs infra registry; vmname=ct-name; vmconf=ct-conf;}; #TODO
+                    specialArgs = {inherit inputs infra; registry=ct-registry; vmname=ct-name; vmconf=ct-conf;}; #TODO
                     autoStart = true;
                     privateNetwork = true;
                     hostAddress = host-addr;
@@ -53,8 +53,9 @@ let
                         };
                     };
                     config = {...}:{
-                        registry-compiler = {
-                            no-endpoints = true; #do not process endpoints
+                        compiler.options = {
+                            noEndpoints = true; #do not process endpoints
+                            noMounts = true;
                         };
                         imports = [
                             
@@ -63,7 +64,12 @@ let
                             "${inputs.self.outPath}/services/step-renew"
                             "${inputs.self.outPath}/profiles/base.nix"
                             "${inputs.self.outPath}/modules/registry"
-                            "${inputs.self.outPath}/modules/registry/compiler/native.nix"
+
+                            "${inputs.self.outPath}/modules/compiler"
+
+                            #"${inputs.self.outPath}/modules/compiler/options.nix"
+                            #"${inputs.self.outPath}/modules/compiler/base.nix"
+                            #"${inputs.self.outPath}/modules/compiler/native.nix"
                             inputs.sops-nix.nixosModules.sops
                             
                         ]; 
@@ -106,13 +112,13 @@ config = lib.mkIf (vmconf.containers != [])
                                     container_id = vars.container_id vmname servicename;
                                 in lib.mkMerge [
                                     (mkContainer {inherit servicename local-addr; host-addr= "192.168.100.1";})
-                                    (sec.generateSecret 
+                                    (comp.generateSecret 
                                             {names = ["${container_id}.key"]; reload = ["container@ct-${servicename}.service"];})
                                     (lib.mkIf (lib.hasAttr servicename registry.services)
                                         (lib.mkMerge 
                                             (lib.map 
                                                 (ep: if ep.is_http then
-                                                        sec.generateReverseProxy {
+                                                        comp.generateReverseProxy {
                                                             fronthost = ep.host;
                                                             backhost = "http://${local-addr}";
                                                             inherit (ep) extraNginxConfig;}
@@ -123,7 +129,7 @@ config = lib.mkIf (vmconf.containers != [])
                             vmconf.containers))
 
                 # Containers requesting a DBAccess cannot be launched before postgres is reachable
-                (deps.mkDBDependencies 
+                (comp.mkDBDependencies 
                     (lib.map 
                         (servicename: "container@${servicename}.service")
                         (lib.filter 
