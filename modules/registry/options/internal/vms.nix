@@ -1,10 +1,11 @@
 {inputs, lib,...}:
 
-let types = lib.types;
+let 
     infratypes = import "${inputs.self.outPath}/lib/infra/types.nix" {inherit lib;};
-    regtypes = import "${inputs.self.outPath}/lib/registry/types/register.nix" {inherit lib;};
+    regtypes = import "${inputs.self.outPath}/lib/registry/types" {inherit lib;};
+    types = lib.types // infratypes // regtypes;;
 
-    mountOptions = types.submodule {
+    attachedVolume = types.submodule {
         options = {
             hostDevice = lib.mkOption {
                 description = "Device on the host (bare-metal) server";
@@ -24,7 +25,7 @@ let types = lib.types;
             };
             fsType = lib.mkOption {
                 description = "Filesystem";
-                type = types.enum ["xfs" "ext4"]; #TODO factorize with lib.infra.volumes/fsType
+                type = types.fsType;
             };
             deviceType = lib.mkOption {
                 description = "Type of device";
@@ -32,7 +33,7 @@ let types = lib.types;
             };
         };
     };
-    persistentDir = types.submodule {
+    persistentDirectories = types.submodule {
         options = {
             srcMountDir = lib.mkOption {
                 description = "Mountpoint";
@@ -68,6 +69,7 @@ let types = lib.types;
             };
         };
     };
+    
 in
 
 {
@@ -75,7 +77,7 @@ in
         options = {
             attachedVolumes = lib.mkOption {
                 description = "Disks attached to the VM";
-                type = types.attrsOf mountOptions; # mountpoints -> mountoptions
+                type = types.attrsOf attachedVolume ; # mountpoints -> mountoptions
                 example = {"/srv/data" = {hostDevice = "/dev/sda1"; vmDevice = "vdb"; options = ["nofail"];};};
                 default = {};
             };

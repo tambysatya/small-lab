@@ -3,7 +3,7 @@
 let
     types = lib.types;
     register = import ./register {inherit inputs lib;};
-    #internal = import ./internal {inherit inputs lib;};
+    internal = import ./internal {inherit inputs lib;};
 in 
 
 {
@@ -12,6 +12,11 @@ in
         type = types.attrsOf register.service;
         description = "Resources required by the services (generated during phase1)";
         default = {};
+    };
+    options.registry.internal = lib.mkOption {
+        internal = true;
+        description = "Internal representation of the infrastructure, with multiple views";
+        type = internal.internal;
     };
 
     /*

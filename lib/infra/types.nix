@@ -9,6 +9,7 @@ types // rec {
     inherit serviceNames;
     serviceType = 
 		lib.types.enum serviceNames;
+
     /* Virtual machine description */
     vmConf = lib.types.submodule {
         options = {
@@ -50,18 +51,5 @@ types // rec {
           };
         };
 
-        /* Virtual machine instance */
-        vmInstance = lib.types.submodule {
-          options = {
-              config = lib.mkOption {
-                type = vmConf;
-                description = "Description of the VM";
-              };
-              token = lib.mkOption {
-                type = types.str;
-                description = "Single-use token to get the AGE privkey from the secret vault";
-              };
-          };
-    };
 
 }

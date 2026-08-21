@@ -1,7 +1,15 @@
 {lib, inputs, ...}:
 
 let
-    services = import ./services.nix {inherit lib;};
-    vms = import ./vms.nix {inherit lib inputs;};
-in
-    services // vms
+    types = lib.types;
+    crypto = import ./crypto.nix {inherit lib inputs;};
+in {
+    internal = types.submodule {
+        options = {
+            crypto = lib.mkOption {
+                description = "Secrets dispatch over the infrastructure";
+                type = crypto.crypto;
+            };
+        };
+    };
+}

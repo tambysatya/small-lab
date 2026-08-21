@@ -3,6 +3,9 @@ let inherit (lib) types;
 in
 
 rec {
+  fsType = 
+        lib.types.enum ["xfs" "ext4" "ntfs"];
+
   mapping= lib.types.submodule { # Additional directory to be mounted
     options = {
         vol = lib.mkOption {
@@ -28,7 +31,7 @@ rec {
         default = ["default"];
       };
       fsType = lib.mkOption {
-        type = types.enum ["xfs" "ext4"]; #TODO
+        type = fsType;
         description = "Filesystem";
       };
     };
