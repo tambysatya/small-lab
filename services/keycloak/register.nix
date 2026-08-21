@@ -2,8 +2,6 @@
 
 let 
     infra = config.infra;
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
-
     hostname = "auth.${infra.domain}";
     port = 8000;
 
@@ -15,9 +13,14 @@ in
 
 registry.services.keycloak = {
     users = [{name="keycloak"; uid=10002;}];
-    files.postgresAccesses = [
-        {database="keycloak"; inherit owner reload;}
-    ];
+    files = {
+        plain = [
+            {filename="keycloak-initial-admin.key"; opensslSize = 64; opensslType = "base64";}
+        ];
+        postgres = [
+            {database="keycloak"; inherit owner reload;}
+        ];  
+    };
     endpoints.http = [
         {inherit hostname port;}
     ];

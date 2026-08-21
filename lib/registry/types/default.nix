@@ -30,7 +30,7 @@ rec {
     filemode = lib.mkOption {
         description = "Permissions of the file";
         type = types.str;
-        default = "0600";
+        default = "0400";
     };
 
     opensslSize = lib.mkOption {
@@ -50,19 +50,19 @@ rec {
 
     /* Types constructors of various (potentially secrets) files that can be exposed by a service*/
 
-    plaintext = types.submodule {
+    plaintext = types.submodule { #will be world readable
             options = {
-                inherit filename owner reload filemode opensslSize opensslType;
+                inherit filename opensslSize opensslType;
             };
     };
     password = types.submodule {
             options = {
-                inherit filename owner reload filemode opensslSize opensslType;
+                inherit filename owner reload opensslSize opensslType;
             };
     };
     sslCertificate = types.submodule {
             options = {
-                inherit hostname owner reload filemode;
+                inherit hostname owner reload;
             };
     };
     s3access = types.submodule {
@@ -87,7 +87,7 @@ rec {
     };
     ldapSSHA = types.submodule {
             options = {
-                inherit owner reload filemode opensslSize opensslType;
+                inherit filename owner opensslSize opensslType;
             };
     };
 

@@ -3,19 +3,29 @@
 let 
 
     infra = config.infra;
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
+    hostname = "openldap.${infra.domain}";
+    owner = "openldap";
+    reload = ["openldap.service"];
 in {
 
-/*
-    config.registry = 
-                      (lib.mkMerge [
-                            (reg.registerCertificate "openldap" "openldap" ["openldap.service"] "openldap.${infra.domain}")
-                            (reg.registerEndpoints "openldap" [
-                                        {host = "openldap.${infra.domain}"; port=389; is_http=false;} #ldap
-                                        {host = "openldap.${infra.domain}"; port=636; is_http=false;} #ldaps
-                                ])
-                            (reg.registerUser "openldap" "openldap" 10004)
-                    ]);
-*/
+registry.services.openldap = {
+    users = [{name="openldap"; uid=10004;}];
+    endpoints.tcp = [
+        {inherit hostname; port=389;}
+        {inherit hostname; port=636;}
+    ];
+    files = {
+        ldapSSHAs = [
+            {filename="ldap-admin.key"; opensslSize=64; opensslType="base64";}
+        ];
+        sslCertificates = [
+            {inherit hostname owner reload;}
+        ];
+    };
+    persistent = [
+        {path="/var/lib/openldap/data"; inherit owner reload;}
+    ];
+};
+
 }
 

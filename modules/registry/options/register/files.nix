@@ -5,11 +5,11 @@ let
 in
 {
     files = lib.mkOption{
-        description = "Various files and secrets exposed by the service";
+        description = "Various files and secrets exposed by the service. These files will be put in the nix store.";
         type = types.submodule {
             options = {
-                plaintexts = lib.mkOption {
-                    description = "Unencrypted files, generated using openssl rand";
+                plain = lib.mkOption {
+                    description = "Unencrypted files, generated using openssl rand. Note that they are put in the nix store and are thus world-readable.";
                     type = types.listOf types.plaintext;
                     default = [];
                 };
@@ -23,12 +23,12 @@ in
                     type = types.listOf types.sslCertificate;
                     default = [];
                 };
-                s3Accesses = lib.mkOption {
+                s3 = lib.mkOption {
                     description = "S3 buckets";
                     type = types.listOf types.s3access;
                     default = [];
                 };
-                postgresAccesses = lib.mkOption {
+                postgres = lib.mkOption {
                     description = "PostgresSQL access";
                     type = types.listOf types.postgresAccess;
                     default = [];

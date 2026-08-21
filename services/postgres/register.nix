@@ -3,20 +3,23 @@
 let
 
     infra = config.infra;
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
-
-#    secrets = {
-#        /* User passwords */
-#        "nextcloud-db.key" = {
-#            path = "/run/secrets/nextcloud-db.key";
-#        };
-#    };
-    endpoints = [{
-                   host = "postgres.${infra.domain}";
-                   port = 5432; 
-                   is_http = false; #use port redirection instead of nginx + TLS
-                 }];
+    hostname = "postgres.${infra.domain}";
+    owner = "postgres";
+    reload = ["postgresql.service"];
 in {
+
+registry.services.postgres = {
+    users = [{name = "postgres"; uid=10005;}];
+    files.sslCertificates = [
+        {inherit hostname owner reload;}
+    ];
+    endpoints.tcp = [
+        {inherit hostname; port = 5432;}
+    ];
+    persistent = [
+        {path = "/var/lib/postgresql"; inherit owner reload;}
+    ];
+};
 
 /*
     config.registry = 
