@@ -1,7 +1,8 @@
 {lib, inputs, config, pkgs, ...}:
 
 let 
-    infra = config.infra;
+    topology = config.infra.topology;
+    domain = topology.domain;
 
     owner = "garage";
     reload = ["garage.service"];
@@ -10,7 +11,7 @@ let
     opensslType = "hex";
     
     extraNginxConfig = {
-        virtualHosts."s3.${infra.domain}".extraConfig = 
+        virtualHosts."s3.${domain}".extraConfig = 
             ''
                     proxy_request_buffering off;
                     proxy_buffering off;
@@ -34,7 +35,7 @@ let
 
 in {
 
-config.registry.services.garage = {
+config.infra.services.garage = {
     users = [{name = "garage"; uid=10001;}];
     files.passwords = [
         {filename = "garage-rpc.key"; inherit owner reload opensslSize opensslType;}
@@ -46,8 +47,8 @@ config.registry.services.garage = {
         {path="/var/lib/garage/meta"; inherit owner reload; mode = "0700";}
     ];
     endpoints.http = [
-        {hostname="s3.${infra.domain}"; port=3900; inherit extraNginxConfig;}
-        {hostname="s3-admin.${infra.domain}"; port=3903;}
+        {hostname="s3.${domain}"; port=3900; inherit extraNginxConfig;}
+        {hostname="s3-admin.${domain}"; port=3903;}
     ];
 };
 }

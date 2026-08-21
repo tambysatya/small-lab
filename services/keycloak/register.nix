@@ -1,8 +1,7 @@
 {lib, inputs, pkgs, config, ...}:
 
 let 
-    infra = config.infra;
-    hostname = "auth.${infra.domain}";
+    hostname = "auth.${config.infra.topology.domain}";
     port = 8000;
 
     owner="root";
@@ -11,7 +10,7 @@ let
 in 
 {
 
-registry.services.keycloak = {
+infra.services.keycloak = {
     users = [{name="keycloak"; uid=10002;}];
     files = {
         plain = [

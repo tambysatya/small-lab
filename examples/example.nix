@@ -1,10 +1,12 @@
 {path, ...}:
 {
   #imports = [inputs.small-lab.nixosModules.infra];
-  config.infra = {
+  config.infra.topology = {
+/*
     flakePath = path;
     secretsPath = ".secrets";
     caURL = "ca.local.fr";
+*/
     domain = "local.fr";
     vmSubnet = "192.168.1.0/24";
     dns = ["8.8.8.8" "8.8.4.4"];

@@ -52,3 +52,4 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 
 - TODO: sanitize the code: registry should provide a unified interface to register services informations instead of multiple functions that are mkMerged
 - TODO: put a registry.internal.vms."name".config containing the entire config of each vm ? THis could allow us to avoid infinite recursion
+- TODO: refactor: config.infra.topology (actual config.infra) + config.infra.services (actual config.registry...)

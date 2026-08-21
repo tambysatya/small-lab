@@ -2,13 +2,13 @@
 
 let
 
-    infra = config.infra;
-    hostname = "postgres.${infra.domain}";
+    topology = config.infra.topology;
+    hostname = "postgres.${topology.domain}";
     owner = "postgres";
     reload = ["postgresql.service"];
 in {
 
-registry.services.postgres = {
+infra.services.postgres = {
     users = [{name = "postgres"; uid=10005;}];
     files.sslCertificates = [
         {inherit hostname owner reload;}

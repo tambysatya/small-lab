@@ -2,13 +2,13 @@
 
 let 
 
-    infra = config.infra;
-    hostname = "openldap.${infra.domain}";
+    topology = config.infra.topology;
+    hostname = "openldap.${topology.domain}";
     owner = "openldap";
     reload = ["openldap.service"];
 in {
 
-registry.services.openldap = {
+infra.services.openldap = {
     users = [{name="openldap"; uid=10004;}];
     endpoints.tcp = [
         {inherit hostname; port=389;}

@@ -2,8 +2,8 @@
 
 let
  
-    infra = config.infra;
-    hostname = "nextcloud.${infra.domain}";
+    topology= config.infra.topology;
+    hostname = "nextcloud.${topology.domain}";
     owner = "nextcloud";
     reload = ["phpfpm.service" "nextcloud-setup.service"];
     extraNginxConfig = {
@@ -39,7 +39,7 @@ let
     secret = {names = ["nextcloud-admin.key"]; owner="nextcloud"; reload=["phpfmp.service"]; kind = {provider="openssl";};};
 in {
 
-registry.services.nextcloud = {
+infra.services.nextcloud = {
     users = [{name="nextcloud"; uid=10003;}];
     files = {
         passwords = [
