@@ -2,14 +2,21 @@
 
 let 
     infra = config.infra;
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
     secrets = {
         names = ["ca-password.key"  "intermediate_ca_key"];
         owner = "step-ca";
         kind = {provider = "step";};
     };
+    hostname = "ca.${infra.domain}";
+    port = infra.caPort;
 in
 {
+registry.services.step-ca = {
+    users = [{name="keycloak"; uid=10006;}];
+    endpoints.tcp = [
+        {inherit hostname port;}
+    ];
+};
 /*
     config.registry = 
                 (lib.mkMerge [
