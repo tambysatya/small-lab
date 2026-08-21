@@ -38,6 +38,7 @@ rec {
         type = types.enum ["base64" "hex"];
     };
     hostname = lib.mkOption {
+        description = "Host domain";
         type = types.str;
         example = "auth.local.fr";
     };

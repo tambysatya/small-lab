@@ -25,6 +25,7 @@ in
     };
 
     domain = lib.mkOption {
+        description = "Domain of the infrastructure";
         type = types.str;
         example = "infra.local";
     };
@@ -36,6 +37,7 @@ in
     };
 
     dns = lib.mkOption {
+      description = "Domain Name Servers of the infrastructure";
       type = types.listOf types.str;
       example = ["8.8.8.8" "8.8.4.4"];
     };
@@ -48,15 +50,17 @@ in
       description = "A list of SSH keys that will be allowed to connect as root";
     };
     hosts = lib.mkOption {
+      description = "Available baremetal hosts";
       type = types.attrsOf (
         types.submodule {
           options = {
-            ipAddress = lib.mkOption {type = types.str;};
+            ipAddress = lib.mkOption {description = "IP address of the host"; type = types.str;};
           };
         }
       );
     };
     vms = lib.mkOption {
+      description = "Configuration of the virtual machines";
       type = types.attrsOf types.vmConf;
     };
   };
