@@ -33,12 +33,17 @@ in {
         description = "Various endpoints exposed by the service. If an HTTPs reverse proxy is required, use the endpoint_https section.";
         type = types.submodule {
             options = {
-                endpoints = lib.mkOption {
-                    description = "Undefined endpoints";
+                udp = lib.mkOption {
+                    description = "UDP endpoints";
                     type = types.listOf endpoint;
                     default = [];
                 };
-                http_endpoints = lib.mkOption {
+                tcp = lib.mkOption {
+                    description = "TCP endpoints. If the protocol is HTTP, consider registering an HTTP endpoint instead, in order to automatically deploy SSL.";
+                    type = types.listOf endpoint;
+                    default = [];
+                };
+                http = lib.mkOption {
                     description = "HTTP endpoints. A reverse proxy exposing HTTPs will be connected on top of it. TLS certifiicates will be automatically managed.";
                     type = types.listOf http_endpoint;
                     default = [];
