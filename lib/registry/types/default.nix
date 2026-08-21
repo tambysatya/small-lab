@@ -7,6 +7,11 @@ in
 rec {
 
     /* Basic types constructors */
+    filename = lib.mkOption {
+        description = "Name of the file";
+        type = types.str;
+    };
+
     owner = lib.mkOption {
         description = "Username of the owner";
         type = types.str;
@@ -47,12 +52,12 @@ rec {
 
     plaintext = types.submodule {
             options = {
-                inherit  owner reload filemode opensslSize opensslType;
+                inherit filename owner reload filemode opensslSize opensslType;
             };
     };
     password = types.submodule {
             options = {
-                inherit owner reload filemode opensslSize opensslType;
+                inherit filename owner reload filemode opensslSize opensslType;
             };
     };
     sslCertificate = types.submodule {
