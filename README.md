@@ -44,3 +44,10 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 	+ avoid configs = in order to avoid infinite recursions 
 	+ do everything in one step instead of having multiple evalModules
 	+ move and regroup the code in order to never have a function editing multiple root fields of config (eg config.users and config.services)
+
+
+- TODO: store the secrets properly in the registry
+- TODO add multiple provisioenrs in step-ca
+
+
+- TODO: sanitize the code: registry should provide a unified interface to register services informations instead of multiple functions that are mkMerged

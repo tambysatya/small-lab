@@ -17,25 +17,6 @@ in
         type = types.attrsOf types.vmConfig;
         default = {};
     };
-
-    /*
-       options.registry = lib.mkOption {
-       type = types.submodule {
-       options = {
-       services = lib.mkOption {
-       internal = true;
-       type = types.attrsOf types.serviceConfig;
-       description = "Resources required by the services (generated during phase1)";
-       default = {};
-       };
-       vms = lib.mkOption {
-       internal = true;
-       type = types.attrsOf types.vmConfig;
-       default = {};
-       };
-       };
-       };
-       };
-     */
+        
 }
 

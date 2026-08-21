@@ -1,6 +1,6 @@
 {lib,...}:
 let libtypes = lib.types;
-    customtypes = import ./register.nix {inherit lib;};
+    customtypes = import ../register.nix {inherit lib;};
     types = libtypes // customtypes;
     
 in
