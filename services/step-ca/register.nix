@@ -10,11 +10,12 @@ let
     };
 in
 {
+/*
     config.registry = 
                 (lib.mkMerge [
                     (reg.registerSecret "step-ca" "step-ca-keys" secrets)
                     (reg.registerUser "step-ca" "step-ca" 10006)
                 ]);
-                    
+*/                    
 }
 

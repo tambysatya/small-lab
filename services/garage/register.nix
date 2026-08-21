@@ -49,12 +49,14 @@ let
     ];
 
 in {
+/*
     config.registry = 
                 lib.mkMerge [
                     (reg.registerSecret "garage" "garage-keys" secret)
                     (reg.registerEndpoints "garage" endpoints)
                     (reg.registerUser "garage" "garage" 10001)
                 ];
+*/
 }
 
 

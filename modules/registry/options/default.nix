@@ -1,22 +1,26 @@
+{lib, inputs, ...}:
 
-{inputs, lib, config, ... }:
 let
-types = import "${inputs.self.outPath}/lib/registry/types" { inherit inputs lib; };
-
-in
+    types = lib.types;
+    register = import ./register {inherit inputs lib;};
+    #internal = import ./internal {inherit inputs lib;};
+in 
 
 {
     options.registry.services = lib.mkOption {
         internal = true;
-        type = types.attrsOf types.serviceConfig;
+        type = types.attrsOf register.service;
         description = "Resources required by the services (generated during phase1)";
         default = {};
     };
+
+    /*
     options.registry.vms = lib.mkOption {
         internal = true;
         type = types.attrsOf types.vmConfig;
         default = {};
     };
+    */
         
 }
 

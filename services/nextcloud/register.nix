@@ -34,6 +34,7 @@ let
     secret = {names = ["nextcloud-admin.key"]; owner="nextcloud"; reload=["phpfmp.service"]; kind = {provider="openssl";};};
 in {
 
+/*
     config.registry = 
                 (lib.mkMerge [ 
                     (lib.mkMerge [
@@ -60,5 +61,6 @@ in {
                     (reg.registerVolume "nextcloud" {owner="nextcloud"; path="/var/lib/nextcloud/data"; reload=["phpfmp.service" "nextcloud-setup.service"];})
                     (reg.registerUser "nextcloud" "nextcloud" 10003)
                     ]);
+*/
 }
 

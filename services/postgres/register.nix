@@ -18,6 +18,7 @@ let
                  }];
 in {
 
+/*
     config.registry = 
                 (lib.mkMerge [ 
                     #(reg.registerSecrets "postgres" "postgres" ["postgres.service"] secrets)
@@ -25,5 +26,6 @@ in {
                     (reg.registerEndpoints "postgres" endpoints)
                     (reg.registerUser "postgres" "postgres" 10005)
                 ]);
+*/
 }
 

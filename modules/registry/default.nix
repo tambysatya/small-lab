@@ -103,7 +103,7 @@ let
 in 
 
 {
-imports = [./options.nix]++ modules;    
-config.registry.services = lib.mkMerge (lib.mapAttrsToList compileVMsHosts infra.vms);
-config.registry.vms = lib.mkMerge (lib.mapAttrsToList compileVMsFiles infra.vms);
+imports = [./options]++ modules;    
+#config.registry.services = lib.mkMerge (lib.mapAttrsToList compileVMsHosts infra.vms);
+#config.registry.vms = lib.mkMerge (lib.mapAttrsToList compileVMsFiles infra.vms);
 }

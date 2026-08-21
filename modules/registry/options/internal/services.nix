@@ -7,54 +7,50 @@ in
 {
     serviceConfig = lib.types.submodule {
       options = {
-        settings = lib.mkOption {
-            description = "Service configuration (same type as the service configuration)";
-            type = types.attrs;
-        };
         endpoints = lib.mkOption{ 
-            internal = true;
             description = "List of reverse proxy that will be created";
-            default = [];
             type = types.listOf types.endpoint;
+            default = [];
         };
         secrets = lib.mkOption{ 
-            internal = true;
             description = "List of required by the service";
-            default = {};
             type = types.attrsOf types.secret;
+            default = {};
         };
         sslCertificates = lib.mkOption{
             internal = true;
             description = "List of TLS certificates handled by the service";
-            default = {};
             type = types.attrsOf types.sslCertificate;
+            default = {};
         };
         dbAccesses = lib.mkOption {
             internal = true;
             description  = "List of user/tables to be created on the database. The tables will be accessible through TLS only. Note that the password is set at every-rebuild so you can change it without losing access to the datas.";
-            default = [];
             type = types.listOf types.dbAccess;
+            default = [];
         };
         s3Accesses = lib.mkOption {
             internal = true;
             description  = "List of bucket/key to be created on the s3 server.";
-            default = [];
             type = types.listOf types.s3Access;
+            default = [];
         };
         volumes = lib.mkOption {
             internal = true;
             description = "List of directories containing persistent data.";
-            default = [];
             type = types.listOf types.volume;
+            default = [];
         };
         users = lib.mkOption {
             internal = true;
             description = "UserIDs of the Service Users";
-            default = {};
             type = types.attrsOf types.userID;
+            default = {};
 
         };
         hosts = lib.mkOption {
+            internal = true;
+            description = "Which machines/containers run this service";
             type = types.submodule {
                 options = {
                     vms = lib.mkOption {

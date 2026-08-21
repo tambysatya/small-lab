@@ -5,6 +5,8 @@ let
     infra = config.infra;
     reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
 in {
+
+/*
     config.registry = 
                       (lib.mkMerge [
                             (reg.registerCertificate "openldap" "openldap" ["openldap.service"] "openldap.${infra.domain}")
@@ -14,5 +16,6 @@ in {
                                 ])
                             (reg.registerUser "openldap" "openldap" 10004)
                     ]);
+*/
 }
 

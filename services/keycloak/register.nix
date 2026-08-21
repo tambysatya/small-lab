@@ -10,6 +10,7 @@ let
 
 in 
 {
+/*
    config.registry = 
                      (lib.mkMerge [
                          (reg.registerDBAccess "keycloak" 
@@ -17,5 +18,6 @@ in
                          (reg.registerEndpoints "keycloak" [{host=servicevhost; port=serviceport;}])
                          (reg.registerUser "keycloak" "keycloak" 10002)
                      ]);
+*/
 }
 
