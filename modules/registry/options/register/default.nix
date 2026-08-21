@@ -2,7 +2,7 @@
 {lib,inputs, ...}:
 let libtypes = lib.types;
     filestypes = import ./files.nix {inherit lib inputs;};
-    endpointstypes = import ./files.nix {inherit lib inputs;};
+    endpointstypes = import ./endpoints.nix {inherit lib inputs;};
     types = libtypes // filestypes // endpointstypes;
 
     user = types.submodule {

@@ -4,7 +4,7 @@ let
     types = lib.types;
 
 in
-{
+rec {
 
     /* Basic types constructors */
     owner = lib.mkOption {
@@ -46,22 +46,22 @@ in
 
     plaintext = types.submodule {
             options = {
-                inherit (types) owner reload filemode opensslSize opensslType;
+                inherit  owner reload filemode opensslSize opensslType;
             };
     };
     password = types.submodule {
             options = {
-                inherit (types) owner reload filemode opensslSize opensslType;
+                inherit owner reload filemode opensslSize opensslType;
             };
     };
     sslCertificate = types.submodule {
             options = {
-                inherit (types) hostname owner reload filemode;
+                inherit hostname owner reload filemode;
             };
     };
     s3access = types.submodule {
             options = {
-                inherit (types) owner reload;
+                inherit owner reload;
                 bucket = lib.mkOption{
                     description = "Name of the bucket";
                     type = types.str;
@@ -71,7 +71,7 @@ in
     };
     postgresAccess = types.submodule {
             options = {
-                inherit (types) owner reload;
+                inherit owner reload;
                 database = lib.mkOption {
                     description = "Name of the database. So far, the role (= user) name does necessarily match the database"; #TODO
                     type = types.str;
@@ -81,7 +81,7 @@ in
     };
     ldapSSHA = types.submodule {
             options = {
-                inherit (types) owner reload filemode opensslSize opensslType;
+                inherit owner reload filemode opensslSize opensslType;
             };
     };
 

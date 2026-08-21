@@ -31,6 +31,7 @@ let
     terranix-generator_fun = args:
         let conf = compileModule args;
         in (import ./lib/terranix {inherit lib inputs; inherit (conf) infra registry; }).generator;
+
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
         {inventory, extraArgs ? {}}:
            (lib.evalModules {
@@ -41,13 +42,14 @@ let
                   ./modules/registry
                   inventory
                 ];
-           }).config; 
+           });
+    compileConfig = args: (compileModule args).config;
 
-    compileInfra = args: (compileModule args).infra;
-    compileRegistry = args: (compileModule args).registry;
+    compileInfra = args: (compileConfig args).infra;
+    compileRegistry = args: (compileConfig args).registry;
 
     nixos-generator = args@{inventory, extraArgs ?{}}: 
-        let conf = compileModule args; 
+        let conf = compileConfig args; 
             configs = lib.mapAttrs
                             (vmname: vmconf:
                                 lib.nixosSystem {
@@ -81,7 +83,7 @@ let
 
         compileGenSecrets = 
             args:
-                let conf = compileModule args;
+                let conf = compileConfig args;
                     script =(import tools/secrets-generator/main.nix 
                                 {inherit inputs lib pkgs;
                                  inherit (conf) infra registry;}).main;
@@ -99,7 +101,7 @@ let
         
         compileTerranix = 
             args:
-                let conf = compileModule args;
+                let conf = compileConfig args;
                 in terranix.lib.terranixConfiguration {
                             inherit system;
                             modules = [
@@ -111,7 +113,7 @@ let
             args: nixos-generator args;
         compileIso = 
             args:
-                let conf = compileModule args;
+                let conf = compileConfig args;
                 in lib.nixosSystem {
                     inherit system;
                     specialArgs = {inherit inputs lib; inherit (conf) infra registry;};
@@ -134,6 +136,7 @@ let
         
         #args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
         args = {inventory = ./examples/example.nix; extraArgs = {path=inputs.self.outPath;};};
+
 
     in compileGenSecrets args //{
       
@@ -160,9 +163,13 @@ let
       #infra = gen-infra args;
       #registry = gen-registry args;
       terranix = compileTerranix args;
-      nixosConfigurations = compileNixos args // {iso = compileIso args;};
+      #nixosConfigurations = compileNixos args // {iso = compileIso args;};
 
-      checks.${system} = gen-config-checks inputs;
+      #checks.${system} = gen-config-checks inputs;
+
+      packages.${system}.options-doc = 
+        let module = compileModule args;
+        in (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
                    
 
       #nixosConfigurations = configs;
