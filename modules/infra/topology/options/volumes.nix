@@ -1,5 +1,7 @@
-{lib}:
-let inherit (lib) types;
+{lib, inputs,...}:
+let libtypes = lib.types;
+    mytypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
+    types = libtypes // mytypes;
 in
 
 rec {

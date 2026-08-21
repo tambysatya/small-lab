@@ -1,11 +1,17 @@
-{lib,...}:
+{lib, inputs,...}:
 
 let
     types = lib.types;
+    serviceNames = ["step-ca" "openldap" "keycloak" "garage" "postgres" "nextcloud"];
+    serviceType = types.enum serviceNames;
+
+    deployement = import ./deployement.nix {inherit lib inputs;};
+
+
 
 in
-rec {
-
+deployement // rec {
+    inherit serviceNames serviceType;
 
     /* Basic types constructors */
     filename = lib.mkOption {
@@ -91,6 +97,7 @@ rec {
                 inherit filename owner opensslSize opensslType;
             };
     };
+
 
 
 }

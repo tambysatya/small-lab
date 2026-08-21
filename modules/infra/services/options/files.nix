@@ -1,7 +1,7 @@
 {lib,inputs, ...}:
 
 let
-    types = lib.types // (import "${inputs.self.outPath}/lib/registry/types" {inherit lib inputs;});
+    types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
 in
 {
     files = lib.mkOption{

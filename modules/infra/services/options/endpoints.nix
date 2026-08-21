@@ -4,7 +4,7 @@
 {lib,inputs, ...}:
 let 
     libtypes = lib.types;
-    regtypes = import "${inputs.self.outPath}/lib/registry/types" {inherit lib inputs;};
+    regtypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
     types = libtypes // regtypes;
 
     port = lib.mkOption {

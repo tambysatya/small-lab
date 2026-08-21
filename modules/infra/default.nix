@@ -1,8 +1,14 @@
-{lib, config,...}:
+{lib, inputs, config,...}:
 
-{
+let
+    infratypes= import "${inputs.self.outPath}/lib/types" {inherit inputs lib;};
+    types = infratypes;
+
+    serviceModules = map (name: "${inputs.self.outPath}/services/${name}/register.nix") types.serviceNames;
+
+in {
   imports = [./topology
-             ./services];
+             ./services] ++ serviceModules;
 
 /*  
   config.assertions = lib.mapAttrsToList

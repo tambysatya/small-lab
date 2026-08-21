@@ -1,14 +1,11 @@
-{lib}:
+{lib, inputs, ...}:
 let 
     libtypes = lib.types;
-    voltypes = import ./volumes.nix {inherit lib;}; 
-    types = libtypes //voltypes;
-    serviceNames = ["step-ca" "openldap" "keycloak" "garage" "postgres" "nextcloud"];
+    voltypes = import ./volumes.nix {inherit lib inputs;}; 
+    mytypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
+    types = libtypes //voltypes // mytypes;
 in
-types // rec {
-    inherit serviceNames;
-    serviceType = 
-		lib.types.enum serviceNames;
+{
 
     /* Virtual machine description */
     vmConf = lib.types.submodule {
@@ -36,13 +33,13 @@ types // rec {
               description = "The IP address of the VM";
             };
             services = lib.mkOption {
-              type = types.listOf serviceType;
+              type = types.listOf types.serviceType;
               description = "List of services names deployed on the VM";
               example = ["ldap"];
               default = [];
             };
             containers = lib.mkOption {
-              type = types.listOf serviceType;
+              type = types.listOf types.serviceType;
               description = "List of services names deployed inside a container VM";
               example = ["ldap"];
               default = [];

@@ -1,9 +1,10 @@
 /* Exposed API to register modules informations */
 {lib,inputs, ...}:
 let libtypes = lib.types;
+    infratypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
     filestypes = import ./files.nix {inherit lib inputs;};
     endpointstypes = import ./endpoints.nix {inherit lib inputs;};
-    types = libtypes // filestypes // endpointstypes;
+    types = libtypes // infratypes // filestypes // endpointstypes;
 
     user = types.submodule {
         options = {
@@ -41,6 +42,7 @@ let libtypes = lib.types;
             };
         };
     };
+
 in
 {
     service = types.submodule {
@@ -54,6 +56,11 @@ in
                     type = types.listOf persistentDirectory;
                 };
                 inherit (types) files endpoints;
+                deployement = lib.mkOption {
+                    description = "List of environment where the service is currently deployed";
+                    type = types.listOf types.deployement;
+                    default = [];
+                };
             };
     };
 }

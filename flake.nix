@@ -35,11 +35,10 @@ let
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
         {inventory, extraArgs ? {}}:
            (lib.evalModules {
-               specialArgs = {inherit inputs;} // extraArgs;
+               specialArgs = {inherit inputs lib;} // extraArgs;
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/infra
-                  ./modules/registry
                   inventory
                 ];
            });

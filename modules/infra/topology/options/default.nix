@@ -1,7 +1,10 @@
 {inputs, lib, ... }:
 
 let
-  types = import "${inputs.self.outPath}/lib/infra/types.nix" { inherit lib; };
+    libtypes = lib.types;
+    vmtypes = import ./vms.nix {inherit lib inputs;};
+    mytypes = import "${inputs.self.outPath}/lib/types" { inherit lib inputs;};
+    types = libtypes // vmtypes // mytypes;
 in
 {
   /* Options definitions */
