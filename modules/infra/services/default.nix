@@ -9,12 +9,12 @@ let
                 [(utils.mergeAll 
                     (map 
                         (service: 
-                            {${service}.deployement = [{type = "vm"; host=vmname;}];})
+                            {${service}.deployements = [{type = "vm"; host=vmname;}];})
                         services))
                  (utils.mergeAll
                     (map 
                         (service: 
-                            {${service}.deployement = [{type="container"; host={container=service; vm=vmname;};}];})
+                            {${service}.deployements = [{type="container"; host={container=service; vm=vmname;};}];})
                         containers))]; #containers names are equal to the service
 in {
    imports = [./options];

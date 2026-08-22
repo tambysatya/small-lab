@@ -2,6 +2,8 @@
 let
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
     secretType = types.enum ["plain" "password" "ldapssha" "sslCertificates" "postgres" "s3" "step-ca"];
+
+    agekey = types.str;
     secret = types.submodule {
         options = {
             type = lib.mkOption {
@@ -10,11 +12,13 @@ let
             };
             content = lib.mkOption {
                 description = "Content of the secret. Must match the type";
-                type = types.attrs;
+                type = with types;
+                        #nullOr (oneOf [plaintext password sslCertificate postgresAccess s3Access ldapSSHA]);
+                        nullOr attrs; #TODO
             };
             recipients = lib.mkOption {
                 description = "Identity names of the recipients.";
-                type = types.listOf types.deployementHost;
+                type = types.listOf agekey;
             };
         };
     };
