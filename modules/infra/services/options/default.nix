@@ -43,9 +43,6 @@ let libtypes = lib.types;
             };
         };
     };
-
-in
-{
     service = types.submodule {
             options = {
                 users = lib.mkOption {
@@ -68,4 +65,12 @@ in
                 };
             };
     };
+
+in
+{
+   options.infra.services = lib.mkOption {
+        description = "Services resources";
+        type = lib.types.attrsOf service;
+   };
+
 }
