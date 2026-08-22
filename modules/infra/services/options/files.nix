@@ -23,21 +23,7 @@ in
                     type = types.listOf types.sslCertificate;
                     default = [];
                 };
-                s3 = lib.mkOption {
-                    description = "S3 buckets";
-                    type = types.listOf types.s3access;
-                    default = [];
-                };
-                postgres = lib.mkOption {
-                    description = "PostgresSQL access";
-                    type = types.listOf types.postgresAccess;
-                    default = [];
-                };
-                ldapSSHAs = lib.mkOption {
-                    description = "Hashed LDAP passwords";
-                    type = types.listOf types.ldapSSHA;
-                    default = [];
-                };
+
             };
         };
     };

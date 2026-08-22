@@ -15,13 +15,16 @@ infra.services.openldap = {
         {inherit hostname; port=636;}
     ];
     files = {
-        ldapSSHAs = [
-            {filename="ldap-admin.key"; opensslSize=64; opensslType="base64";}
-        ];
         sslCertificates = [
             {inherit hostname owner reload;}
         ];
     };
+    links = {
+        ldapSSHAs = [
+            {filename="ldap-admin.key"; opensslSize=64; opensslType="base64";}
+        ];
+    };
+
     persistent = [
         {path="/var/lib/openldap/data"; inherit owner reload;}
     ];

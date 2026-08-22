@@ -16,6 +16,8 @@ infra.services.keycloak = {
         plain = [
             {filename="keycloak-initial-admin.key"; opensslSize = 64; opensslType = "base64";}
         ];
+    };
+    links = {
         postgres = [
             {database="keycloak"; inherit owner reload;}
         ];  

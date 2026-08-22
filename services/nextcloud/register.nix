@@ -45,6 +45,8 @@ infra.services.nextcloud = {
         passwords = [
             {filename = "nextcloud-admin.key"; opensslType = "base64"; opensslSize=64; inherit owner reload;}
         ];
+    };
+    links = {
         postgres = [
             {database = "nextcloud"; inherit owner reload;}
         ];

@@ -3,8 +3,9 @@
 let libtypes = lib.types;
     infratypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
     filestypes = import ./files.nix {inherit lib inputs;};
+    linkstypes = import ./links.nix {inherit lib inputs;};
     endpointstypes = import ./endpoints.nix {inherit lib inputs;};
-    types = libtypes // infratypes // filestypes // endpointstypes;
+    types = libtypes // infratypes // filestypes // endpointstypes // linkstypes;
 
     user = types.submodule {
         options = {
@@ -60,6 +61,10 @@ in
                     description = "List of environment where the service is currently deployed";
                     type = types.listOf types.deployementEnvironment;
                     default = [];
+                };
+                links = lib.mkOption {
+                    description = "Dependencies across the other services of the infrastructure";
+                    type = types.links;
                 };
             };
     };
