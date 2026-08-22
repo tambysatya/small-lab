@@ -3,20 +3,12 @@ let
     types = lib.types;
     vmname = types.str;
 in rec {
-    deployementOptions = types.submodule {
-        options = {
-            priority = lib.mkOption {
-                description = "Priority of the service";
-                type = types.enum ["primary" "fallback" "test"]; #TODO check if there is only one primary across the infrastructure
-                default = "primary";
-            };
-        };
-    };
+    deployementTag = types.enum ["test"]; #TODO check if there is only one primary across the infrastructure
 
 
     container = types.submodule  {
         options = {
-            name = lib.mkOption {
+            container = lib.mkOption {
                 description = "Name of the container";
                 type = types.str;
             };
@@ -26,22 +18,28 @@ in rec {
             };
         };
     };
-    deployementEnvironmentType = types.enum ["vm" "container"];
-    deployementEnvironment = types.either vmname container;
+    deployementHostType = types.enum ["vm" "container"];
+    deployementHost = types.either vmname container;
 
-    deployement = types.submodule {
+    deployementEnvironment = types.submodule {
         options = {
             type = lib.mkOption {
                 description = "Type of deployement: container or nixos";
-                type = deployementEnvironmentType;
+                type = deployementHostType;
             };
-            env = lib.mkOption {
+            host = lib.mkOption {
                 description = "Which environment hosts the service";
-                type = deployementEnvironment;
+                type = deployementHost;
             };
-            options = lib.mkOption{
-                description = "Configuration of the deployement (priority...)";
-                type = deployementOptions;
+            priority = lib.mkOption{
+                description = "Max priority is the primary";
+                type = types.int;
+                default = 100;
+            };
+            tags = lib.mkOption {
+                description = "Specific tags to trigger specific behvavior";
+                type = types.listOf (types.oneOf [deployementTag types.str]);
+                default = [];
             };
         };
     };

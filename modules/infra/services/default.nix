@@ -10,12 +10,12 @@ let
                 [(utils.mergeAll 
                     (map 
                         (service: 
-                            {${service}.deployement = [{type = "vm"; env=vmname;}];})
+                            {${service}.deployement = [{type = "vm"; host=vmname;}];})
                         services))
                  (utils.mergeAll
                     (map 
                         (service: 
-                            {${service}.deployement = [{type="container"; env={name=service; vm=vmname;};}];})
+                            {${service}.deployement = [{type="container"; host={container=service; vm=vmname;};}];})
                         containers))]; #containers names are equal to the service
 in {
    options.infra.services = lib.mkOption {

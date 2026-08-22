@@ -58,7 +58,7 @@ in
                 inherit (types) files endpoints;
                 deployement = lib.mkOption {
                     description = "List of environment where the service is currently deployed";
-                    type = types.listOf types.deployement;
+                    type = types.listOf types.deployementEnvironment;
                     default = [];
                 };
             };
