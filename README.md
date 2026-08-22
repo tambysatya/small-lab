@@ -51,5 +51,9 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 
 
 - TODO: sanitize the code: registry should provide a unified interface to register services informations instead of multiple functions that are mkMerged
-- TODO: put a registry.internal.vms."name".config containing the entire config of each vm ? THis could allow us to avoid infinite recursion
-- TODO: refactor: config.infra.topology (actual config.infra) + config.infra.services (actual config.registry...)
+- TODO: put a infra.vms."name".config containing the entire config of each vm ? THis could allow us to avoid infinite recursion
+
+Deployement:
+- curent refactor involved deployement options (like priority), but VMs may also have tags (like testing, backup) that is applied to their services
+- priority should be a number. Max priority is the primary service.
+- domains names are generated according to the priority. Eg the primary service is "postgres.local" and the first fallback "postgres-01.local". Testing services should be in a dedicated zone testing.local (eg postgres.testing.local, postgres-01.testing.local)
