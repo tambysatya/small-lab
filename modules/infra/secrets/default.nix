@@ -30,7 +30,7 @@ let
         ++  map (processSecret deployements "ldapssha") ldap
         ++  map (processSecret deployements "s3") s3
         ++  (if srvname == "step-ca"
-                then [(processSecret deployements "s3" null)] 
+                then [(processSecret deployements "step-ca" null)] 
                 else []);
     allSecrets= (lib.mapAttrsToList processService (config.infra.services));
 in {
