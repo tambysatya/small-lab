@@ -8,6 +8,13 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - During the first phase, the compiler summarizes the resources requirements of each services over the infrastructure
 - During the second phase, the resources are allocated, e.g. reverse proxys / pNAT rules are built (depending on the type of endpoint), users and secrets are created (if the services is runned inside a container)...
 
+## Code Architecture:
+
+Main module: config.infra
+
+- infra.topology : description of the infrastructure (filled during the deployement)
+- infra.services.name : API for services to register what are their needs
+- ... others are internal structures which are essentially views of the infrastructure to simplify secret generation, visualization, coherence verification...
 
 # TODO
 
