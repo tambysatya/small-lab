@@ -1,5 +1,19 @@
 
-# Module description
+
+
+# Small-lab: automated and reproducible deployement of services.
+
+Features: 
+
+- declarative and reproducible deployement using NixOS
+- automated generation of secrets (services passwords, databases access...) from the infrastructure inventory
+- clear separation between systems and data: systems can be safely destroyed without risking any data loss
+- automatic virtual machines generation and configuration using Open Tofu
+- automatic generation of reverse-proxys with TLS enabled
+- automatic generation of systemd services in order to integrate dependencies between services across the infrastructure (WIP)
+- simple API to integrates more services: simply declares the passwords, ssl certificates, and endpoints: everything will be automatically generated.
+
+see `examples/` 
 
 ## Compilation:
 
