@@ -7,6 +7,8 @@ let
     age = import ./age.nix {inherit inputs lib infra pkgs registry;};
     pvds = import ./providers {inherit inputs lib infra pkgs registry;};
 
+    gen = import ./lib {inherit inputs lib pkgs infra;};
+
     #unique identifier for a container
     #all containers names (key = "ct-vmname-service")
     ctnames = lib.concatLists (
@@ -76,6 +78,19 @@ in
                 pkgs.sops
                 pkgs.step-cli
             ];
+            text = gen.processSecrets;
+           };
+
+    /*
+    main = pkgs.writeShellApplication {
+            name = "gen-secrets";
+            runtimeInputs = [
+                pkgs.age
+                pkgs.openssl
+                pkgs.openldap
+                pkgs.sops
+                pkgs.step-cli
+            ];
             # For each kind of secret, we generate for the services running natively AND running within a container
             text = ''
                     ${gen_all_ages}
@@ -116,4 +131,5 @@ in
 
             '';
     };
+    */
 }

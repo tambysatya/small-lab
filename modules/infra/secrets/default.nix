@@ -7,17 +7,18 @@ let
         deployements: 
         secrettype:
         secret: 
+        lib.mkIf (deployements != [])
         {
             type=secrettype;
             content=secret;
             recipients = map infralib.ageKeyFromDeployementEnvironment deployements;
         };
     processService = 
-        srvname: {deployements, links, files, ...}: 
+        srvname: {deployements, links, files, endpoints, ...}: 
         let
             plain = files.plain;
             passwords = files.passwords;
-            certs = files.sslCertificates;
+            certs = files.sslCertificates ++ endpoints.http;
 
             postgres = links.postgres;
             ldap = links.ldapSSHAs;
