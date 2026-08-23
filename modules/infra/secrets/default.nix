@@ -25,7 +25,7 @@ let
             s3 = links.s3;
         in 
             map (processSecret deployements "plain") plain
-        #++  map (processSecret deployements "password") passwords
+        ++  map (processSecret deployements "password") passwords
         ++  map (processSecret deployements "sslCertificates") certs
         ++  map (processSecret deployements "postgres") postgres
         ++  map (processSecret deployements "ldapssha") ldap
