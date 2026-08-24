@@ -97,11 +97,6 @@ let
         }.${type};
 
 
-    generateMTLS = identities: 
-        lib.concatMapStringsSep "\n"
-            (name: processSSLCert [name] {hostname="${name}.${infra.topology.domain}";})
-            identities;
-    
 
 in {
     processSecrets = 
@@ -113,8 +108,5 @@ in {
             ${lib.concatMapStringsSep "\n" age.generateAge infra.secrets.identities}
             ${ssl.generateCA infra.topology.domain}
             ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
-
-            # Generate an SSL certificate per identity in order to connect to journald using mTLS
-            ${generateMTLS infra.secrets.identities} 
         '';
 }
