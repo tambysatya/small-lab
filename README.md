@@ -78,3 +78,6 @@ Deployement:
 - curent refactor involved deployement options (like priority), but VMs may also have tags (like testing, backup) that is applied to their services
 - priority should be a number. Max priority is the primary service.
 - domains names are generated according to the priority. Eg the primary service is "postgres.local" and the first fallback "postgres-01.local". Testing services should be in a dedicated zone testing.local (eg postgres.testing.local, postgres-01.testing.local)
+
+-TODO: add flakes templates for users
+
