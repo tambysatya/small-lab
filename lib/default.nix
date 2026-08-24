@@ -6,9 +6,9 @@ let
     ageKeyFromDeployementEnvironment = 
         env@{type, host, priority, ...}:
             if type == "vm"
-                then "${host}-${lib.toString priority}.key"
+                then "${host}"
             else if type == "container"
-                then "${host.vm}-${host.container}-${lib.toString priority}.key"
+                then "${host.vm}-${host.container}"
             else
                 throw "Unknown deployement environment ${env}";
 in{

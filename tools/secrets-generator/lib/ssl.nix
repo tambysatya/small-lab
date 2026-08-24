@@ -40,6 +40,9 @@ let
         cp "$STEPPATH/config/ca.json" ${git}
         cp "$STEPPATH/certs/root_ca.crt" ${git}
         cp "$STEPPATH/certs/intermediate_ca.crt" ${git}
+
+        cp "$STEPPATH/secrets/intermediate_ca_key" ${plain}
+        cp "$STEPPATH/ca-password.key" ${plain}
         '';
 
 

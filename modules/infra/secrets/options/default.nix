@@ -28,7 +28,18 @@ in
 {
     options.infra.secrets = lib.mkOption {
         description = "Summary of the secrets dispatched across the infrastructure. Useful for automatic secret generations.";
-        type = types.listOf secret;
+        type = types.submodule {
+            options = {
+                identities = lib.mkOption {
+                    description = "List of age (private keys) identity";
+                    type = types.listOf types.str;
+                };
+                allSecrets = lib.mkOption {
+                    description = "Summary of the secrets dispatched across the infrastructure. Useful for automatic secret generations.";
+                    type = types.listOf secret;
+                };
+            };
+        };
     };
 
 }

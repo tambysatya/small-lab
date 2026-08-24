@@ -7,13 +7,21 @@ let
         deployements: 
         secrettype:
         secret: 
+        let additionalRecipients = # adding the hosts of the requested service (to create the access). Note: no need to add openldap since the file will be hashed
+        if secrettype == "postgres" then
+            map infralib.ageKeyFromDeployementEnvironment config.infra.services.postgres.deployements
+        else if secrettype == "s3" then
+            map infralib.ageKeyFromDeployementEnvironment config.infra.services.garage.deployements 
+        else [];
+        in
         lib.mkIf (deployements != [])
         {
             type=secrettype;
             content=secret;
-            recipients = map infralib.ageKeyFromDeployementEnvironment deployements;
+            recipients = lib.unique (additionalRecipients ++ map infralib.ageKeyFromDeployementEnvironment deployements);
         };
-    processService = 
+
+    serviceSecrets = 
         srvname: {deployements, links, files, endpoints, ...}: 
         let
             plain = files.plain;
@@ -33,9 +41,16 @@ let
         ++  (if srvname == "step-ca"
                 then [(processSecret deployements "step-ca" null)] 
                 else []);
-    allSecrets= (lib.mapAttrsToList processService (config.infra.services));
+    allSecrets= lib.mapAttrsToList serviceSecrets config.infra.services;
+    
+    ageIdentities =
+        srvname: {deployements,...}:
+            map infralib.ageKeyFromDeployementEnvironment deployements;
+            
 in {
     imports = [./options];
-    config.infra.secrets = 
-        lib.concatLists (lib.mapAttrsToList processService (config.infra.services));
+    config.infra.secrets = { 
+        identities = lib.unique (lib.concatLists (lib.mapAttrsToList ageIdentities config.infra.services));
+        allSecrets = lib.unique (lib.concatLists allSecrets);
+    };
 }
