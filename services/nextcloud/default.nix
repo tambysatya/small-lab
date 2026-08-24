@@ -68,8 +68,8 @@ in {
             };
             settings = {
                 #instanceid = builtins.readFile "${infra.secretsPath}/plain/nextcloud-instanceid";
-                loglevel = 1;
-                log_type = "file";
+                #loglevel = 1;
+                #log_type = "file";
                 maintenance_window_start = 0;
                 maintenance_window_end = 3;
                 trusted_domains = [
