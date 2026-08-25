@@ -25,8 +25,9 @@ let
         )
         a 
         // (builtins.removeAttrs b (builtins.attrNames a)) # we concat to b since the fields shared by a and b are now in the term.
-      else 
-        throw "Cannot merge ${a} and ${b}";
+      else if a == b then a
+      else
+        throw "Merge: clash during mergeAll ${builtins.toJSON a} and ${builtins.toJSON b}";
     pathToMountUnit = path:
       if path == "/" then
         "-.mount"

@@ -7,10 +7,10 @@ let
     serviceModules = map (name: "${inputs.self.outPath}/services/${name}/register.nix") types.serviceNames;
 
 in {
-  imports = [./topology
-             ./services
-             ./secrets
-             ./vms
+  imports = [./topology # Inventory of the deployement (which service on which vm on which host)
+             ./services # Requirements of each available service
+             ./secrets # Summary of the secrets (for the secrets-generator)
+             ./deploy # Summary of the requirements (per vm and per container)
              ./outputs] ++ serviceModules;
 
 /*  
