@@ -28,13 +28,15 @@ let
 
     compileVM = 
         vmname: vmconf:
-            utils.mergeAll
-                (map (compileContainer vmname) vmconf.containers ++ map (compileService vmname) vmconf.services);
+            utils.mergeAll [
+                (utils.mergeAll (map (compileContainer vmname) vmconf.containers))
+                (utils.mergeAll (map (compileService vmname) vmconf.services))
+                ];
 
 
 
 in {
-    imports = [./options];
+    imports = [./options ./sops.nix];
     infra.deploy = utils.mergeAll 
                         (lib.mapAttrsToList compileVM config.infra.topology.vms);
 }
