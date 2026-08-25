@@ -10,7 +10,7 @@ in {
 
 infra.services.postgres = {
     users = [{name = "postgres"; uid=10005;}];
-    files.sslCertificates = [
+    store.sslCertificates = [
         {inherit hostname owner reload;}
     ];
     endpoints.tcp = [

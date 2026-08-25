@@ -22,11 +22,11 @@ let
         };
 
     serviceSecrets = 
-        srvname: {deployements, links, files, endpoints, ...}: 
+        srvname: {deployements, links, store, endpoints, ...}: 
         let
-            plain = files.plain;
-            passwords = files.passwords;
-            certs = files.sslCertificates ++ endpoints.http;
+            plain = store.plain;
+            passwords = store.passwords;
+            certs = store.sslCertificates ++ endpoints.http;
 
             postgres = links.postgres;
             ldap = links.ldapSSHAs;

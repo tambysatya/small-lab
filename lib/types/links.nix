@@ -6,7 +6,7 @@ let
     types = libtypes // filestypes // secrets;
 in
 with types;
-{
+rec {
 
     s3access = types.submodule {
             options = {
@@ -33,4 +33,25 @@ with types;
                 inherit filename owner opensslSize opensslType;
             };
     };
+    links = types.submodule{
+        options = {
+            postgres = lib.mkOption {
+                description = "PostgresSQL access";
+                type = types.listOf postgresAccess;
+                default = [];
+            };
+            s3 = lib.mkOption {
+                description = "S3 buckets";
+                type = types.listOf s3access;
+                default = [];
+            };
+            ldapSSHAs = lib.mkOption {
+                description = "Hashed LDAP passwords";
+                type = types.listOf ldapSSHA;
+                default = [];
+            };
+        };
+    };
+
+
 }

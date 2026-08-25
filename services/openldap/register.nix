@@ -14,7 +14,7 @@ infra.services.openldap = {
         {inherit hostname; port=389;}
         {inherit hostname; port=636;}
     ];
-    files = {
+    store = {
         sslCertificates = [
             {inherit hostname owner reload;}
         ];

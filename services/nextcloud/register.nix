@@ -41,7 +41,7 @@ in {
 
 infra.services.nextcloud = {
     users = [{name="nextcloud"; uid=10003;}];
-    files = {
+    store = {
         passwords = [
             {filename = "nextcloud-admin.key"; opensslType = "base64"; opensslSize=64; inherit owner reload;}
         ];

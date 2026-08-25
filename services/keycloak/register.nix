@@ -12,7 +12,7 @@ in
 
 infra.services.keycloak = {
     users = [{name="keycloak"; uid=10002;}];
-    files = {
+    store = {
         plain = [
             {filename="keycloak-initial-admin.key"; opensslSize = 64; opensslType = "base64";}
         ];

@@ -4,7 +4,7 @@ let
     types = lib.types;
 in
 
-{
+rec {
     /* Basic types constructors */
     filename = lib.mkOption {
         description = "Name of the file";
@@ -31,7 +31,5 @@ in
         type = types.str;
         default = "0400";
     };
-
-
 
 }

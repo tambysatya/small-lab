@@ -2,10 +2,7 @@
 {lib,inputs, ...}:
 let libtypes = lib.types;
     infratypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
-    filestypes = import ./files.nix {inherit lib inputs;};
-    linkstypes = import ./links.nix {inherit lib inputs;};
-    endpointstypes = import ./endpoints.nix {inherit lib inputs;};
-    types = libtypes // infratypes // filestypes // endpointstypes // linkstypes;
+    types = libtypes // infratypes;
 
     user = types.submodule {
         options = {
@@ -53,7 +50,14 @@ let libtypes = lib.types;
                     description = "Persistent directories, managed by the service. The infrastructure must explicitely declare a persistent storage for each of them";
                     type = types.listOf persistentDirectory;
                 };
-                inherit (types) files endpoints;
+                endpoints = lib.mkOption {
+                    description = "Various endpoints exposed by the service";
+                    type = types.endpoints;
+                };
+                store = lib.mkOption {
+                    description = "Files placed in the store (config files, strings, encrypted password)";
+                    type = types.store;
+                };
                 deployements = lib.mkOption {
                     description = "List of environment where the service is currently deployed";
                     type = types.listOf types.deployementEnvironment;

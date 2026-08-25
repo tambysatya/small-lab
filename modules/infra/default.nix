@@ -9,7 +9,8 @@ let
 in {
   imports = [./topology
              ./services
-             ./secrets] ++ serviceModules;
+             ./secrets
+             ./vms] ++ serviceModules;
 
 /*  
   config.assertions = lib.mapAttrsToList

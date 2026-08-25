@@ -37,7 +37,7 @@ in {
 
 config.infra.services.garage = {
     users = [{name = "garage"; uid=10001;}];
-    files.passwords = [
+    store.passwords = [
         {filename = "garage-rpc.key"; inherit owner reload opensslSize opensslType;}
         {filename = "garage-admin.key"; inherit owner reload opensslSize opensslType;}
         {filename = "garage-metrics.key"; inherit owner reload opensslSize opensslType;}
