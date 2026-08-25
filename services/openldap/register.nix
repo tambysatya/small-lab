@@ -20,7 +20,7 @@ infra.services.openldap = {
         ];
     };
     links = {
-        ldapSSHAs = [
+        ldap = [
             {filename="ldap-admin.key"; opensslSize=64; opensslType="base64";}
         ];
     };

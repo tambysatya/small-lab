@@ -45,6 +45,11 @@ in
               default = [];
             };
 
+            test = lib.mkOption {
+                type = types.bool;
+                description = "The machine is used for tests and will belong to a specific zone";
+                default = false;
+            };
           };
         };
 

@@ -3,12 +3,14 @@
 let 
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
 
+    vars = import ./vars.nix {inherit lib inputs;};
+
     ageKeyFromDeployementEnvironment = 
         env@{type, host, priority, ...}:
             if type == "vm"
                 then "${host}"
             else if type == "container"
-                then "${host.vm}-${host.container}"
+                then vars.container_id host.vm host.container
             else
                 throw "Unknown deployement environment ${env}";
     merge = a: b:
@@ -24,7 +26,7 @@ let
         a 
         // (builtins.removeAttrs b (builtins.attrNames a)) # we concat to b since the fields shared by a and b are now in the term.
       else 
-        b;
+        throw "Cannot merge ${a} and ${b}";
     pathToMountUnit = path:
       if path == "/" then
         "-.mount"
@@ -33,6 +35,6 @@ let
 
     mergeAll = listOfAttrsets: lib.foldl' merge {} listOfAttrsets;
 
-in{
+in vars // {
     inherit ageKeyFromDeployementEnvironment mergeAll pathToMountUnit;
 }

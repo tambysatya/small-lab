@@ -30,7 +30,7 @@ rec {
     };
     ldapSSHA = types.submodule {
             options = {
-                inherit filename owner opensslSize opensslType;
+                inherit filename owner reload opensslSize opensslType;
             };
     };
     links = types.submodule{
@@ -45,7 +45,7 @@ rec {
                 type = types.listOf s3access;
                 default = [];
             };
-            ldapSSHAs = lib.mkOption {
+            ldap = lib.mkOption {
                 description = "Hashed LDAP passwords";
                 type = types.listOf ldapSSHA;
                 default = [];

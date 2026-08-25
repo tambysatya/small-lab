@@ -2,23 +2,41 @@
 
 let
 
-    utils = import "${inputs.self.outPath}/lib";
-    processService =
-        vmname:
-        srvname:
+    utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
+    compileServiceRequirements = 
+        vmname: srvname:
         let
-            processService' =
+            compileServiceRequirements' =
                 srv@{users, endpoints, links, persistent, store,...}:
                 {
-                    ${vmname} = {
-                        inherit users endpoints links store;
+                    inherit users endpoints links store persistent;
+                };
+        in compileServiceRequirements' config.infra.services.${srvname};
+
+    /* Compilers implies to configure both the host and the container */
+    compileContainerRequirements = 
+        vmname: srvname:
+        let compileContainerRequirements' = 
+                srv@{users, endpoints, links, persistent, store,...}:
+                {
+                    inherit users;
+                    containers.${srvname} = { #TODO persistent volumes...
+                        inherit users endpoints links store persistent;
                     };
                 };
-        in {};
+        in compileContainerRequirements' config.infra.services.${srvname};
 
-        
+    compileRequirements = 
+        vmname: vmconf:
+        {
+           requirements =
+                utils.mergeAll  
+                    (map (compileServiceRequirements vmname) vmconf.services
+                    ++ map (compileContainerRequirements vmname) vmconf.containers);
+        };
+
 
 in {
     imports = [./options];
-    config.infra.vms = l
+    infra.vms = lib.mapAttrs compileRequirements config.infra.topology.vms;
 }

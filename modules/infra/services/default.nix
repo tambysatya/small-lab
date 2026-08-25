@@ -1,7 +1,7 @@
 {lib, inputs, config,...}:
 
 let
-    utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
+    utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
 
     computeHosts = 
         vmname: vmconf@{services, containers,...}:

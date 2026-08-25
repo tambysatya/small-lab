@@ -10,7 +10,8 @@ in {
   imports = [./topology
              ./services
              ./secrets
-             ./vms] ++ serviceModules;
+             ./vms
+             ./outputs] ++ serviceModules;
 
 /*  
   config.assertions = lib.mapAttrsToList

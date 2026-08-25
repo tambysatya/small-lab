@@ -29,7 +29,7 @@ let
             certs = store.sslCertificates ++ endpoints.http;
 
             postgres = links.postgres;
-            ldap = links.ldapSSHAs;
+            ldap = links.ldap;
             s3 = links.s3;
         in 
             map (processSecret deployements "plain") plain

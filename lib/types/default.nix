@@ -13,8 +13,9 @@ let
     endpointstypes = import ./endpoints.nix {inherit lib inputs;};
     store = import ./store.nix {inherit lib inputs;};
     users = import ./users.nix {inherit lib inputs;};
+    volumes = import ./volumes.nix {inherit lib inputs;};
 
-    types = libtypes // files // deployement // secrets // links // networktypes // endpointstypes // store // users;
+    types = libtypes // files // deployement // secrets // links // networktypes // endpointstypes // store // users // volumes;
 
 
 
