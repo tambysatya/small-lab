@@ -11,7 +11,7 @@ let
                 {
                     vms.${vmname}.users = users;
                 };
-        in compileService' config.infra.services.${srvname};
+        in compileService' config.infra.services.${utils.serviceName config srvname};
 
     /* Compilers implies to configure both the host and the container */
     compileContainer= 
@@ -24,7 +24,7 @@ let
                         inherit users;
                     };
                 };
-        in compileContainer' config.infra.services.${srvname};
+        in compileContainer' config.infra.services.${utils.serviceName config srvname};
 
     compileVM = 
         vmname: vmconf:

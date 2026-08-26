@@ -36,6 +36,13 @@ let
 
     mergeAll = listOfAttrsets: lib.foldl' merge {} listOfAttrsets;
 
+    serviceName = config: id:
+        config.infra.topology.services.${id};
+    serviceInfo = config: id:
+        let srvname = serviceName config id;
+        in config.infra.services.${srvname};
+
 in vars // {
     inherit ageKeyFromDeployementEnvironment mergeAll pathToMountUnit;
+    inherit serviceName serviceInfo;
 }

@@ -81,3 +81,9 @@ Deployement:
 
 -TODO: add flakes templates for users
 
+Migration:
+- store the current state in a JSON
+- add an ID to each service of the infra
+- generate unique IDs from persistent resources from the ID of the service requiring it
+- generate a migration script from the current state and the desired state
+

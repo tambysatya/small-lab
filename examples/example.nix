@@ -13,6 +13,14 @@
     gateway = "172.31.61.1";
     rootSSHPublicKeys = [
     ];
+    services = {
+        "keycloak-main" = "keycloak";
+        "stepca-main" = "step-ca";
+        "openldap-main" = "openldap";
+        "garage-main" = "garage";
+        "postgres-main" = "postgres";
+        "nextcloud-main" = "nextcloud";
+    };
     hosts = {
       cpuhost1 = {
         ipAddress = "192.168.2.200";
@@ -30,7 +38,7 @@
         memory = 8000;
         ipAddress = "192.168.1.200";
         #services = ["step-ca" "openldap"];
-        services = ["keycloak" "step-ca" "openldap"];
+        services = ["keycloak-main" "stepca-main" "openldap-main"];
         persistentVolumes.disks = [
             {
                 src="/dev/pvhdd/ldap"; 
@@ -55,7 +63,7 @@
         ];
 
         ipAddress = "192.168.1.201";
-        services = ["garage"]; 
+        services = ["garage-main"]; 
       };
       postgres = {
         host = "cpuhost1";
@@ -69,7 +77,7 @@
         ];
 
         ipAddress = "192.168.1.202";
-        services = ["postgres"]; 
+        services = ["postgres-main"]; 
       };
       apps = {
         host = "cpuhost1";
@@ -78,7 +86,7 @@
 
         ipAddress = "192.168.1.203";
         #services = ["nextcloud"]; 
-        containers = ["nextcloud"]; 
+        containers = ["nextcloud-main"]; 
         persistentVolumes.qcows = [
             {
                 name = "persistent";

@@ -5,17 +5,18 @@
 
 let 
     utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
+
+    mkCertSops = 
+        cert@{hostname,owner, reload,...}:
+        let crt = "${hostname}.crt";
+            key = "${hostname}.key";
+            mkSops = name: {filename=name; inherit owner reload; mode="0400";};
+        in [(mkSops crt) (mkSops key)];
     processStore = 
         store@{passwords, sslCertificates,...}:
         let
            sopspass = map (args: {inherit (args) filename owner reload mode;}) passwords;
-           sopscerts = lib.concatMap 
-                            (cert@{hostname,...}:
-                                let crt = "${hostname}.crt";
-                                    key = "${hostname}.key";
-                                    mkSops = name: {filename=name; inherit (cert) owner reload; mode="0400";};
-                                in [(mkSops crt) (mkSops key)]) 
-                            sslCertificates;
+           sopscerts = lib.concatMap mkCertSops sslCertificates;
         in sopspass ++ sopscerts;
     processLinks = 
         links@{s3, postgres, ldap,...}:
@@ -29,21 +30,28 @@ let
             mkSopsLDAP = access: {inherit (access) filename owner reload; mode = "0400";};
         in lib.concatMap mkSopsS3 s3 ++ map mkSopsDB postgres ++ map mkSopsLDAP ldap;
 
+    processEndpoints =  #TODO regroup endpoint managments ? To move easily from nginx to ha-proxy
+        srvid:
+        let srv = utils.serviceInfo config srvid;
+            fun = args@{hostname,...}: mkCertSops {inherit hostname; owner="nginx"; reload=["nginx.service"]; };
+        in lib.concatMap fun srv.endpoints.http;
 
     processService = 
-        srvname:
-        let srv = config.infra.services.${srvname};
+        srvid:
+        let srv = utils.serviceInfo config srvid;
             fun = srv@{store, links, ...}: processStore store ++ processLinks links;
         in fun srv;
 
     sopsVM =
         vmname: vmconf: 
-            let mkContainerSecret = srvname: {filename = "${utils.container_id vmname srvname}.key"; owner="root"; reload=["container@${srvname}.service"]; mode="0400";}; 
+            let mkContainerSecret = srvid: {filename = "${utils.container_id vmname srvid}.key"; owner="root"; reload=["container@${srvid}.service"]; mode="0400";}; 
                 containersSecrets = map mkContainerSecret vmconf.containers;
             in 
             {
-                containers = utils.mergeAll (lib.map (srvname: {${utils.container_id vmname srvname}.sops = processService srvname;}) vmconf.containers);
+                containers = utils.mergeAll (lib.map (srvid: {${utils.container_id vmname srvid}.sops = processService srvid;}) vmconf.containers);
                 vms.${vmname}.sops = (lib.concatMap processService vmconf.services)
+                                       ++ (lib.concatMap processEndpoints vmconf.services)
+                                       ++ (lib.concatMap processEndpoints vmconf.containers)
                                        ++ containersSecrets;
                
             }; 

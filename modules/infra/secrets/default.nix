@@ -2,7 +2,6 @@
 let
 
     infralib = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
-
     processSecret = 
         deployements: 
         secrettype:

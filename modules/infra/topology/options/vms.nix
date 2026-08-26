@@ -33,14 +33,14 @@ in
               description = "The IP address of the VM";
             };
             services = lib.mkOption {
-              type = types.listOf types.serviceType;
-              description = "List of services names deployed on the VM";
-              example = ["ldap"];
+              type = types.listOf types.str;  
+              description = "List of services identifier deployed on the VM";
+              example = ["openldap-main"]; #TODO check if they are declared
               default = [];
             };
             containers = lib.mkOption {
-              type = types.listOf types.serviceType;
-              description = "List of services names deployed inside a container VM";
+              type = types.listOf types.str;
+              description = "List of services identifier deployed inside a container VM";
               example = ["ldap"];
               default = [];
             };

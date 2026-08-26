@@ -4,7 +4,10 @@ let
     utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
 
     computeHosts = 
-        vmname: vmconf@{services, containers,...}:
+        vmname: vmconf:
+            let services = map (utils.serviceName config) vmconf.services;
+                containers = map (utils.serviceName config) vmconf.containers;
+            in
             utils.mergeAll
                 [(utils.mergeAll 
                     (map 

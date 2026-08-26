@@ -13,6 +13,11 @@ let
                 type = types.str;
                 example = "infra.local";
             };
+            services = lib.mkOption {
+                description = "All services instances, referenced using an unique identifier. Required to handle migrations.";
+                type = types.attrsOf types.serviceType;
+                default = {};
+            };
 
             vmSubnet = lib.mkOption {
                 type = types.str;
