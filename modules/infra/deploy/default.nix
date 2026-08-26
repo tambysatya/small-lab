@@ -38,6 +38,6 @@ let
 
 
 in {
-    imports = [./options ./store.nix];
+    imports = [./options ./store.nix ./links.nix];
     infra.deploy = utils.mergeAll (lib.mapAttrsToList compileVM config.infra.topology.vms);
 }

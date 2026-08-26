@@ -31,6 +31,7 @@ rec {
     ldapSSHA = types.submodule {
             options = {
                 inherit filename owner reload opensslSize opensslType;
+                mode = filemode;
             };
     };
     links = types.submodule{

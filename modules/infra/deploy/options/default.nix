@@ -45,6 +45,7 @@ let
             provisioner = lib.mkOption {
                 description = "This system is a VM or a container";
                 type = types.deployementHostType;
+                default = "vm";
 
             };
             users = lib.mkOption {

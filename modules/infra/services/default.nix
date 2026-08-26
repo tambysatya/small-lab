@@ -6,7 +6,6 @@ let
     computeHosts = 
         vmname: vmconf:
             let services = map (utils.serviceName config) vmconf.services;
-                containers = map (utils.serviceName config) vmconf.containers;
             in
             utils.mergeAll
                 [(utils.mergeAll 
@@ -16,9 +15,10 @@ let
                         services))
                  (utils.mergeAll
                     (map 
-                        (service: 
-                            {${service}.deployements = [{type="container"; host={container=service; vm=vmname;};}];})
-                        containers))]; #containers names are equal to the service
+                        (srvid: 
+                            let service = utils.serviceName config srvid;
+                            in {${service}.deployements = [{type="container"; host={container=srvid; vm=vmname;};}];})
+                        vmconf.containers))]; #containers names are equal to the service
 in {
    imports = [./options];
    config.infra.services = utils.mergeAll (lib.mapAttrsToList computeHosts config.infra.topology.vms);
