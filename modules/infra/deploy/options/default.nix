@@ -40,57 +40,50 @@ let
             };
         };
     };
-    users = lib.mkOption {
-        description = "List of service users to be created";
-        type = types.listOf types.user;
-        default = [];
-    };
-    sops = lib.mkOption {
-        description = "All files supervised with SOPS";
-        type = types.listOf sopsFile;
-        default = [];
-    };
-    sslCertificates = lib.mkOption {
-        description = "All SSL certificates to refresh";
-        type = types.listOf types.sslCertificate;
-        default = [];
-    };
-    bindMounts = lib.mkOption {
-        description = "List of directory that should be bind-mounted";
-        type = types.listOf bindMount;
-        default = [];
-    };
-    containerMounts = lib.mkOption {
-        description = "List of files passed to a container";
-        type = types.listOf containerMount;
-        default = [];
+    deployementConfig = types.submodule {
+        options = {
+            provisioner = lib.mkOption {
+                description = "This system is a VM or a container";
+                type = types.deployementHostType;
+
+            };
+            users = lib.mkOption {
+                description = "List of service users to be created";
+                type = types.listOf types.user;
+                default = [];
+            };
+            sops = lib.mkOption {
+                description = "All files supervised with SOPS";
+                type = types.listOf sopsFile;
+                default = [];
+            };
+            sslCertificates = lib.mkOption {
+                description = "All SSL certificates to refresh";
+                type = types.listOf types.sslCertificate;
+                default = [];
+            };
+            bindMounts = lib.mkOption {
+                description = "List of directory that should be bind-mounted";
+                type = types.listOf bindMount;
+                default = [];
+            };
+            containerMounts = lib.mkOption {
+                description = "List of files passed to a container";
+                type = types.listOf containerMount;
+                default = [];
+            };
+
+        };
     };
 
 
-
-
-
-   containerRequirements = types.submodule {
-        options = {inherit users sops sslCertificates;};
-    };
-    
-    vmRequirements = types.submodule {
-        options = {inherit users sops sslCertificates bindMounts containerMounts;};
-    };
         
 in
 {
-    options.infra.deploy.vms = lib.mkOption {
+    options.infra.deploy.systems = lib.mkOption {
         internal = true;
         description = "Intermediate representation of a virtual machine configuration";
-        type = types.attrsOf vmRequirements;
+        type = types.attrsOf deployementConfig;
     };
-    options.infra.deploy.containers = lib.mkOption {
-        internal = true;
-        description = "Intermediate representation of the containers";
-        type = types.attrsOf containerRequirements;
-    };
-
-
 
 }

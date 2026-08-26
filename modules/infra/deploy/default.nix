@@ -9,7 +9,7 @@ let
             compileService' =
                 srv@{users, endpoints, links, persistent, store,...}:
                 {
-                    vms.${vmname}.users = users;
+                    systems.${vmname}.users = users;
                 };
         in compileService' config.infra.services.${utils.serviceName config srvname};
 
@@ -19,9 +19,10 @@ let
         let compileContainer' = 
                 srv@{users, endpoints, links, persistent, store,...}:
                 {
-                    vms.${vmname} = {inherit users;};
-                    containers.${utils.container_id vmname srvname}= { 
+                    systems.${vmname} = {inherit users;};
+                    systems.${utils.container_id vmname srvname}= { 
                         inherit users;
+                        provisioner = "container";
                     };
                 };
         in compileContainer' config.infra.services.${utils.serviceName config srvname};
@@ -29,6 +30,7 @@ let
     compileVM = 
         vmname: vmconf:
             utils.mergeAll [
+                {systems.${vmname}.provisioner = "vm";}
                 (utils.mergeAll (map (compileContainer vmname) vmconf.containers))
                 (utils.mergeAll (map (compileService vmname) vmconf.services))
                 ];
@@ -36,7 +38,6 @@ let
 
 
 in {
-    imports = [./options ./sops.nix];
-    infra.deploy = utils.mergeAll 
-                        (lib.mapAttrsToList compileVM config.infra.topology.vms);
+    imports = [./options ./store.nix];
+    infra.deploy = utils.mergeAll (lib.mapAttrsToList compileVM config.infra.topology.vms);
 }

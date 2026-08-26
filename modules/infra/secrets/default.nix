@@ -49,7 +49,7 @@ let
 in {
     imports = [./options];
     config.infra.secrets = { 
-        identities = lib.unique (lib.concatLists (lib.mapAttrsToList ageIdentities config.infra.services));
+        identities = lib.unique (builtins.attrNames config.infra.topology.vms ++ lib.concatLists (lib.mapAttrsToList ageIdentities config.infra.services));
         allSecrets = lib.unique (lib.concatLists allSecrets);
     };
 }

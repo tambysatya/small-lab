@@ -77,7 +77,8 @@
         ];
 
         ipAddress = "192.168.1.202";
-        services = ["postgres-main"]; 
+        containers = ["postgres-main"]; 
+        #services = ["postgres-main"]; 
       };
       apps = {
         host = "cpuhost1";
