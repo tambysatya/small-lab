@@ -25,7 +25,13 @@ let utils = import ./lib.nix {inherit lib inputs;};
     processServiceID =
         srvid:
         let service = utils.serviceInfo config srvid;
-        in processStore service.store; 
+            stepcasecretnames = ["intermediate_ca_key" "ca-password.key"];
+            stepcasecrets = map (filename: {inherit filename; owner="root"; mode="0400"; reload=["step-ca.service"];}) stepcasecretnames;
+            additionalsecrets = if utils.serviceName config srvid == "step-ca" then {sops = stepcasecrets;} else {};
+
+        in utils.mergeAll 
+            [(processStore service.store) 
+             additionalsecrets];
     
     compileVMStore = 
         vmname: vmconf:
