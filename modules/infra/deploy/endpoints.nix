@@ -7,6 +7,22 @@ let
         endpoints@{tcp, udp,...}:
         processTCP tcp ++ processUDP udp;
 
+    mkTLSProxy = 
+    backend: tcp@{hostname, port, proto, proxyExtraConfig,...}:
+    {
+        frontend.${hostname} = {
+            ip = hostname; 
+            mode = "http";
+            port = 443;
+            extraConf = proxyExtraConfig;
+        };
+        backend.${hostname} = { 
+           ip=backend; 
+           mode = "http";
+           port = port;
+        };
+    };
+
     processUDP = throw "UDP not implemented yet";
     processTCP = 
         env:
@@ -17,22 +33,22 @@ let
           ip = if env.type == "vm"
                     then cfg.${ageuid}.ip
                     else cfg.${env.host.vm}.ip;
-          networkVM = {
-                ${utils.ageUID env}.network.localEndpoints.tcp = [tcp];
-          };
+          networkVM = if needTLS then {
+                ${utils.ageUID env}.proxy = mkTLSProxy "localhost" tcp;
+          } else {};
           containerVM = {
-                
-               ${utils.ageUID env}.network.localEndpoints.tcp =[tcp];
-               ${env.host.vm}.network.containerEndpoints = [{inherit ageuid; endpoints.tcp=[tcp];}];
+               ${env.host.vm}.proxy = let containerip = config.infra.deploy.systems.${utils.ageUID env}.ip;
+                                      in mkTLSProxy containerip tcp;
+#                
           };
         in
            {
 
                 network.postgres = if proto == "postgres"
-                                   then [{ip = ip; inherit env port;} ]
+                                   then [{inherit env port;} ]
                                    else [];
                 network.s3 = if proto == "s3"
-                                   then [{ip = ip; inherit env port;}]
+                                   then [{inherit env port;}]
                                    else [];
                 systems = if env.type == "vm" then networkVM else containerVM;
            };        

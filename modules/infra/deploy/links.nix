@@ -2,21 +2,16 @@
 
 let utils = import ./lib.nix {inherit lib inputs;};
 
-    compileVMLinks =
-        vmname: vmconf:
-        utils.mergeAll [
-            (utils.mergeAll (map (processServiceID vmname) vmconf.services)) 
-            (utils.mergeAll (map (srvname: processServiceID (utils.container_id vmname srvname) srvname) vmconf.containers)) 
-        ];
-    processServiceID =
-        ageuid: srvid:
-        let srv = utils.serviceInfo config srvid;
-        in utils.mergeAll (processLinks ageuid srv.links);
+    processService =
+        _:
+        {deployements, links,...}:
+        utils.mergeAll (lib.concatMap (processLinks links) deployements);
 
     processLinks =
-        ageuid:
         {ldap, s3, postgres}:
-        map (processLdap ageuid) ldap 
+        env:
+        let ageuid = utils.ageUID env;
+        in map (processLdap ageuid) ldap 
         ++ map (processS3 ageuid) s3
         ++ map (processPostgres ageuid) postgres;
 
@@ -34,6 +29,9 @@ let utils = import ./lib.nix {inherit lib inputs;};
     processLdap =
         ageuid: ldap:
         let secret = {inherit (ldap) filename owner reload mode;};
+#            remote = {
+#                ${ageuid}.network.remoteEndpoints.tcp = confg.infra.deploy.network
+#            };
         in mkSharedSecret ageuid ldaphosts secret; 
     processS3 = 
         ageuid: access:
@@ -47,5 +45,5 @@ let utils = import ./lib.nix {inherit lib inputs;};
         let secret = {filename = utils.db_key access; inherit (access) owner reload; mode="0400";};
         in mkSharedSecret ageuid dbhosts secret;
 in {
-    infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList compileVMLinks config.infra.topology.vms);
+    infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList processService config.infra.services);
 }

@@ -6,6 +6,10 @@ let
     
 in {
 
+    ip = lib.mkOption {
+        description = "Ip address";
+        type = types.str;
+    };
     hostname = lib.mkOption {
         description = "Host domain";
         type = types.str;

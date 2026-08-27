@@ -75,41 +75,47 @@ let
                 type = types.listOf containerMount;
                 default = [];
             };
-            network = lib.mkOption {
+            proxy = lib.mkOption {
                 description = "Network interactions";    
-                type = netInterface;
+                type = proxy;
             };
 
         };
     };
 
-    containerEndpoint = types.submodule {
+    addr = types.submodule {
         options = {
-            ageuid = lib.mkOption {
-                description = "AgeUID of the container";
-                type = types.str;
+            inherit (types) ip port;
+        };  
+    };
+    proxyEntry = types.submodule {
+        options = {
+            inherit (types) ip port;
+            mode = lib.mkOption {
+                description = "Proxy mode";
+                type = types.enum ["http" "tcp" "udp"];
+                default = "tcp";
             };
-            endpoints = lib.mkOption {
-                description = "Endpoint transfered";
-                type = types.endpoints;
+            extraConf = lib.mkOption {
+                description = "Extra configuration passed to the proxy";
+                type = types.attrs;
+                default = {};
             };
         };
     };
-
-    netInterface = types.submodule {
+    proxy = types.submodule {
         options = {
-            containerEndpoints = lib.mkOption {
-                description = "Endpoints exposed by a container";
-                type = types.listOf containerEndpoint;
-                default = [];
+            frontend = lib.mkOption {
+                description = "Protocol mapping of the frontend";
+                type = types.attrsOf proxyEntry;
+                #example = {"postgres.local.fr" = {ip="192.168.1.100"; port=5432;};};
+                default = {};
             };
-            localEndpoints = lib.mkOption {
-                description = "Endpoints exposed by the virtual machine"; 
-                type = types.endpoints;
-            };
-            remoteEndpoints = lib.mkOption {
-                description = "Endpoints accessed by the virtual machine";
-                type = types.endpoints;
+            backend = lib.mkOption {
+                description = "Backends locations";
+                type = types.attrsOf proxyEntry;
+                example = {"nextcloud.local.fr" = {ip="localhost"; port=80;};};
+                default = {};
             };
         };
     };
@@ -117,10 +123,6 @@ let
     
     location = types.submodule {
         options = {
-            ip = lib.mkOption {
-                description = "IP of the host";
-                type = types.str;
-            };
             env = lib.mkOption {
                 description = "Environment of the server";
                 type = types.deployementEnvironment;
@@ -141,6 +143,12 @@ let
                 type = types.listOf location;
                 default = [];
             };
+            ldap = lib.mkOption {
+                description = "List of hosts providing an ldap access";
+                type = types.listOf location;
+                default = [];
+            };
+
         };
     };
         
