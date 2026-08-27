@@ -9,43 +9,39 @@ let
 
 in
 rec {
-  
-    port = lib.mkOption {
-        description = "Port on which the service can be reached. If the service runs within a container the firewall must be oppened";
-        type = types.port;
-    };
-    http_endpoint = types.submodule {
+    
+    tcpEndpoint = types.submodule {
         options = {
-            inherit port;
-            inherit (types) hostname;
-            extraNginxConfig = lib.mkOption {
-                description = "Extra config passed to the reverse proxy";
+            inherit (types) hostname port;
+            proto = types.tcpProtocol;
+            needTLS = lib.mkOption {
+                description = "A reverse proxy assuming TLS termination will be created"; 
+                type = types.bool;
+                default = false;
+            };
+            proxyExtraConfig = lib.mkOption {
+                description = "Extra attrset transfered to the proxy configuration";
                 type = types.attrs;
                 default = {};
             };
         };
     };
-    endpoint = types.submodule {
-        options =  {
-            inherit port;
-            inherit (types) hostname;
+
+    udpEndpoint = types.submodule {
+        options = {
+            inherit (types) hostname port udpProtocol;
         };
-    };
+    };  
     endpoints = types.submodule {
         options = {
             udp = lib.mkOption {
-                description = "UDP endpoints";
-                type = types.listOf endpoint;
+                description = "UDP endpoints.";
+                type = types.listOf udpEndpoint;
                 default = [];
             };
             tcp = lib.mkOption {
-                description = "TCP endpoints. If the protocol is HTTP, consider registering an HTTP endpoint instead, in order to automatically deploy SSL.";
-                type = types.listOf endpoint;
-                default = [];
-            };
-            http = lib.mkOption {
-                description = "HTTP endpoints. A reverse proxy exposing HTTPs will be connected on top of it. TLS certifiicates will be automatically managed.";
-                type = types.listOf http_endpoint;
+                description = "TCP endpoints.";
+                type = types.listOf tcpEndpoint;
                 default = [];
             };
         };

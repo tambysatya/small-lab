@@ -22,8 +22,8 @@ infra.services.keycloak = {
             {database="keycloak"; inherit owner reload;}
         ];  
     };
-    endpoints.http = [
-        {inherit hostname port;}
+    endpoints.tcp = [
+        {inherit hostname port; needTLS=true;}
     ];
 };
 
