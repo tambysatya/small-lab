@@ -4,46 +4,39 @@ let utils = import ./lib.nix {inherit lib inputs;};
 
     processStore = 
         store@{passwords, sslCertificates,...}:
+        env:
             utils.mergeAll 
-                (map processPasswords passwords
-                ++ map processCertificates sslCertificates);
+                (map (processPasswords env) passwords
+                ++ map (processCertificates env) sslCertificates);
     processPasswords =
+        env:
         pass: 
         {
-            sops = [{inherit (pass) filename owner reload mode;}];
+            ${utils.ageUID env}.sops = [{inherit (pass) filename owner reload mode;}];
         };
     processCertificates = 
+        env:
         cert@{hostname,...}:
         let crt = "${hostname}.crt";
             key = "${hostname}.key";
         in {
-            sops = [{filename=crt; mode="0400"; inherit (cert) owner reload;}
-                    {filename=key; mode="0400"; inherit (cert) owner reload;}];
-            sslCertificates = [cert];
+            ${utils.ageUID env} = {
+                sops = [{filename=crt; mode="0400"; inherit (cert) owner reload;}
+                        {filename=key; mode="0400"; inherit (cert) owner reload;}];
+                sslCertificates = [cert];
+            };
         };
-    
-    processServiceID =
-        srvid:
-        let service = utils.serviceInfo config srvid;
-            stepcasecretnames = ["intermediate_ca_key" "ca-password.key"];
-            stepcasecrets = map (filename: {inherit filename; owner="root"; mode="0400"; reload=["step-ca.service"];}) stepcasecretnames;
-            additionalsecrets = if utils.serviceName config srvid == "step-ca" then {sops = stepcasecrets;} else {};
 
-        in utils.mergeAll 
-            [(processStore service.store) 
-             additionalsecrets];
-    
-    compileVMStore = 
-        vmname: vmconf:
-        let containerssops =
-                map 
-                    (srvid: {
-                        ${utils.container_id vmname srvid} = processServiceID srvid;
-                    }) vmconf.containers;
-        in {
-            ${vmname} = utils.mergeAll (map processServiceID vmconf.services);
-        } // utils.mergeAll containerssops;
+
+    processService = 
+        srvname: {deployements, store,...}:
+        let stepcasecretnames = ["intermediate_ca_key" "ca-password.key"];
+            stepcasecrets = map (filename: {inherit filename; owner="root"; mode="0400"; reload=["step-ca.service"];}) stepcasecretnames;
+            additionalsecrets = env: {${utils.ageUID env}.sops = stepcasecrets;};
+        in
+        utils.mergeAll (map (processStore store) deployements ++ (if srvname == "step-ca" then map additionalsecrets deployements else []));
+
 in
 {
-    infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList compileVMStore config.infra.topology.vms);
+    infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList processService config.infra.services);
 }
