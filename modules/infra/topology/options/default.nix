@@ -6,6 +6,25 @@ let
     mytypes = import "${inputs.self.outPath}/lib/types" { inherit lib inputs;};
     types = libtypes // vmtypes // mytypes;
      /* Options definitions */
+    serviceIdentity = types.submodule {
+        options = {
+            is = lib.mkOption {
+                description = "Name of the service";
+                type = types.serviceType;
+            };
+            priority = lib.mkOption {
+                description = "Max priority is the primary service";
+                type = types.int;
+                default = 100;
+            };
+            tags = lib.mkOption {
+                description = "Tags to trigger specific behavior";
+                type = types.listOf (types.oneOf [types.deployementTag types.str]);
+                default = [];
+            };
+        };
+    };
+
     topology = types.submodule {
         options = {
             domain = lib.mkOption {
@@ -15,7 +34,7 @@ let
             };
             services = lib.mkOption {
                 description = "All services instances, referenced using an unique identifier. Required to handle migrations.";
-                type = types.attrsOf types.serviceType;
+                type = types.attrsOf serviceIdentity;
                 default = {};
             };
 

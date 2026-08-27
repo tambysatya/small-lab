@@ -5,19 +5,24 @@ let
 
     computeHosts = 
         vmname: vmconf:
-            let services = map (utils.serviceName config) vmconf.services;
+            with utils;
+            let 
+                mkDeployementService = srvname: 
+                    {type="vm"; host=vmname; priority = servicePriority config srvname; tags = serviceTags config srvname;};
+                mkDeployementContainer = srvname:
+                    {type="container"; host={vm=vmname; container=srvname;}; priority = servicePriority config srvname; tags = serviceTags config srvname;};
             in
             utils.mergeAll
                 [(utils.mergeAll 
                     (map 
-                        (service: 
-                            {${service}.deployements = [{type = "vm"; host=vmname;}];})
-                        services))
+                        (srvid: 
+                            {${utils.serviceName config srvid}.deployements = [(mkDeployementService srvid)];})
+                        vmconf.services))
                  (utils.mergeAll
                     (map 
                         (srvid: 
                             let service = utils.serviceName config srvid;
-                            in {${service}.deployements = [{type="container"; host={container=srvid; vm=vmname;};}];})
+                            in {${service}.deployements = [(mkDeployementContainer srvid)];})
                         vmconf.containers))]; #containers names are equal to the service
 in {
    imports = [./options];

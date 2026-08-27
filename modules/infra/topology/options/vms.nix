@@ -6,7 +6,6 @@ let
     types = libtypes //voltypes // mytypes;
 in
 {
-
     /* Virtual machine description */
     vmConf = lib.types.submodule {
         options = {

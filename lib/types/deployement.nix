@@ -21,6 +21,7 @@ in rec {
     deployementHostType = types.enum ["vm" "container"];
     deployementHost = types.either vmname container;
 
+
     deployementEnvironment = types.submodule {
         options = {
             type = lib.mkOption {

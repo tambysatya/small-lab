@@ -14,12 +14,12 @@
     rootSSHPublicKeys = [
     ];
     services = {
-        "keycloak-main" = "keycloak";
-        "stepca-main" = "step-ca";
-        "openldap-main" = "openldap";
-        "garage-main" = "garage";
-        "postgres-main" = "postgres";
-        "nextcloud-main" = "nextcloud";
+        "keycloak-main".is = "keycloak";
+        "stepca-main".is = "step-ca";
+        "openldap-main".is = "openldap";
+        "garage-main".is = "garage";
+        "postgres-main".is = "postgres";
+        "nextcloud-main".is = "nextcloud";
     };
     hosts = {
       cpuhost1 = {
