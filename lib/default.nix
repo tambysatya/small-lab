@@ -7,7 +7,7 @@ let
 
     # Retrieve the AGE Unique Identifier of a  component
     ageUID = 
-        env@{type, host, priority, ...}:
+        env@{type, host, ...}:
             if type == "vm"
                 then "${host}"
             else if type == "container"

@@ -3,41 +3,31 @@
 let
 
     utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
-    compileService = 
-        vmname: srvname:
+
+
+    processVM =
+        vmname: {ip, services, containers, ...}:
         let
-            compileService' =
-                srv@{users, endpoints, links, persistent, store,...}:
-                {
-                    systems.${vmname}.users = users;
-                };
-        in compileService' config.infra.services.${utils.serviceName config srvname};
-
-    /* Compilers implies to configure both the host and the container */
-    compileContainer= 
-        vmname: srvname:
-        let compileContainer' = 
-                srv@{users, endpoints, links, persistent, store,...}:
-                {
-                    systems.${vmname} = {inherit users;};
-                    systems.${utils.container_id vmname srvname}= { 
-                        inherit users;
-                        provisioner = "container";
-                    };
-                };
-        in compileContainer' config.infra.services.${utils.serviceName config srvname};
-
-    compileVM = 
-        vmname: vmconf:
-            utils.mergeAll [
-                {systems.${vmname}.provisioner = "vm";}
-                (utils.mergeAll (map (compileContainer vmname) vmconf.containers))
-                (utils.mergeAll (map (compileService vmname) vmconf.services))
-                ];
-
-
+            mkEnv = name: {type="container"; host={container=name; vm=vmname;};};
+            ctconfs = lib.imap 
+                        (i: name: {
+                            ${utils.ageUID (mkEnv name)} = {
+                                ip = "192.168.100.${lib.toString (50+i)}";
+                                env = mkEnv name;
+                            };
+                        })
+                        containers;
+            vmconf = {
+                        ${vmname} = {
+                            env = {type="vm"; host=vmname;};
+                            inherit ip;
+                        };
+                     };
+        in utils.mergeAll ([vmconf]  ++ ctconfs);
 
 in {
-    imports = [./options ./store.nix ./links.nix];
-    infra.deploy = utils.mergeAll (lib.mapAttrsToList compileVM config.infra.topology.vms);
+    imports = [./options
+               ./endpoints.nix];
+    #imports = [./options ./store.nix ./links.nix ./endpoints.nix];
+    infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList processVM config.infra.topology.vms);
 }

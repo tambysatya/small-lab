@@ -36,7 +36,7 @@
         host = "cpuhost1";
         vcpu = 4;
         memory = 8000;
-        ipAddress = "192.168.1.200";
+        ip = "192.168.1.200";
         #services = ["step-ca" "openldap"];
         services = ["keycloak-main" "stepca-main" "openldap-main"];
         persistentVolumes.disks = [
@@ -62,7 +62,7 @@
             }
         ];
 
-        ipAddress = "192.168.1.201";
+        ip = "192.168.1.201";
         services = ["garage-main"]; 
       };
       postgres = {
@@ -76,7 +76,7 @@
             }
         ];
 
-        ipAddress = "192.168.1.202";
+        ip = "192.168.1.202";
         containers = ["postgres-main"]; 
         #services = ["postgres-main"]; 
       };
@@ -85,7 +85,7 @@
         vcpu = 8;
         memory = 16000;
 
-        ipAddress = "192.168.1.203";
+        ip = "192.168.1.203";
         #services = ["nextcloud"]; 
         containers = ["nextcloud-main"]; 
         persistentVolumes.qcows = [

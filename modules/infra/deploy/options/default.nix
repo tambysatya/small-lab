@@ -42,11 +42,13 @@ let
     };
     deployementConfig = types.submodule {
         options = {
-            provisioner = lib.mkOption {
+            env = lib.mkOption {
                 description = "This system is a VM or a container";
-                type = types.deployementHostType;
-                default = "vm";
-
+                type = types.deployementEnvironment;
+            };
+            ip = lib.mkOption {
+                description = "IP address";
+                type = types.str;
             };
             users = lib.mkOption {
                 description = "List of service users to be created";
@@ -73,11 +75,74 @@ let
                 type = types.listOf containerMount;
                 default = [];
             };
+            network = lib.mkOption {
+                description = "Network interactions";    
+                type = netInterface;
+            };
 
         };
     };
 
+    containerEndpoint = types.submodule {
+        options = {
+            ageuid = lib.mkOption {
+                description = "AgeUID of the container";
+                type = types.str;
+            };
+            endpoints = lib.mkOption {
+                description = "Endpoint transfered";
+                type = types.endpoints;
+            };
+        };
+    };
 
+    netInterface = types.submodule {
+        options = {
+            containerEndpoints = lib.mkOption {
+                description = "Endpoints exposed by a container";
+                type = types.listOf containerEndpoint;
+                default = [];
+            };
+            localEndpoints = lib.mkOption {
+                description = "Endpoints exposed by the virtual machine"; 
+                type = types.endpoints;
+            };
+            remoteEndpoints = lib.mkOption {
+                description = "Endpoints accessed by the virtual machine";
+                type = types.endpoints;
+            };
+        };
+    };
+
+    
+    location = types.submodule {
+        options = {
+            ip = lib.mkOption {
+                description = "IP of the host";
+                type = types.str;
+            };
+            env = lib.mkOption {
+                description = "Environment of the server";
+                type = types.deployementEnvironment;
+            };
+            inherit (types) port;
+
+        };
+    };
+    network = types.submodule {
+        options = {
+            postgres = lib.mkOption {
+                description = "List of hosts providing a database";
+                type = types.listOf location;
+                default = [];
+            };
+            s3 = lib.mkOption {
+                description = "List of hosts providing an S3 access";
+                type = types.listOf location;
+                default = [];
+            };
+        };
+    };
         
 in
 {
@@ -85,6 +150,11 @@ in
         internal = true;
         description = "Intermediate representation of a virtual machine configuration";
         type = types.attrsOf deployementConfig;
+    };
+    options.infra.deploy.network= lib.mkOption {
+        internal = true;
+        description = "Intermediate representation of the entire network.";
+        type = network;
     };
 
 }

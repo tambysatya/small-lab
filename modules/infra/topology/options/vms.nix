@@ -28,7 +28,7 @@ in
               type = types.volumesList;
               description = "Additional volumes that will be passed to the VM";
             };
-            ipAddress = lib.mkOption { 
+            ip = lib.mkOption { 
               type = types.str;
               description = "The IP address of the VM";
             };
