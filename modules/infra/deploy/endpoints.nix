@@ -1,7 +1,7 @@
 {lib, inputs, config, ...}:
 
 let
-    utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
+    utils = import ./lib.nix {inherit lib inputs;};
 
     processEndpoints = 
         endpoints@{tcp, udp,...}:
@@ -11,16 +11,16 @@ let
     backend: tcp@{hostname, port, proto, proxyExtraConfig,...}:
     {
         frontend.${hostname} = {
-            ip = hostname; 
+            listen = "0.0.0.0"; 
             mode = "http";
             port = 443;
             extraConf = proxyExtraConfig;
         };
-        backend.${hostname} = { 
-           ip=backend; 
+        backend.${hostname} = [{ 
+           ip="0.0.0.0"; 
            mode = "http";
            port = port;
-        };
+        }];
     };
 
     processUDP = throw "UDP not implemented yet";
@@ -36,11 +36,32 @@ let
           networkVM = if needTLS then {
                 ${utils.ageUID env}.proxy = mkTLSProxy "localhost" tcp;
           } else {};
-          containerVM = {
+          containerVM = if needTLS 
+            then {
                ${env.host.vm}.proxy = let containerip = config.infra.deploy.systems.${utils.ageUID env}.ip;
                                       in mkTLSProxy containerip tcp;
 #                
-          };
+            }
+            else {
+               ${env.host.vm}.proxy = {
+                    frontend.${hostname} = {
+                        mode = if proto == "http" || proto == "https"
+                            then "http"
+                            else "tcp";
+                        port = port;
+                        extraConf = proxyExtraConfig;
+                        listen = "0.0.0.0";
+                    };
+                    backend.${hostname} = [{
+                        ip = utils.envIP config env;
+                        mode = if proto == "http" || proto == "https"
+                            then "http"
+                            else "tcp";
+                        port = port;
+                    }];
+               };
+            };
+
         in
            {
 

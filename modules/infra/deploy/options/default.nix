@@ -88,7 +88,7 @@ let
             inherit (types) ip port;
         };  
     };
-    proxyEntry = types.submodule {
+    backendEntry = types.submodule {
         options = {
             inherit (types) ip port;
             mode = lib.mkOption {
@@ -103,19 +103,46 @@ let
             };
         };
     };
+     frontendEntry = types.submodule {
+        options = {
+            inherit (types) port;
+            listen = lib.mkOption {
+                description = "Which IP address to listen";
+                type = types.str;
+                default = "127.0.0.1";
+            };
+            mode = lib.mkOption {
+                description = "Proxy mode";
+                type = types.enum ["http" "tcp" "udp"];
+                default = "tcp";
+            };
+            extraConf = lib.mkOption {
+                description = "Extra configuration passed to the proxy";
+                type = types.attrs;
+                default = {};
+            };
+        };
+    };
+       
     proxy = types.submodule {
         options = {
+            defaultProxy = lib.mkOption {
+                description = "IP of the default proxy.";
+                type = types.str;
+                default = "localhost";
+            };
             frontend = lib.mkOption {
                 description = "Protocol mapping of the frontend";
-                type = types.attrsOf proxyEntry;
+                type = types.attrsOf frontendEntry;
                 #example = {"postgres.local.fr" = {ip="192.168.1.100"; port=5432;};};
                 default = {};
             };
             backend = lib.mkOption {
-                description = "Backends locations";
-                type = types.attrsOf proxyEntry;
+                description = "Backends locations. Multiple backends can be provided.";
+                type = types.attrsOf (types.listOf backendEntry);
                 example = {"nextcloud.local.fr" = {ip="localhost"; port=80;};};
                 default = {};
+                apply = t: lib.mapAttrs (key: l: lib.unique l) t;
             };
         };
     };

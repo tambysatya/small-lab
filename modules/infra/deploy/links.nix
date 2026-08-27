@@ -26,26 +26,66 @@ let utils = import ./lib.nix {inherit lib inputs;};
         in utils.mergeAll 
                 ([{${ageuid}.sops = [secret]; }] ++ map mkHostSecret dsts);
 
+    mkProxy =
+        env: proxyname: port: hostenvs:
+        let proxyVM =
+            {
+                ${utils.ageUID env}.proxy = {
+                        frontend.${proxyname}= {
+                            port = port;
+                            mode = "tcp";
+                            listen = if utils.hostHasContainers config env
+                                     then "192.168.1.1"
+                                     else "127.0.0.1";
+                        };
+                        backend.${proxyname}= 
+                            let genBackend = hostenv:
+                                    {
+                                        mode = "tcp";
+                                        ip = utils.envHostIP config hostenv;
+                                        port = port;
+                                    };
+                            in map genBackend hostenvs;
+                    };
+            };
+            proxyContainer = {
+                 ${utils.ageUID env}.proxy.defaultProxy = config.infra.deploy.systems.${env.host.vm}.ip;
+                 ${env.host.vm}.proxy = {
+                        frontend.${proxyname} = {
+                            listen = "192.168.1.1";
+                            port = port;
+                            mode = "tcp";
+                        };
+                        backend.${proxyname} = 
+                            let genBackend = hostenv:
+                                    {
+                                        mode = "tcp";
+                                        ip = utils.envHostIP config hostenv;
+                                        port = port;
+                                    };
+                            in map genBackend hostenvs;
+                    };               
+            };
+        in if env.type == "vm" then proxyVM else proxyContainer;
+
     processLdap =
         env: ldap:
         let secret = {inherit (ldap) filename owner reload mode;};
-#            remote = {
-#                ${ageuid}.proxy = {
-#                    = confg.infra.deploy.network
-#                    };
-#            };
-        in mkSharedSecret env ldaphosts secret; 
+        in mkSharedSecret env ldaphosts secret // mkProxy env "ldap" 636 ldaphosts; 
     processS3 = 
         env: access:
         let id = {filename=utils.s3_key_id access; inherit (access) owner reload; mode="0400";};
             key = {filename=utils.s3_key access; inherit (access) owner reload; mode="0400";};
+
         in utils.mergeAll 
                 [(mkSharedSecret env s3hosts id)
-                 (mkSharedSecret env s3hosts key)];
+                 (mkSharedSecret env s3hosts key)
+                 (mkProxy env "s3" 443 s3hosts)];
     processPostgres = 
         env: access: 
         let secret = {filename = utils.db_key access; inherit (access) owner reload; mode="0400";};
-        in mkSharedSecret env dbhosts secret;
+        in mkSharedSecret env dbhosts secret //
+           mkProxy env "postgres" 5432 dbhosts;
 in {
     infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList processService config.infra.services);
 }

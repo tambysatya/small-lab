@@ -4,11 +4,12 @@ let
     libtypes = lib.types;
     types = libtypes;
     
-in {
+in rec {
 
     ip = lib.mkOption {
         description = "Ip address";
         type = types.str;
+        default = "127.0.0.1";
     };
     hostname = lib.mkOption {
         description = "Host domain";
@@ -19,11 +20,10 @@ in {
         description = "Port on which the service can be reached.";
         type = types.port;
     };
+    tcpList = ["tcp" "postgres" "s3" "http" "https"];
     tcpProtocol = lib.mkOption {
         description = "Endpoint protocol. Use TCP if the protocol is not listed.";
-        type = types.enum 
-                    ["tcp"
-                     "postgres" "s3" "http" "https"];
+        type = types.enum tcpList; 
         default = "tcp";
     };
     udpProtocol = lib.mkOption {
@@ -33,5 +33,6 @@ in {
         default = "udp";
     };
 
+    isTCP = proto: builtins.elem proto tcpProtocol;
     
 }
