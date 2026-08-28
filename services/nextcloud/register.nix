@@ -57,8 +57,8 @@ infra.services.nextcloud = {
         ];
     };
     persistent = [
-        {path="/var/lib/nextcloud/config"; inherit owner reload;}
-        {path="/var/lib/nextcloud/data"; inherit owner reload;}
+        {path="/var/lib/nextcloud/config"; shared=true; inherit owner reload;}
+        {path="/var/lib/nextcloud/data"; shared=true; inherit owner reload;}
     ];
     endpoints.tcp = endpoints;
 

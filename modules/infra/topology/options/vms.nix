@@ -1,9 +1,8 @@
 {lib, inputs, ...}:
 let 
     libtypes = lib.types;
-    voltypes = import ./volumes.nix {inherit lib inputs;}; 
     mytypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
-    types = libtypes //voltypes // mytypes;
+    types = libtypes // mytypes;
 in
 {
     /* Virtual machine description */
@@ -23,8 +22,8 @@ in
               description = "The size of the memory (MiB) allocated to the VM";
               default = 1024;
             };
-            persistentVolumes = lib.mkOption {
-              type = types.volumesList;
+            disks = lib.mkOption {
+              type = types.listOf types.disk;
               description = "Additional volumes that will be passed to the VM";
             };
             ip = lib.mkOption { 

@@ -11,7 +11,7 @@ let libtypes = lib.types;
                 };
                 persistent = lib.mkOption {
                     description = "Persistent directories, managed by the service. The infrastructure must explicitely declare a persistent storage for each of them";
-                    type = types.listOf types.persistentDirectory;
+                    type = types.listOf types.volume;
                 };
                 endpoints = lib.mkOption {
                     description = "Various endpoints exposed by the service";
