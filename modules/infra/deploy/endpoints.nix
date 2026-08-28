@@ -17,7 +17,7 @@ let
             extraConf = proxyExtraConfig;
         };
         backend.${hostname} = [{ 
-           ip="0.0.0.0"; 
+           ip=backend;
            mode = "http";
            port = port;
         }];
