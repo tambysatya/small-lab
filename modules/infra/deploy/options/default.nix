@@ -36,7 +36,21 @@ let
                 type = types.str;
             };
             inherit (types) owner reload;
-            mode = types.dirmode;
+            mode = types.dirmode; 
+        };
+    };
+    containerMount = types.submodule {
+        options = {
+            hostPath = lib.mkOption {
+                description = "Path of the directory on the host";
+                type = types.str;
+            };
+            isReadOnly = lib.mkOption {
+                description = "If set to read-only";
+                type = types.bool;
+                default = false;
+            };
+
         };
     };
 
@@ -48,9 +62,14 @@ let
                 default = [];
             };
             binds = lib.mkOption {
-                description = "Bind mounted directory.";
+                description = "Bind mounted directories.";
                 type = types.listOf bindMount;
                 default = [];
+            };
+            containers = lib.mkOption {
+                description = "Bind mounted directories through the containers. For each container, there is an attrset filename => {hostpath}";
+                type = types.attrsOf (types.attrsOf containerMount);
+                default = {};
             };
         };
     };

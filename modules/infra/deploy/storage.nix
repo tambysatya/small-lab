@@ -45,10 +45,34 @@ let
             ${vmname}.storage.binds =
                 map process allSharedVolumes;
         };
+    generateContainer = 
+        vmname: disks:
+        let
+            containers = config.infra.topology.vms.${vmname}.containers;
+            defaultMapping = serviceuid:
+                {
+                    ${vmname}.storage.containers.${utils.container_id vmname serviceuid} = {
+                        "/etc/resolv.conf" = {hostPath = "/etc/resolv.conf"; isReadOnly=true;};
+                        "/var/lib/sops-nix/key.txt" = {hostPath = "/run/secrets/${utils.container_id vmname serviceuid}.key"; isReadOnly=true;};
+                    };
+                };
+
+            processDisk = vol@{serviceUID, disk, volume, env,...}:
+                {
+                    ${vmname}.storage.containers.${utils.container_id vmname env.host.container}."${volume.path}" = {
+                        hostPath = if volume.shared 
+                                        then "${disk.mount}/${serviceUID}/${lib.removePrefix "/" volume.path}"
+                                        else disk.mount;
+                        isReadOnly = false;
+                    };
+                };
+        in utils.mergeAll (map defaultMapping containers ++ map processDisk disks);
+                
     processAllVolumes = 
         utils.mergeAll [
             (utils.mergeAll (lib.mapAttrsToList generateMapping volumesByVM) )
             (utils.mergeAll (lib.mapAttrsToList generateBinds sharedVolumesByVM))
+            (utils.mergeAll (lib.mapAttrsToList generateContainer sharedVolumesByVM))
         ];
 
 in 
