@@ -33,7 +33,7 @@ let
         in (import ./lib/terranix {inherit lib inputs; inherit (conf) infra registry; }).generator;
 
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
-        {inventory, extraArgs ? {}}:
+        {inventory, extraArgs ? {path = "${inputs.self.outPath}/.secrets";}}:
            (lib.evalModules {
                specialArgs = {inherit inputs lib;} // extraArgs;
                modules = [
@@ -77,7 +77,6 @@ let
 
         in configs;
 
-        extraArgs = {path=inputs.self.outPath;};
 
 
         compileGenSecrets = 
