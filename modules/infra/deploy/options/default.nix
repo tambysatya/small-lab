@@ -12,34 +12,29 @@ let
         };
     };
 
-    containerMount = types.submodule {
+    diskMapping = types.submodule {
         options = {
-            container = {
-                description = "Container name";
+            host = lib.mkOption {
+                description = "Path to the disk on the host";
                 type = types.str;
             };
-            src = lib.mkOption {
-               description = "Path of the file on the host";
-               type = types.str;
-            };
-            dst = lib.mkOption {
-                description = "Where to mount on the container";
+            letter = lib.mkOption {
+                description = "Letter corresponding to the device mapping vdX";
                 type = types.str;
             };
         };
     };
-    bindMount = types.submodule {
+
+    storage = types.submodule {
         options = {
-            src = lib.mkOption {
-               description = "Which file to mount";
-               type = types.str;
-            };
-            dst = lib.mkOption {
-                description = "Where to mount on the host ";
-                type = types.str;
+            mappings = lib.mkOption {
+                description = "Mapping between disks on the KVM host and on the virtual machine";
+                type = types.listOf diskMapping;
+                default = [];
             };
         };
     };
+
     deployementConfig = types.submodule {
         options = {
             env = lib.mkOption {
@@ -65,19 +60,13 @@ let
                 type = types.listOf types.sslCertificate;
                 default = [];
             };
-            bindMounts = lib.mkOption {
-                description = "List of directory that should be bind-mounted";
-                type = types.listOf bindMount;
-                default = [];
-            };
-            containerMounts = lib.mkOption {
-                description = "List of files passed to a container";
-                type = types.listOf containerMount;
-                default = [];
-            };
             proxy = lib.mkOption {
                 description = "Network interactions";    
                 type = proxy;
+            };
+            storage = lib.mkOption {
+                description = "Persistent storage  configuration";
+                type = storage;
             };
 
         };

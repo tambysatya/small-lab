@@ -7,7 +7,7 @@ let
         let infos = config.infra.topology.services.${srvuid};
             vmconf = config.infra.topology.vms.${vmname};
         in if builtins.elem srvuid vmconf.services
-            then {type="vm"; host="vm"; inherit (infos) priority tags;}
+            then {type="vm"; host=vmname; inherit (infos) priority tags;}
             else {type="container"; host={vm=vmname; container=srvuid;}; inherit (infos) priority tags;};
 
     mountpoint = 
@@ -37,9 +37,11 @@ let
                 vol@{path,shared, ...}:
                 {
                     ${utils.directory_id srvuid path} = 
-                    {
+                    let disk = lib.head (findDisk path vmname shared);
+                        mount = mountpoint disk;
+                    in {
                         volume = vol;
-                        disk = lib.head (findDisk path vmname shared);
+                        disk = {inherit mount; inherit (disk) path type size shared fs options;};
                         serviceUID = srvuid;
                         env= mkServiceEnv vmname srvuid;
                     };
