@@ -25,11 +25,31 @@ let
         };
     };
 
+    bindMount = types.submodule {
+        options = {
+            what = lib.mkOption {
+                description = "Source directory (what to mount). The directory will be created if it does not exists.";
+                type = types.str;
+            };
+            where = lib.mkOption {
+                description = "Target directory (where to mount).";
+                type = types.str;
+            };
+            inherit (types) owner reload;
+            mode = types.dirmode;
+        };
+    };
+
     storage = types.submodule {
         options = {
             mappings = lib.mkOption {
                 description = "Mapping between disks on the KVM host and on the virtual machine";
                 type = types.listOf diskMapping;
+                default = [];
+            };
+            binds = lib.mkOption {
+                description = "Bind mounted directory.";
+                type = types.listOf bindMount;
                 default = [];
             };
         };
