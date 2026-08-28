@@ -2,28 +2,24 @@
 
 let
 
-    infra = config.infra;
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
-
-#    secrets = {
-#        /* User passwords */
-#        "nextcloud-db.key" = {
-#            path = "/run/secrets/nextcloud-db.key";
-#        };
-#    };
-    endpoints = [{
-                   host = "postgres.${infra.domain}";
-                   port = 5432; 
-                   is_http = false; #use port redirection instead of nginx + TLS
-                 }];
+    topology = config.infra.topology;
+    hostname = "postgres.${topology.domain}";
+    owner = "postgres";
+    reload = ["postgresql.service"];
 in {
 
-    config.registry = 
-                (lib.mkMerge [ 
-                    #(reg.registerSecrets "postgres" "postgres" ["postgres.service"] secrets)
-                    (reg.registerCertificate "postgres" "postgres" ["postgresql.service"] "postgres.${infra.domain}")
-                    (reg.registerEndpoints "postgres" endpoints)
-                    (reg.registerUser "postgres" "postgres" 10005)
-                ]);
+infra.services.postgres = {
+    users = [{name = "postgres"; uid=10005;}];
+    store.sslCertificates = [
+        {inherit hostname owner reload;}
+    ];
+    endpoints.tcp = [
+        {inherit hostname; port = 5432; proto="postgres";}
+    ];
+    persistent = [
+        {path = "/var/lib/postgresql"; inherit owner reload;}
+    ];
+};
+
 }
 

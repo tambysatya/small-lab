@@ -1,4 +1,4 @@
-{lib,pkgs, config, inputs, infra, ...}:
+{lib,pkgs, config, inputs, infra, gitpath, ...}:
 
 let
     vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit inputs lib infra;};
@@ -32,7 +32,7 @@ let
                         if ! ${pkgs.garage_2}/bin/garage key info ${servicename}; then
                             echo "Creating nextcloud key"
                                 ${pkgs.garage_2}/bin/garage key import --yes \
-                                ${builtins.readFile "${infra.flakePath}/${vars.git}/${vars.s3_key_id access}"} \
+                                ${builtins.readFile "${gitpath}/${vars.s3_key_id access}"} \
                                 $(cat  ${config.sops.secrets."${vars.s3_key access}".path}) \
                                 -n ${servicename}
                                 ${pkgs.garage_2}/bin/garage bucket allow \

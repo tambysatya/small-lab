@@ -1,21 +1,31 @@
 {lib, inputs, pkgs, config, ...}:
 
 let 
-    infra = config.infra;
-    reg = import "${inputs.self.outPath}/lib/registry/register.nix" {inherit inputs lib infra;};
+    hostname = "auth.${config.infra.topology.domain}";
+    port = 8000;
 
-    servicevhost = "auth.${infra.domain}";
-    serviceaddr = "127.0.0.1";
-    serviceport = 8000;
+    owner="root";
+    reload = ["keycloak.service"];
 
 in 
 {
-   config.registry = 
-                     (lib.mkMerge [
-                         (reg.registerDBAccess "keycloak" 
-                                {role = "keycloak"; table="keycloak"; reload= ["keycloak.service"]; owner="root";})
-                         (reg.registerEndpoints "keycloak" [{host=servicevhost; port=serviceport;}])
-                         (reg.registerUser "keycloak" "keycloak" 10002)
-                     ]);
+
+infra.services.keycloak = {
+    users = [{name="keycloak"; uid=10002;}];
+    store = {
+        plain = [
+            {filename="keycloak-initial-admin.key"; opensslSize = 64; opensslType = "base64";}
+        ];
+    };
+    links = {
+        postgres = [
+            {database="keycloak"; inherit owner reload;}
+        ];  
+    };
+    endpoints.tcp = [
+        {inherit hostname port; needTLS=true;}
+    ];
+};
+
 }
 

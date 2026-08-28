@@ -1,5 +1,19 @@
 
-# Module description
+
+
+# Small-lab: automated and reproducible deployement of services.
+
+Features: 
+
+- declarative and reproducible deployement using NixOS
+- automated generation of secrets (services passwords, databases access...) from the infrastructure inventory
+- clear separation between systems and data: systems can be safely destroyed without risking any data loss
+- automatic virtual machines generation and configuration using Open Tofu
+- automatic generation of reverse-proxys with TLS enabled
+- automatic generation of systemd services in order to integrate dependencies between services across the infrastructure (WIP)
+- simple API to integrates more services: simply declares the passwords, ssl certificates, and endpoints: everything will be automatically generated.
+
+see `examples/` 
 
 ## Compilation:
 
@@ -8,6 +22,13 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 - During the first phase, the compiler summarizes the resources requirements of each services over the infrastructure
 - During the second phase, the resources are allocated, e.g. reverse proxys / pNAT rules are built (depending on the type of endpoint), users and secrets are created (if the services is runned inside a container)...
 
+## Code Architecture:
+
+Main module: config.infra
+
+- infra.topology : description of the infrastructure (filled during the deployement)
+- infra.services.name : API for services to register what are their needs
+- ... others are internal structures which are essentially views of the infrastructure to simplify secret generation, visualization, coherence verification...
 
 # TODO
 
@@ -44,3 +65,23 @@ Each service declares the resources it needs (secrets, endpoints, postgres bases
 	+ avoid configs = in order to avoid infinite recursions 
 	+ do everything in one step instead of having multiple evalModules
 	+ move and regroup the code in order to never have a function editing multiple root fields of config (eg config.users and config.services)
+
+
+- TODO add multiple provisioenrs in step-ca
+
+
+- TODO: put a infra.vms."name".config containing the entire config of each vm ? THis could allow us to avoid infinite recursion
+
+Deployement:
+- curent refactor involved deployement options (like priority), but VMs may also have tags (like testing, backup) that is applied to their services
+- priority should be a number. Max priority is the primary service.
+- domains names are generated according to the priority. Eg the primary service is "postgres.local" and the first fallback "postgres-01.local". Testing services should be in a dedicated zone testing.local (eg postgres.testing.local, postgres-01.testing.local)
+
+-TODO: add flakes templates for users
+
+Migration:
+- store the current state in a JSON
+- add an ID to each service of the infra
+- generate unique IDs from persistent resources from the ID of the service requiring it
+- generate a migration script from the current state and the desired state
+

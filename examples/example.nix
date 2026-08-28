@@ -1,39 +1,41 @@
 {path, ...}:
 {
   #imports = [inputs.small-lab.nixosModules.infra];
-  config.infra = {
+  config.infra.topology = {
+/*
     flakePath = path;
     secretsPath = ".secrets";
     caURL = "ca.local.fr";
+*/
     domain = "local.fr";
     vmSubnet = "192.168.1.0/24";
     dns = ["8.8.8.8" "8.8.4.4"];
-    gateway = "172.31.61.1";
+    gateway = "172.31.1.1";
     rootSSHPublicKeys = [
     ];
+    services = {
+        "keycloak-main".is = "keycloak";
+        "stepca-main".is = "step-ca";
+        "openldap-main".is = "openldap";
+        "garage-main".is = "garage";
+        "postgres-main".is = "postgres";
+        "nextcloud-main".is = "nextcloud";
+    };
     hosts = {
       cpuhost1 = {
         ipAddress = "192.168.2.200";
       };
-      /*
-      backhost = {
-        ipAddress = "172.31.72.201";
-      };
-      */
     };
     vms = {
       identity = {
         host = "cpuhost1";
         vcpu = 4;
         memory = 8000;
-        ipAddress = "192.168.1.200";
+        ip = "192.168.1.200";
         #services = ["step-ca" "openldap"];
-        services = ["keycloak" "step-ca" "openldap"];
-        persistentVolumes.disks = [
-            {
-                src="/dev/pvhdd/ldap"; 
-                mount = {dir="/var/lib/openldap/data"; fsType="xfs"; options = ["nofail"];};
-            }
+        services = ["keycloak-main" "stepca-main" "openldap-main"];
+        disks = [
+            {type="disk"; path="/dev/pvhdd/ldap"; mount="/var/lib/openldap/data"; fs="xfs";}
         ];
 
       };
@@ -41,56 +43,36 @@
         host = "cpuhost1";
         vcpu = 24;
         memory = 8000;
-        persistentVolumes.disks = [
-            {
-                src="/dev/pvhdd/s3"; 
-                mount = {dir="/srv/data"; fsType="xfs"; options=["nofail"];};
-            }
-            {
-                src="/dev/ssd/s3_metadatas";
-                mount = {dir="/srv/meta"; fsType="xfs"; options=["nofail"];};
-            }
+        disks = [
+            {type="disk"; path="/dev/pvhdd/s3"; mount="/var/lib/garage/data"; fs="xfs"; options=["nofail"];}
+            {type="disk"; path="/dev/pvhdd/s3_metadatas"; mount="/var/lib/garage/meta"; fs="xfs"; options=["nofail"];}
         ];
 
-        ipAddress = "192.168.1.201";
-        services = ["garage"]; 
+        ip = "192.168.1.201";
+        services = ["garage-main"]; 
       };
       postgres = {
         host = "cpuhost1";
         vcpu = 4;
         memory = 8000;
-        persistentVolumes.disks = [
-            {
-                src="/dev/ssd/postgres";
-                mount = {dir="/var/lib/postgresql"; fsType="xfs"; options=["nofail"];};
-            }
+        disks = [
+            {type="disk"; path="/dev/ssd/postgres"; mount="/var/lib/postgresql"; fs="xfs"; options=["nofail"];}
         ];
 
-        ipAddress = "192.168.1.202";
-        services = ["postgres"]; 
+        ip = "192.168.1.202";
+        containers = ["postgres-main"]; 
+        #services = ["postgres-main"]; 
       };
       apps = {
         host = "cpuhost1";
         vcpu = 8;
         memory = 16000;
 
-        ipAddress = "192.168.1.203";
+        ip = "192.168.1.203";
         #services = ["nextcloud"]; 
-        containers = ["nextcloud"]; 
-        persistentVolumes.qcows = [
-            {
-                name = "persistent";
-                size = 100 * 1024*1024; # 100M
-                mount = {
-                    dir = "/srv/persistent";
-                    fsType = "ext4";
-                    options = ["default"];
-                };
-                mapping = [ 
-                        {vol = "config"; sys = "/var/lib/nextcloud/config";}
-                        {vol = "data"; sys = "/var/lib/nextcloud/data";}
-                ];
-            }
+        containers = ["nextcloud-main"]; 
+        disks = [
+            {type="qcow"; path="persistent"; fs="ext4"; shared=true;}
         ];
       };
 

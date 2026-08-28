@@ -47,4 +47,6 @@ iso:
 apps:
 	nix build .#nixosConfigurations.apps.config.system.build.toplevel
 
+doc:
+	nix build .#options-doc
 

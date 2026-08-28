@@ -1,0 +1,5 @@
+{lib, inputs,...}:
+
+{
+    imports = [./options];
+}
