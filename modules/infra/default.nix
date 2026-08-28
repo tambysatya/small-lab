@@ -10,6 +10,7 @@ in {
   imports = [./topology # Inventory of the deployement (which service on which vm on which host)
              ./services # Requirements of each available service
              ./secrets # Summary of the secrets (for the secrets-generator)
+             ./volumes # Summary of the storage allocation (for the migration procedure)
              ./deploy # Summary of the requirements (per vm and per container)
              ./outputs] ++ serviceModules;
 

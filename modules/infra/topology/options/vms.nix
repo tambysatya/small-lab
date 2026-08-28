@@ -25,6 +25,7 @@ in
             disks = lib.mkOption {
               type = types.listOf types.disk;
               description = "Additional volumes that will be passed to the VM";
+              default = [];
             };
             ip = lib.mkOption { 
               type = types.str;

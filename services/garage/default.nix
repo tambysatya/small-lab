@@ -33,8 +33,8 @@ config = lib.mkIf
                             package = pkgs.garage_2; 
                             settings = 
                             {
-                                data_dir = "/srv/data";
-                                metadata_dir = "/srv/meta";
+                                #data_dir = "/srv/data";
+                                #metadata_dir = "/srv/meta";
                                 rpc_bind_addr = "[::]:3901";
                                 rpc_secret_file = config.sops.secrets."garage-rpc.key".path;
                                 replication_factor = 1;

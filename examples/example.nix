@@ -35,7 +35,7 @@
         #services = ["step-ca" "openldap"];
         services = ["keycloak-main" "stepca-main" "openldap-main"];
         disks = [
-            {type="disk"; path="/dev/pvhdd/ldap"; fs="xfs";}
+            {type="disk"; path="/dev/pvhdd/ldap"; mount="/var/lib/openldap/data"; fs="xfs";}
         ];
 
       };
@@ -44,8 +44,8 @@
         vcpu = 24;
         memory = 8000;
         disks = [
-            {type="disk"; path="/dev/pvhdd/s3"; fs="xfs"; options=["nofail"];}
-            {type="disk"; path="/dev/pvhdd/s3_metadatas"; fs="xfs"; options=["nofail"];}
+            {type="disk"; path="/dev/pvhdd/s3"; mount="/var/lib/garage/data"; fs="xfs"; options=["nofail"];}
+            {type="disk"; path="/dev/pvhdd/s3_metadatas"; mount="/var/lib/garage/meta"; fs="xfs"; options=["nofail"];}
         ];
 
         ip = "192.168.1.201";
@@ -56,7 +56,7 @@
         vcpu = 4;
         memory = 8000;
         disks = [
-            {type="disk"; path="/dev/ssd/postgres"; fs="xfs"; options=["nofail"];}
+            {type="disk"; path="/dev/ssd/postgres"; mount="/var/lib/postgresql"; fs="xfs"; options=["nofail"];}
         ];
 
         ip = "192.168.1.202";

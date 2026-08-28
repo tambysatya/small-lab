@@ -32,7 +32,6 @@ let libtypes = lib.types;
                 };
             };
     };
-
 in
 {
    options.infra.services = lib.mkOption {
