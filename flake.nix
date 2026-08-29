@@ -25,7 +25,7 @@
 let
     system = "x86_64-linux";
     lib = nixpkgs.lib;
-    utils = import ./lib/utils.nix {inherit lib;};
+    utils = import ./lib {inherit lib inputs;};
     pkgs = nixpkgs.legacyPackages.${system};
 
     terranix-generator_fun = args:
@@ -150,7 +150,7 @@ let
         args = {inventory = ./examples/example.nix; extraArgs = {path=inputs.self.outPath;};};
 
 
-    in compileGenSecrets args // compileVisualization args // {
+    in utils.mergeAll [(compileGenSecrets args)  (compileVisualization args)] // {
       
 
       lib = {

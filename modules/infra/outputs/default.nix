@@ -7,13 +7,21 @@ let
         ageuid:
         deploy@{env, ip, proxy, sops, sslCertificates, storage, users}:
         {
-            config = utils.mergeAll [
+            ${ageuid}.config = utils.mergeAll [
                         (processSops sops)
-                        #(processStepRenew sslCertifcates)
-                        #(processStorage storage)
-                        #(processUsers users)
                      ];
-        };
+        } 
+        //
+        (if env.type == "container"
+            then {
+                ${env.host.vm}.config.sops.secrets."${env.host.container}.key" = {
+                    sopsFile = "${path}/.secrets/enc/${env.host.container}.key";
+                    format = "binary";
+                    restartUnits = ["container@${env.host.container}.service"];
+                    owner = "root";
+                };
+            }
+            else {});
 
     processSops =
         sops:
@@ -34,5 +42,5 @@ in
 
 {
     imports = [./options ./step.nix];
-    infra.outputs = lib.mapAttrs processSystem config.infra.deploy.systems;
+    infra.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.deploy.systems);
 }
