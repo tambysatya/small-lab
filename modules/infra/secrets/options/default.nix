@@ -1,7 +1,7 @@
 {lib, inputs, ...}:
 let
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
-    secretType = types.enum ["plain" "password" "ldapssha" "sslCertificates" "postgres" "s3" "step-ca"];
+    secretType = types.enum ["plain" "password" "ldapssha" "sslCertificates" "postgres" "s3" "step-ca" "age"];
 
     agekey = types.str;
     secret = types.submodule {

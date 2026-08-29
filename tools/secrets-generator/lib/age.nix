@@ -11,6 +11,7 @@ let
                 ${pkgs.age}/bin/age-keygen -o ${priv}
                 ${pkgs.age}/bin/age-keygen -y ${priv}\
                     > ${pub}
+                cp ${priv} .secrets/plain
             fi
         '';
     encrypt = filename: identity: 

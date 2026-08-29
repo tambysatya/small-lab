@@ -87,6 +87,9 @@ let
     processSecret = 
         {type, content, recipients, ...}:
         {
+             "age" = lib.concatMapStringsSep "\n"
+                            (age.encrypt content.filename)
+                            recipients;
              "plain" = generateSSLString content;
              "password" = processPassword recipients content;
              "ldapssha" = processLDAP recipients content;
