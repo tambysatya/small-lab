@@ -92,6 +92,20 @@ let
                         program = lib.getExe script;
                     };
                 };
+        compileVisualization = 
+            args:
+                let conf = compileConfig args;
+                    script =(import tools/visualization/main.nix 
+                                {inherit inputs lib pkgs;
+                                 inherit (conf) infra registry;}).main;
+                in {
+                    packages.${system}.visualization = script;
+                    apps.${system}.visualization = {
+                        type = "app";
+                        program = lib.getExe script;
+                    };
+                };
+ 
                             
 
     
@@ -136,7 +150,7 @@ let
         args = {inventory = ./examples/example.nix; extraArgs = {path=inputs.self.outPath;};};
 
 
-    in compileGenSecrets args //{
+    in compileGenSecrets args // compileVisualization args // {
       
 
       lib = {
