@@ -33,6 +33,6 @@ let
 in
 
 {
-    imports = [./options];
+    imports = [./options ./step.nix];
     infra.outputs = lib.mapAttrs processSystem config.infra.deploy.systems;
 }

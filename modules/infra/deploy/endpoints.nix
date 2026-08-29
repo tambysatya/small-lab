@@ -10,18 +10,25 @@ let
     mkTLSProxy = 
     backend: tcp@{hostname, port, proto, proxyExtraConfig,...}:
     {
-        frontend.${hostname} = {
-            listen = "0.0.0.0"; 
-            mode = "http";
-            port = 443;
-            extraConf = proxyExtraConfig;
+
+        sops = utils.mkSopsCert {inherit hostname; owner="haproxy"; reload=["haproxy.service"];};
+        sslCertificates = [{inherit hostname; owner="haproxy"; reload=["haproxy.service"];}];
+        proxy = {
+            frontend.${hostname} = {
+                listen = "0.0.0.0"; 
+                mode = "http";
+                port = 443;
+                extraConf = proxyExtraConfig;
+            };
+            backend.${hostname} = [{ 
+               ip=backend;
+               mode = "http";
+               port = port;
+            }];
         };
-        backend.${hostname} = [{ 
-           ip=backend;
-           mode = "http";
-           port = port;
-        }];
     };
+
+
 
     processUDP = throw "UDP not implemented yet";
     processTCP = 
@@ -34,19 +41,12 @@ let
                     then cfg.${ageuid}.ip
                     else cfg.${env.host.vm}.ip;
           networkVM = if needTLS then {
-                ${utils.ageUID env} = {
-                    proxy = mkTLSProxy "localhost" tcp;
-                    sops = utils.mkSopsCert {inherit hostname; owner="haproxy"; reload=["haproxy.service"];};
-                };
+                ${utils.ageUID env} = mkTLSProxy "localhost" tcp;
           } else {};
           containerVM = if needTLS 
             then {
-               ${env.host.vm} = {
-                    proxy = let containerip = config.infra.deploy.systems.${utils.ageUID env}.ip;
-                            in mkTLSProxy containerip tcp;
-                    sops = utils.mkSopsCert {inherit hostname; owner="haproxy"; reload=["haproxy.service"];};
-                };
-#                
+               ${env.host.vm} = let containerip = config.infra.deploy.systems.${utils.ageUID env}.ip;
+                                in mkTLSProxy containerip tcp;
             }
             else {
                ${env.host.vm}.proxy = {
