@@ -119,14 +119,14 @@ let
 
     httpProxyEntry = types.submodule {
         options = {
-            backend = lib.mkOption {
+            backends = lib.mkOption {
                 description = "List of backends, ordered by priority";
                 type = types.listOf addr;
                 default = [];
             };
             extraOption = lib.mkOption {
                 description = "Extra option passed to the proxy";
-                type = types.attr;
+                type = types.attrs;
                 default = {};
             };
         };
@@ -137,7 +137,7 @@ let
                 description = "Listening server";
                 type = addr;
             };
-            backend = lib.mkOption {
+            backends = lib.mkOption {
                 description = "List of backends, ordered by priority";
                 type = types.listOf addr;
                 default = [];
