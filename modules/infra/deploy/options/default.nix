@@ -116,66 +116,55 @@ let
             inherit (types) ip port;
         };  
     };
-    backendEntry = types.submodule {
+
+    httpProxyEntry = types.submodule {
         options = {
-            inherit (types) ip port;
-            mode = lib.mkOption {
-                description = "Proxy mode";
-                type = types.enum ["http" "tcp" "udp"];
-                default = "tcp";
+            backend = lib.mkOption {
+                description = "List of backends, ordered by priority";
+                type = types.listOf addr;
+                default = [];
             };
-            extraConf = lib.mkOption {
-                description = "Extra configuration passed to the proxy";
-                type = types.attrs;
+            extraOption = lib.mkOption {
+                description = "Extra option passed to the proxy";
+                type = types.attr;
                 default = {};
             };
         };
     };
-     frontendEntry = types.submodule {
+    proxyEntry = types.submodule {
         options = {
-            inherit (types) port;
-            listen = lib.mkOption {
-                description = "Which IP address to listen";
-                type = types.str;
-                default = "127.0.0.1";
-            };
-            mode = lib.mkOption {
-                description = "Proxy mode";
-                type = types.enum ["http" "tcp" "udp"];
-                default = "tcp";
-            };
-            extraConf = lib.mkOption {
-                description = "Extra configuration passed to the proxy";
-                type = types.attrs;
-                default = {};
-            };
-        };
-    };
-       
-    proxy = types.submodule {
-        options = {
-            defaultProxy = lib.mkOption {
-                description = "IP of the default proxy.";
-                type = types.str;
-                default = "localhost";
-            };
             frontend = lib.mkOption {
-                description = "Protocol mapping of the frontend";
-                type = types.attrsOf frontendEntry;
-                #example = {"postgres.local.fr" = {ip="192.168.1.100"; port=5432;};};
-                default = {};
+                description = "Listening server";
+                type = addr;
             };
             backend = lib.mkOption {
-                description = "Backends locations. Multiple backends can be provided.";
-                type = types.attrsOf (types.listOf backendEntry);
-                example = {"nextcloud.local.fr" = {ip="localhost"; port=80;};};
-                default = {};
-                apply = t: lib.mapAttrs (key: l: lib.unique l) t;
+                description = "List of backends, ordered by priority";
+                type = types.listOf addr;
+                default = [];
             };
         };
     };
 
-    
+    proxy = types.submodule {
+        options = {
+            tcp = lib.mkOption {
+                description = "Correspondances name => frontend/backend";
+                type = types.attrsOf proxyEntry;
+                default = {};
+            };
+            udp = lib.mkOption {
+                description = "Correspondances name => frontend/backend";
+                type = types.attrsOf proxyEntry;
+                default = {};
+            };
+            http = lib.mkOption {
+                description = "Correspondances VirtualHost => [backend]";
+                type = types.attrsOf httpProxyEntry;
+                default = {};
+            };
+        };
+    };
+
     location = types.submodule {
         options = {
             env = lib.mkOption {

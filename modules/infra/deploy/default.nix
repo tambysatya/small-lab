@@ -27,9 +27,10 @@ let
 
 in {
     imports = [./options
-               ./links.nix ./store.nix
-               ./storage.nix
-               ./endpoints.nix];
+               #./links.nix ./store.nix
+               #./storage.nix
+               #./endpoints.nix
+               ];
     #imports = [./options ./store.nix ./links.nix ./endpoints.nix];
     infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList processVM config.infra.topology.vms);
 }
