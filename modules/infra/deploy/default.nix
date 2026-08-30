@@ -11,7 +11,7 @@ let
             mkEnv = name: {type="container"; host={container=name; vm=vmname;};};
             ctconfs = lib.imap 
                         (i: name: {
-                            ${utils.ageUID (mkEnv name)} = {
+                            ${utils.envUID (mkEnv name)} = {
                                 ip = "192.168.100.${lib.toString (50+i)}";
                                 env = mkEnv name;
                             };

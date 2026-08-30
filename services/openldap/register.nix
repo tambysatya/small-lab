@@ -16,7 +16,7 @@ infra.services.openldap = {
     ];
     store = {
         sslCertificates = [
-            {inherit hostname owner reload;}
+            {inherit hostname owner;}
         ];
     };
     links = {

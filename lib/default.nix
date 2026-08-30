@@ -6,14 +6,7 @@ let
     vars = import ./vars.nix {inherit lib inputs;};
 
     # Retrieve the AGE Unique Identifier of a  component
-    ageUID = 
-        env@{type, host, ...}:
-            if type == "vm"
-                then "${host}"
-            else if type == "container"
-                then vars.container_id host.vm host.container
-            else
-                throw "Unknown deployement environment ${env}";
+
     merge = path: a: b:
       if lib.isList a && lib.isList b then
         a ++ b
@@ -48,6 +41,6 @@ let
         in config.infra.services.${srvname};
 
 in vars // {
-    inherit ageUID mergeAll pathToMountUnit;
+    inherit mergeAll pathToMountUnit;
     inherit serviceName servicePriority serviceTags serviceInfo;
 }

@@ -4,10 +4,10 @@ let
 
     utils = import ../deploy/lib.nix {inherit inputs lib;};
     processSystem =
-        ageuid:
+        envuid:
         deploy@{env, ip, proxy, sops, sslCertificates, storage, users}:
         {
-            ${ageuid}.config = utils.mergeAll [
+            ${envuid}.config = utils.mergeAll [
                         (processSops sops)
                      ];
         } 
@@ -42,5 +42,5 @@ in
 
 {
     imports = [./options ./step.nix];
-    infra.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.deploy.systems);
+    #infra.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.deploy.systems);
 }

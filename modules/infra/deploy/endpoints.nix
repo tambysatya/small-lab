@@ -11,7 +11,7 @@ let
     backend: tcp@{hostname, port, proto, proxyExtraConfig,...}:
     {
 
-        sops = utils.mkSopsCert {inherit hostname; owner="haproxy"; reload=["haproxy.service"];};
+        secrets = utils.mkSopsCert {inherit hostname; owner="haproxy"; reload=["haproxy.service"];};
         sslCertificates = [{inherit hostname; owner="haproxy"; reload=["haproxy.service"];}];
         proxy = {
             frontend.${hostname} = {
@@ -36,16 +36,16 @@ let
         tcp@{hostname, port, proto, needTLS, proxyExtraConfig}:
         let
           cfg = config.infra.deploy.systems;
-          ageuid = utils.ageUID env; 
+          envuid = utils.envUID env; 
           ip = if env.type == "vm"
-                    then cfg.${ageuid}.ip
+                    then cfg.${envuid}.ip
                     else cfg.${env.host.vm}.ip;
           networkVM = if needTLS then {
-                ${utils.ageUID env} = mkTLSProxy "localhost" tcp;
+                ${utils.envUID env} = mkTLSProxy "localhost" tcp;
           } else {};
           containerVM = if needTLS 
             then {
-               ${env.host.vm} = let containerip = config.infra.deploy.systems.${utils.ageUID env}.ip;
+               ${env.host.vm} = let containerip = config.infra.deploy.systems.${utils.envUID env}.ip;
                                 in mkTLSProxy containerip tcp;
             }
             else {

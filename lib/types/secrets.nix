@@ -24,7 +24,7 @@ rec {
     };
     password = types.submodule {
             options = {
-                inherit filename owner reload opensslSize opensslType;
+                inherit filename owner opensslSize opensslType;
                 mode = types.filemode;
             };
     };

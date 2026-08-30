@@ -17,13 +17,16 @@ let
     db_key = access@{database, ...}: "db-${database}.key";
     
     directory_id = srvuid: path: "${srvuid}:${path}";
-    envName = env: if env.type == "vm" then env.host else env.host.container;
-    envHost = env: if env.type == "vm" then env.host else env.host.vm;
+    envUID = env: if builtins.isString env then env
+                  else if env.type == "vm" then env.host
+                  else env.host.container;
+    envHost = env: if builtins.isString env then env
+                   else if env.type == "vm" then env.host
+                   else env.host.vm;
 
 in {
-    inherit container_id;
     inherit ssl_root ssl_basedir ssl_crt_path ssl_key_path;
     inherit s3_key s3_key_id db_key;
     inherit directory_id;
-    inherit envName envHost;
+    inherit envUID envHost;
 }

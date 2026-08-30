@@ -20,17 +20,17 @@ let utils = import ./lib.nix {inherit lib inputs;};
 
 
     mkSharedSecret = env: hosts: secret:
-        let ageuid = utils.ageUID env;
-            mkHostSecret = host: {${utils.ageUID host}.sops=[secret];};
+        let ageuid = utils.envUID env;
+            mkHostSecret = host: {${utils.envUID host}.secrets=[secret];};
             dsts = lib.filter (name: name != ageuid) hosts;
         in utils.mergeAll 
-                ([{${ageuid}.sops = [secret]; }] ++ map mkHostSecret dsts);
+                ([{${ageuid}.secrets = [secret]; }] ++ map mkHostSecret dsts);
 
     mkProxy =
         env: proxyname: port: hostenvs: mode:
         let proxyVM =
             {
-                ${utils.ageUID env}.proxy = {
+                ${utils.envUID env}.proxy = {
                         frontend.${proxyname}= {
                             inherit mode;
                             port = port;
@@ -49,7 +49,7 @@ let utils = import ./lib.nix {inherit lib inputs;};
                     };
             };
             proxyContainer = {
-                 ${utils.ageUID env}.proxy.defaultProxy = config.infra.deploy.systems.${env.host.vm}.ip;
+                 ${utils.envUID env}.proxy.defaultProxy = config.infra.deploy.systems.${env.host.vm}.ip;
                  ${env.host.vm}.proxy = {
                         frontend.${proxyname} = {
                             listen = "192.168.1.1";
@@ -74,8 +74,8 @@ let utils = import ./lib.nix {inherit lib inputs;};
         in mkSharedSecret env ldaphosts secret // mkProxy env "ldap" 636 ldaphosts "tcp"; 
     processS3 = 
         env: access:
-        let id = {filename=utils.s3_key_id access; inherit (access) owner reload; mode="0400";};
-            key = {filename=utils.s3_key access; inherit (access) owner reload; mode="0400";};
+        let id = {filename=utils.s3_key_id access; inherit (access) owner; mode="0400";};
+            key = {filename=utils.s3_key access; inherit (access) owner; mode="0400";};
 
         in utils.mergeAll 
                 [(mkSharedSecret env s3hosts id)
@@ -83,7 +83,7 @@ let utils = import ./lib.nix {inherit lib inputs;};
                  (mkProxy env "s3" 443 s3hosts "http")];
     processPostgres = 
         env: access: 
-        let secret = {filename = utils.db_key access; inherit (access) owner reload; mode="0400";};
+        let secret = {filename = utils.db_key access; inherit (access) owner; mode="0400";};
         in mkSharedSecret env dbhosts secret //
            mkProxy env "postgres" 5432 dbhosts "tcp";
 in {

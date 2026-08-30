@@ -89,8 +89,8 @@ let
                 type = types.listOf types.user;
                 default = [];
             };
-            sops = lib.mkOption {
-                description = "All files supervised with SOPS";
+            secrets = lib.mkOption {
+                description = "All secrets files.";
                 type = types.listOf sopsFile;
                 default = [];
             };

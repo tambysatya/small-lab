@@ -38,9 +38,9 @@ in {
 config.infra.services.garage = {
     users = [{name = "garage"; uid=10001;}];
     store.passwords = [
-        {filename = "garage-rpc.key"; inherit owner reload opensslSize opensslType;}
-        {filename = "garage-admin.key"; inherit owner reload opensslSize opensslType;}
-        {filename = "garage-metrics.key"; inherit owner reload opensslSize opensslType;}
+        {filename = "garage-rpc.key"; inherit owner opensslSize opensslType;}
+        {filename = "garage-admin.key"; inherit owner opensslSize opensslType;}
+        {filename = "garage-metrics.key"; inherit owner opensslSize opensslType;}
     ];
     persistent = [
         {path="/var/lib/garage/data"; inherit owner reload; mode = "0700";}

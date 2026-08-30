@@ -85,3 +85,5 @@ Migration:
 - generate unique IDs from persistent resources from the ID of the service requiring it
 - generate a migration script from the current state and the desired state
 
+
+- Assume that there is only one shared volume per VM: therefore there is no need to declare it in the inventory, except maybe to change the default size

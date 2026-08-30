@@ -12,7 +12,7 @@ let utils = import ./lib.nix {inherit lib inputs;};
         env:
         pass: 
         {
-            ${utils.ageUID env}.sops = [{inherit (pass) filename owner reload mode;}];
+            ${utils.envUID env}.secrets = [{inherit (pass) filename owner mode;}];
         };
     processCertificates = 
         env:
@@ -20,9 +20,9 @@ let utils = import ./lib.nix {inherit lib inputs;};
         let crt = "${hostname}.crt";
             key = "${hostname}.key";
         in {
-            ${utils.ageUID env} = {
-                sops = [{filename=crt; mode="0400"; inherit (cert) owner reload;}
-                        {filename=key; mode="0400"; inherit (cert) owner reload;}];
+            ${utils.envUID env} = {
+                secrets = [{filename=crt; mode="0400"; inherit (cert) owner;}
+                        {filename=key; mode="0400"; inherit (cert) owner;}];
                 sslCertificates = [cert];
             };
         };
@@ -31,8 +31,8 @@ let utils = import ./lib.nix {inherit lib inputs;};
     processService = 
         srvname: {deployements, store,...}:
         let stepcasecretnames = ["intermediate_ca_key" "ca-password.key"];
-            stepcasecrets = map (filename: {inherit filename; owner="root"; mode="0400"; reload=["step-ca.service"];}) stepcasecretnames;
-            additionalsecrets = env: {${utils.ageUID env}.sops = stepcasecrets;};
+            stepcasecrets = map (filename: {inherit filename; owner="root"; mode="0400";}) stepcasecretnames;
+            additionalsecrets = env: {${utils.envUID env}.secrets = stepcasecrets;};
         in
         utils.mergeAll (map (processStore store) deployements ++ (if srvname == "step-ca" then map additionalsecrets deployements else []));
 

@@ -5,7 +5,7 @@ let
     processContainerDeployement =
         env: {
                 type="age";
-                content = { filename = "${infralib.envName env}.key";};
+                content = { filename = "${infralib.envUID env}.key";};
                 recipients = [env.host.vm];
         };
     processSecret = 
@@ -14,16 +14,16 @@ let
         secret: 
         let additionalRecipients = # adding the hosts of the requested service (to create the access). Note: no need to add openldap since the file will be hashed
         if secrettype == "postgres" then
-            map infralib.envName config.infra.services.postgres.deployements
+            map infralib.envUID config.infra.services.postgres.deployements
         else if secrettype == "s3" then
-            map infralib.envName config.infra.services.garage.deployements 
+            map infralib.envUID config.infra.services.garage.deployements 
         else [];
         in
         lib.mkIf (deployements != [])
         {
             type=secrettype;
             content=secret;
-            recipients = lib.unique (additionalRecipients ++ map infralib.envName deployements);
+            recipients = lib.unique (additionalRecipients ++ map infralib.envUID deployements);
         };
 
     serviceSecrets = 
@@ -50,7 +50,7 @@ let
     
     ageIdentities =
         srvname: {deployements,...}:
-            map infralib.envName deployements;
+            map infralib.envUID deployements;
             
 in {
     imports = [./options];
