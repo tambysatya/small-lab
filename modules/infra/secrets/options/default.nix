@@ -17,7 +17,7 @@ let
             };
             recipients = lib.mkOption {
                 description = "Identity names of the recipients.";
-                type = types.listOf types.str;
+                type = types.listOf types.deployementEnvironment;
             };
         };
     };
@@ -29,9 +29,9 @@ in
         description = "Summary of the secrets dispatched across the infrastructure. Useful for automatic secret generations.";
         type = types.submodule {
             options = {
-                identities = lib.mkOption {
+                allEnvs = lib.mkOption {
                     description = "List of unique identifiers";
-                    type = types.listOf types.str;
+                    type = types.listOf types.deployementEnvironment;
                 };
                 allSecrets = lib.mkOption {
                     description = "Summary of the secrets dispatched across the infrastructure. Useful for automatic secret generations.";

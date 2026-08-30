@@ -3,13 +3,11 @@
 let
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
     ssl = import ./ssl.nix {inherit lib inputs pkgs;};
-    age = import ./age.nix {inherit lib inputs pkgs;};
+    basic = import ./basic.nix {inherit lib inputs pkgs;};
 
     plain = ".secrets/plain";
-    git = ".secrets/git";
-    keys = ".secrets/keys";
-    enc = ".secrets/git/enc";
     dstPath = filename: "${plain}/${filename}";
+    
     generateSSLString = 
         {filename, opensslSize, opensslType,...}:
         ''
@@ -24,7 +22,7 @@ let
         lib.concatStringsSep "\n"
             [
                 (generateSSLString sslargs)
-                (lib.concatMapStringsSep "\n" (age.encrypt filename) recipients)
+                (lib.concatMapStringsSep "\n" (basic.give filename) recipients)
             ];
         
     processS3Access =
@@ -36,8 +34,8 @@ let
             [
                 (genString id)
                 (genString key)
-                (lib.concatMapStringsSep "\n" (age.encrypt id) recipients)
-                (lib.concatMapStringsSep "\n" (age.encrypt key) recipients)
+                (lib.concatMapStringsSep "\n" (basic.give id) recipients)
+                (lib.concatMapStringsSep "\n" (basic.give key) recipients)
             ];
     processPostgres = 
         recipients: {database,...}:
@@ -45,7 +43,7 @@ let
         in lib.concatStringsSep "\n"
             [
                 (generateSSLString {inherit filename; opensslSize = 64; opensslType = "base64";})
-                (lib.concatMapStringsSep "\n" (age.encrypt filename) recipients)
+                (lib.concatMapStringsSep "\n" (basic.give filename) recipients)
             ];
 
     processLDAP = 
@@ -53,11 +51,11 @@ let
         lib.concatStringsSep "\n" 
             [
                 (generateSSLString content)
-                (lib.concatMapStringsSep "\n" (age.encrypt filename) recipients)
+                (lib.concatMapStringsSep "\n" (basic.give filename) recipients)
                 ''
                     cat ${plain}/${filename} \
                     | ${pkgs.openldap}/bin/slappasswd -s -- -h "{SSHA}" \
-                    > ${git}/${filename}.ssha
+                    > ${plain}/${filename}.ssha
                 ''
             ];
     processSSLCert =
@@ -68,8 +66,8 @@ let
         in
         lib.concatStringsSep "\n" [
             (ssl.gen_ssl_certificate hostname)
-            (lib.concatMapStringsSep "\n" (age.encrypt crt) recipients)
-            (lib.concatMapStringsSep "\n" (age.encrypt key) recipients)
+            (lib.concatMapStringsSep "\n" (basic.give crt) recipients)
+            (lib.concatMapStringsSep "\n" (basic.give key) recipients)
         ];
     
 
@@ -80,16 +78,13 @@ let
             
         in
         lib.concatStringsSep "\n" [
-            (lib.concatMapStringsSep "\n" (age.encrypt "intermediate_ca_key") recipients)
-            (lib.concatMapStringsSep "\n" (age.encrypt "ca-password.key") recipients)
+            (lib.concatMapStringsSep "\n" (basic.give "intermediate_ca_key") recipients)
+            (lib.concatMapStringsSep "\n" (basic.give "ca-password.key") recipients)
         ];
 
     processSecret = 
         {type, content, recipients, ...}:
         {
-             "age" = lib.concatMapStringsSep "\n"
-                            (age.encrypt content.filename)
-                            recipients;
              "plain" = generateSSLString content;
              "password" = processPassword recipients content;
              "ldapssha" = processLDAP recipients content;
@@ -105,10 +100,8 @@ in {
     processSecrets = 
         ''
             mkdir -p ${plain}
-            mkdir -p ${git}
-            mkdir -p ${enc}
-            mkdir -p ${keys}
-            ${lib.concatMapStringsSep "\n" age.generateAge infra.secrets.identities}
+            mkdir -p .secrets/provisioner/
+            ${lib.concatMapStringsSep "\n" basic.generateIdentity infra.secrets.allEnvs}
             ${ssl.generateCA infra.topology.domain}
             ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
         '';

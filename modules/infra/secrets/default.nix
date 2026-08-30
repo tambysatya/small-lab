@@ -2,28 +2,22 @@
 let
 
     infralib = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
-    processContainerDeployement =
-        env: {
-                type="age";
-                content = { filename = "${infralib.envUID env}.key";};
-                recipients = [env.host.vm];
-        };
     processSecret = 
         deployements: 
         secrettype:
         secret: 
         let additionalRecipients = # adding the hosts of the requested service (to create the access). Note: no need to add openldap since the file will be hashed
                 if secrettype == "postgres" then
-                    map infralib.envUID config.infra.services.postgres.deployements
+                   config.infra.services.postgres.deployements
                 else if secrettype == "s3" then
-                    map infralib.envUID config.infra.services.garage.deployements 
+                   config.infra.services.garage.deployements 
                 else [];
         in
         lib.mkIf (deployements != [])
         {
             type=secrettype;
             content=secret;
-            recipients = lib.unique (additionalRecipients ++ map infralib.envUID deployements);
+            recipients = lib.unique (additionalRecipients ++ deployements);
         };
 
     serviceSecrets = 
@@ -36,8 +30,7 @@ let
             postgres = links.postgres;
             ldap = links.ldap;
             s3 = links.s3;
-        in  map processContainerDeployement (lib.filter ({type,...}:type == "container") deployements)
-        ++  map (processSecret deployements "plain") plain
+        in  map (processSecret deployements "plain") plain
         ++  map (processSecret deployements "password") passwords
         ++  map (processSecret deployements "sslCertificates") certs
         ++  map (processSecret deployements "postgres") postgres
@@ -47,15 +40,13 @@ let
                 then [(processSecret deployements "step-ca" null)] 
                 else []);
     allSecrets= lib.mapAttrsToList serviceSecrets config.infra.services;
+    allEnvs = lib.unique (lib.concatMap (builtins.getAttr "deployements") (builtins.attrValues config.infra.services));
     
-    getIdentities =
-        srvname: {deployements,...}:
-            map infralib.envUID deployements;
             
 in {
     imports = [./options];
     config.infra.secrets = { 
-        identities = lib.unique (builtins.attrNames config.infra.topology.vms ++ lib.concatLists (lib.mapAttrsToList getIdentities config.infra.services));
+        allEnvs = allEnvs;
         allSecrets = lib.unique (lib.concatLists allSecrets);
     };
 }
