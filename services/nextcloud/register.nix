@@ -6,7 +6,7 @@ let
     hostname = "nextcloud.${topology.domain}";
     owner = "nextcloud";
     reload = ["phpfpm.service" "nextcloud-setup.service"];
-    proxyExtraConfig = {
+    extraConfig = {
         virtualHosts.${hostname}.extraConfig = 
             ''
                 proxy_request_buffering off;
@@ -34,9 +34,8 @@ let
     endpoints = [{
                    hostname = hostname;
                    port = 80; 
-                   proto = "http";
-                   needTLS = true;
-                   inherit proxyExtraConfig;
+                   tls = true;
+                   inherit extraConfig;
                  }];
 in {
 
@@ -59,7 +58,7 @@ infra.services.nextcloud = {
         {path="/var/lib/nextcloud/config"; shared=true; inherit owner reload;}
         {path="/var/lib/nextcloud/data"; shared=true; inherit owner reload;}
     ];
-    endpoints.tcp = endpoints;
+    endpoints.http = endpoints;
 
 };
 

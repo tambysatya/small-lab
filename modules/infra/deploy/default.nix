@@ -27,7 +27,8 @@ let
 
 in {
     imports = [./options
-               #./links.nix ./store.nix
+               ./store.nix
+               #./links.nix 
                #./storage.nix
                #./endpoints.nix
                ];

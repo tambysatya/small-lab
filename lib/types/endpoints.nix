@@ -10,16 +10,25 @@ let
 in
 rec {
     
-    tcpEndpoint = types.submodule {
+    httpEndpoint = types.submodule {
         options = {
             inherit (types) hostname port;
-            proto = types.tcpProtocol;
-            needTLS = lib.mkOption {
-                description = "A reverse proxy assuming TLS termination will be created"; 
+            tls = lib.mkOption {
+                description = "If set to true, a proxy performing TLS termination will be set up. Use this option if your server does not support TLS natively."; 
                 type = types.bool;
                 default = false;
             };
-            proxyExtraConfig = lib.mkOption {
+            extraConfig = lib.mkOption {
+                description = "Extra attrset transfered to the proxy configuration";
+                type = types.attrs;
+                default = {};
+            };
+        };
+    };
+    tcpEndpoint = types.submodule {
+        options = {
+            inherit (types) hostname port;
+            extraConfig = lib.mkOption {
                 description = "Extra attrset transfered to the proxy configuration";
                 type = types.attrs;
                 default = {};
@@ -29,7 +38,7 @@ rec {
 
     udpEndpoint = types.submodule {
         options = {
-            inherit (types) hostname port udpProtocol;
+            inherit (types) hostname port;
         };
     };  
     endpoints = types.submodule {
@@ -42,6 +51,11 @@ rec {
             tcp = lib.mkOption {
                 description = "TCP endpoints.";
                 type = types.listOf tcpEndpoint;
+                default = [];
+            };
+            http = lib.mkOption {
+                description = "TCP endpoints.";
+                type = types.listOf httpEndpoint;
                 default = [];
             };
         };

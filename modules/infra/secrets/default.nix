@@ -25,7 +25,7 @@ let
         let
             plain = store.plain;
             passwords = store.passwords;
-            certs = store.sslCertificates ++ lib.filter (builtins.getAttr "needTLS") endpoints.tcp;
+            certs = store.sslCertificates ++ lib.filter (builtins.getAttr "tls") endpoints.http;
 
             postgres = links.postgres;
             ldap = links.ldap;

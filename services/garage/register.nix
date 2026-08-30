@@ -10,7 +10,7 @@ let
     opensslSize = 32;
     opensslType = "hex";
     
-    proxyExtraConfig = {
+    extraConfig = {
         virtualHosts."s3.${domain}".extraConfig = 
             ''
                     proxy_request_buffering off;
@@ -46,9 +46,9 @@ config.infra.services.garage = {
         {path="/var/lib/garage/data"; inherit owner reload; mode = "0700";}
         {path="/var/lib/garage/meta"; inherit owner reload; mode = "0700";}
     ];
-    endpoints.tcp= [
-        {hostname="s3.${domain}"; port=3900; proto = "s3"; needTLS = true; inherit proxyExtraConfig;}
-        {hostname="s3-admin.${domain}";port=3903; proto="http"; needTLS = true;}
+    endpoints.http= [
+        {hostname="s3.${domain}"; port=3900; tls = true; inherit extraConfig;}
+        {hostname="s3-admin.${domain}";port=3903; tls = true;}
     ];
 };
 }

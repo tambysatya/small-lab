@@ -14,7 +14,7 @@ infra.services.postgres = {
         {inherit hostname owner reload;}
     ];
     endpoints.tcp = [
-        {inherit hostname; port = 5432; proto="postgres";}
+        {inherit hostname; port = 5432;}
     ];
     persistent = [
         {path = "/var/lib/postgresql"; inherit owner reload;}
