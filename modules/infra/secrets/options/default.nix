@@ -3,7 +3,6 @@ let
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
     secretType = types.enum ["plain" "password" "ldapssha" "sslCertificates" "postgres" "s3" "step-ca" "age"];
 
-    agekey = types.str;
     secret = types.submodule {
         options = {
             type = lib.mkOption {
@@ -18,7 +17,7 @@ let
             };
             recipients = lib.mkOption {
                 description = "Identity names of the recipients.";
-                type = types.listOf agekey;
+                type = types.listOf types.str;
             };
         };
     };
@@ -31,7 +30,7 @@ in
         type = types.submodule {
             options = {
                 identities = lib.mkOption {
-                    description = "List of age (private keys) identity";
+                    description = "List of unique identifiers";
                     type = types.listOf types.str;
                 };
                 allSecrets = lib.mkOption {

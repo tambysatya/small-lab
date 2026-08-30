@@ -13,11 +13,11 @@ let
         secrettype:
         secret: 
         let additionalRecipients = # adding the hosts of the requested service (to create the access). Note: no need to add openldap since the file will be hashed
-        if secrettype == "postgres" then
-            map infralib.envUID config.infra.services.postgres.deployements
-        else if secrettype == "s3" then
-            map infralib.envUID config.infra.services.garage.deployements 
-        else [];
+                if secrettype == "postgres" then
+                    map infralib.envUID config.infra.services.postgres.deployements
+                else if secrettype == "s3" then
+                    map infralib.envUID config.infra.services.garage.deployements 
+                else [];
         in
         lib.mkIf (deployements != [])
         {
@@ -48,14 +48,14 @@ let
                 else []);
     allSecrets= lib.mapAttrsToList serviceSecrets config.infra.services;
     
-    ageIdentities =
+    getIdentities =
         srvname: {deployements,...}:
             map infralib.envUID deployements;
             
 in {
     imports = [./options];
     config.infra.secrets = { 
-        identities = lib.unique (builtins.attrNames config.infra.topology.vms ++ lib.concatLists (lib.mapAttrsToList ageIdentities config.infra.services));
+        identities = lib.unique (builtins.attrNames config.infra.topology.vms ++ lib.concatLists (lib.mapAttrsToList getIdentities config.infra.services));
         allSecrets = lib.unique (lib.concatLists allSecrets);
     };
 }
