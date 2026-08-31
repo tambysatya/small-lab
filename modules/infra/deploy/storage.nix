@@ -2,29 +2,24 @@
 
 let
     utils = import ./lib.nix {inherit lib inputs;};
-    allLetters = "bcdefghijklmnopqrstuvwxyz"; #starting from b since /dev/vda is reserved for the root file system;
+    allLetters = lib.stringToCharacters "bcdefghijklmnopqrstuvwxyz"; #starting from b since /dev/vda is reserved for the root file system;
 
-
-    generatePartialMapping =
-        env:
-        dir@{mode, owner, path, reload, shared}:
+    
+    generateMappings = 
+        vmname: disks:
         let
-            diruid = utils.directory_id env path;
-            info = config.infra.volumes.${diruid};
-            disk = info.disk;
-            vol = info.volume;
-            mapping = {
-                host=disk.path;
-                inherit (disk) type mount;
-                #letter is selected after nubbing the list of mappings
-            };
-            bind = {
-                inherit (vol) owner reload mode;
-            };
-        in {};
+            generateMapping = 
+                host:
+                {mount,type, ...}:
+                letter: {
+                    ${vmname}.storage.mappings = [{inherit host mount type letter;}];
+                };
+        in utils.mergeAll (lib.zipListsWith (f: x: f x) (lib.mapAttrsToList generateMapping disks) allLetters);
+
+
 
 in 
 {
     imports = [./options];
-    #infra.deploy.systems = processAllVolumes;
+    infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList generateMappings config.infra.volumes.perVM);
 }
