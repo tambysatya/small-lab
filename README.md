@@ -87,3 +87,11 @@ Migration:
 
 
 - Assume that there is only one shared volume per VM: therefore there is no need to declare it in the inventory, except maybe to change the default size
+
+
+CHECKS:
+- check that each disk is declared once
+- each disk is mounted on ONE mountpoint
+- each mountpoint is declared by one disk
+- Two services does not request the same repository
+

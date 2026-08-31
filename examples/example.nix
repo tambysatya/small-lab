@@ -73,6 +73,7 @@
         containers = ["nextcloud-main"]; 
         disks = [
             {type="qcow"; path="persistent"; fs="ext4"; shared=true;}
+            {type="qcow"; path="test"; mount="/srv/persistent"; fs="ext4"; shared=false;}
         ];
       };
 

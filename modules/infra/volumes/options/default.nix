@@ -4,10 +4,7 @@ let
     libtypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
     types = lib.types // libtypes;
 
-    resourceUID = lib.mkOption {
-        description = "Unique resource identifier of the form <servicename>:path";
-        type = types.str;
-    };
+    resourceUID = types.str;
 
     dirInfos = types.submodule {
        options = {
@@ -30,11 +27,11 @@ let
        };   
     };
 
-    vmDisks = types.submodule {
+    vmDisk = types.submodule {
         options = {
             inherit (types) owner reload;
-            host = lib.mkOption {
-                description = "Path to the host device/ name of the qcow file";
+            mount = lib.mkOption {
+                description = "Path to the mount point";
                 type = types.str;
             };
             type = lib.mkOption {
@@ -45,6 +42,11 @@ let
                 description = "Unique identifier of the resources present on the disk";
                 type = types.listOf resourceUID;
                 default = [];
+            };
+            shared = lib.mkOption {
+                description = "True if the disk is shared. In this case, bind mounts will be installed";
+                type = types.bool;
+                default = false;
             };
 
         };
@@ -60,8 +62,8 @@ in
        default = {};
     };
     options.infra.volumes.perVM = lib.mkOption {
-       description  = "Summary of storage allocations across the infrastructure, each directory being referred using an unique deterministic identifier.";
-       type = types.attrsOf vmDisks;
+       description  = "Summary of disks allocated to each VM. Will be of the form disk => vmDisk";
+       type = types.attrsOf (types.attrsOf vmDisk);
        default = {};
     };
 }

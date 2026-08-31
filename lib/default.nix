@@ -29,6 +29,17 @@ let
         "${(lib.replaceStrings [ "/" ] [ "-" ] (lib.removePrefix "/" path))}.mount";
 
     mergeAll = listOfAttrsets: lib.foldl' (merge "") {} listOfAttrsets;
+    hasDupplicate = l: builtins.length (lib.unique l) == builtins.length l;
+    getFirstDupplicate = xs: #returns the first dupplicate or returns null
+        let go = seen: rest:
+                if rest == []
+                then null
+                else 
+                    let x = builtins.head rest;
+                    in if builtins.elem x seen
+                       then x
+                       else go (seen ++ [x]) (builtins.tail rest);
+        in go [] xs;
 
     serviceName = config: id:
         config.infra.topology.services.${id}.is;
@@ -42,5 +53,6 @@ let
 
 in vars // {
     inherit mergeAll pathToMountUnit;
+    inherit hasDupplicate getFirstDupplicate;
     inherit serviceName servicePriority serviceTags serviceInfo;
 }

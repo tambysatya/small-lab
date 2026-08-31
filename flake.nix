@@ -44,6 +44,7 @@ let
            });
     compileConfig = args: (compileModule args).config;
 
+    compileAssertions = args: (compileModule args).assertions;
     compileInfra = args: (compileConfig args).infra;
     compileRegistry = args: (compileConfig args).registry;
 
