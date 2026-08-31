@@ -42,12 +42,14 @@ let
             mount = mkMountPoint disk;
         in {
             perDirectory.${diruid} = {
-               inherit serviceUID env;
-               volume = persistent;
-               disk = {
-                    inherit (disk) path type size shared fs options;
-                    inherit mount;
-               };
+                phys = disk.path; 
+                path = if shared 
+                       then "${mount}/${serviceUID}/${lib.removePrefix "/" path}"
+                       else mount;
+                bindTo = path; #should be ignored if path == bindTo TODO
+                inherit (persistent) owner mode;
+                inherit env;
+             
             };
             perVM.${utils.envHost env}.${disk.path} = {
                 inherit mount;

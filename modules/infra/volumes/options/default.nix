@@ -8,22 +8,27 @@ let
 
     dirInfos = types.submodule {
        options = {
-            volume = lib.mkOption {
-                description = "Volume informations (anything related to the usage: permissions, ...)";
-                type = types.volume;
-            };
-            disk = lib.mkOption {
-                description = "Disk information (anything related to the mounting procedure)";
-                type = types.disk;
-            };
-            serviceUID = lib.mkOption {
-                description = "UniqueID of the service owning this directory";
+            phys = lib.mkOption {
+                description = "Physical device where the directory lives on the KVM host";
                 type = types.str;
             };
-            env = lib.mkOption {
-                description = "Deployement details";
-                type = types.deployementEnvironment;
+            path = lib.mkOption {
+                description = "Where the directory lives";
+                type = types.str;
+                example = "/srv/persistent/dirA";
             };
+            bindTo = lib.mkOption {
+                description = "If the directory is stored on a shared volume, where to bind-mount it";
+                type = types.nullOr (types.str);
+                example = "/var/lib/nextcloud/config";
+                default = null;
+            };
+            env = lib.mkOption {
+                description = "Environment requesting the directory. In containers, the directory will be bound within the container";
+            };
+            mode = types.dirmode;
+            inherit (types) owner;
+
        };   
     };
 
