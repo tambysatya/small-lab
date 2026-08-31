@@ -3,14 +3,15 @@ let
 
     infralib = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
     processSecret = 
-        deployements: 
+        deployementsAttr: 
         secrettype:
         secret: 
-        let additionalRecipients = # adding the hosts of the requested service (to create the access). Note: no need to add openldap since the file will be hashed
+        let deployements = builtins.attrValues deployementsAttr;
+            additionalRecipients = # adding the hosts of the requested service (to create the access). Note: no need to add openldap since the file will be hashed
                 if secrettype == "postgres" then
-                   config.infra.services.postgres.deployements
+                   builtins.attrValues config.infra.services.postgres.deployements
                 else if secrettype == "s3" then
-                   config.infra.services.garage.deployements 
+                   builtins.attrValues config.infra.services.garage.deployements 
                 else [];
         in
         lib.mkIf (deployements != [])
@@ -40,7 +41,7 @@ let
                 then [(processSecret deployements "step-ca" null)] 
                 else []);
     allSecrets= lib.mapAttrsToList serviceSecrets config.infra.services;
-    allEnvs = lib.unique (lib.concatMap (builtins.getAttr "deployements") (builtins.attrValues config.infra.services));
+    allEnvs = lib.unique (lib.concatMap (srv: builtins.attrValues srv.deployements) (builtins.attrValues config.infra.services));
     
             
 in {

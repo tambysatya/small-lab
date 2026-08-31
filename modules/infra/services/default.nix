@@ -16,13 +16,13 @@ let
                 [(utils.mergeAll 
                     (map 
                         (srvid: 
-                            {${utils.serviceName config srvid}.deployements = [(mkDeployementService srvid)];})
+                            {${utils.serviceName config srvid}.deployements.${srvid} = mkDeployementService srvid;})
                         vmconf.services))
                  (utils.mergeAll
                     (map 
                         (srvid: 
                             let service = utils.serviceName config srvid;
-                            in {${service}.deployements = [(mkDeployementContainer srvid)];})
+                            in {${service}.deployements.${srvid} = mkDeployementContainer srvid;})
                         vmconf.containers))]; #containers names are equal to the service
 in {
    imports = [./options];

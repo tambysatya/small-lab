@@ -30,11 +30,12 @@ let utils = import ./lib.nix {inherit lib inputs;};
 
     processService = 
         srvname: {deployements, store,...}:
-        let stepcasecretnames = ["intermediate_ca_key" "ca-password.key"];
+        let envs = builtins.attrValues deployements;
+            stepcasecretnames = ["intermediate_ca_key" "ca-password.key"];
             stepcasecrets = map (filename: {inherit filename; owner="root"; mode="0400";}) stepcasecretnames;
             additionalsecrets = env: {${utils.envUID env}.secrets = stepcasecrets;};
         in
-        utils.mergeAll (map (processStore store) deployements ++ (if srvname == "step-ca" then map additionalsecrets deployements else []));
+        utils.mergeAll (map (processStore store) envs ++ (if srvname == "step-ca" then map additionalsecrets envs else []));
 
 in
 {

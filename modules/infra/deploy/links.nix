@@ -5,7 +5,7 @@ let utils = import ./lib.nix {inherit lib inputs;};
     processService =
         _:
         {deployements, links,...}:
-        utils.mergeAll (lib.concatMap (processLinks links) deployements);
+        utils.mergeAll (lib.concatMap (processLinks links) (builtins.attrValues deployements));
 
     processLinks =
         {ldap, s3, postgres}:
@@ -15,9 +15,9 @@ let utils = import ./lib.nix {inherit lib inputs;};
         ++ map (processPostgres env) postgres;
 
     domain = config.infra.topology.domain;
-    ldaphosts = config.infra.services.openldap.deployements;
-    s3hosts = config.infra.services.garage.deployements;
-    dbhosts = config.infra.services.postgres.deployements;
+    ldaphosts = builtins.attrValues config.infra.services.openldap.deployements;
+    s3hosts = builtins.attrValues config.infra.services.garage.deployements;
+    dbhosts = builtins.attrValues config.infra.services.postgres.deployements;
 
 
     mkSharedSecret = env: hosts: secret:

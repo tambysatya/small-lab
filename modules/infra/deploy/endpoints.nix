@@ -48,17 +48,18 @@ let
     processUDP = throw "UDP not implemented yet";
     processService = 
         srv@{deployements, endpoints,...}:
-        let allTCP =
+        let envs = builtins.attrValues deployements;
+            allTCP =
                 lib.concatMap
                     (env: map (mkTCPProxy env) endpoints.tcp)
-                    deployements;
+                    envs;
             allUDP =
                 lib.concatMap
                     (env: map (processUDP env) endpoints.udp)
-                    deployements;
+                    envs;
             allHTTP = lib.concatMap
                         (env: map (mkHTTPProxy env) endpoints.http)
-                        deployements;
+                        envs;
         in utils.mergeAll (allTCP ++ allHTTP ++ allUDP);
 in {
     config.infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList (srvname: srv: processService srv) config.infra.services);

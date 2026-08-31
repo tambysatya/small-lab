@@ -14,6 +14,10 @@ let
 
     diskMapping = types.submodule {
         options = {
+            type = lib.mkOption {
+                description = "Type of storage";
+                type = types.enum ["qcow" "disk"];
+            };
             host = lib.mkOption {
                 description = "Path to the disk on the host";
                 type = types.str;
@@ -22,7 +26,11 @@ let
                 description = "Letter corresponding to the device mapping vdX";
                 type = types.str;
             };
-        };
+            mount = lib.mkOption {
+                description = "Where to mount the disk";
+                type = types.str;
+            };
+        };  
     };
 
     bindMount = types.submodule {

@@ -16,7 +16,7 @@ let
     s3_key = access@{bucket,...}: "s3-${bucket}.key";
     db_key = access@{database, ...}: "db-${database}.key";
     
-    directory_id = srvuid: path: "${srvuid}:${path}";
+    directory_id = serviceuid: path: "${serviceuid}:${path}";
     envUID = env: if builtins.isString env then env
                   else if env.type == "vm" then env.host
                   else env.host.container;

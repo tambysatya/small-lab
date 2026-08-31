@@ -22,8 +22,8 @@ let libtypes = lib.types;
                     type = types.store;
                 };
                 deployements = lib.mkOption {
-                    description = "List of environment where the service is currently deployed";
-                    type = types.listOf types.deployementEnvironment;
+                    description = "AttrSet of serviceuid => environment where the service is currently deployed";
+                    type = types.attrsOf types.deployementEnvironment;
                     default = [];
                 };
                 links = lib.mkOption {
