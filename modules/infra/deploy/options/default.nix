@@ -5,9 +5,9 @@ let
     infratypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
     types = libtypes // infratypes;
 
-    sopsFile = types.submodule {
+    secretFile = types.submodule {
         options = {
-            inherit (types) filename owner reload;
+            inherit (types) filename owner;
             mode = types.filemode;
         };
     };
@@ -91,7 +91,7 @@ let
             };
             secrets = lib.mkOption {
                 description = "All secrets files.";
-                type = types.listOf sopsFile;
+                type = types.listOf secretFile;
                 default = [];
             };
             sslCertificates = lib.mkOption {
@@ -124,7 +124,12 @@ let
                 type = types.listOf addr;
                 default = [];
             };
-            extraOption = lib.mkOption {
+            tls = lib.mkOption {
+                description = "If set to true, the HA proxy terminates TLS: a certificate will be generated automatically";
+                type = types.bool;
+                default = false;
+            };
+            extraConfig = lib.mkOption {
                 description = "Extra option passed to the proxy";
                 type = types.attrs;
                 default = {};
@@ -141,6 +146,11 @@ let
                 description = "List of backends, ordered by priority";
                 type = types.listOf addr;
                 default = [];
+            };
+            extraConfig = lib.mkOption {
+                description = "Extra option passed to the proxy";
+                type = types.attrs;
+                default = {};
             };
         };
     };

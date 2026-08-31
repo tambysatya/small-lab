@@ -3,93 +3,63 @@
 let
     utils = import ./lib.nix {inherit lib inputs;};
 
-    processEndpoints = 
-        endpoints@{tcp, udp,...}:
-        processTCP tcp ++ processUDP udp;
 
-    mkTLSProxy = 
-    backend: tcp@{hostname, port, proto, proxyExtraConfig,...}:
-    {
-
-        secrets = utils.mkSopsCert {inherit hostname; owner="haproxy"; reload=["haproxy.service"];};
-        sslCertificates = [{inherit hostname; owner="haproxy"; reload=["haproxy.service"];}];
-        proxy = {
-            frontend.${hostname} = {
-                listen = "0.0.0.0"; 
-                mode = "http";
-                port = 443;
-                extraConf = proxyExtraConfig;
+    mkHTTPProxy = 
+    env:
+    {hostname, port, tls, extraConfig,...}:
+    let cert = {inherit hostname; owner="haproxy"; reload=["haproxy.service"];};
+    in {
+        ${utils.envHost env} = {
+            proxy.http.${hostname} = {
+                inherit tls extraConfig;
+                backends = [
+                    {
+                        ip = if env.type == "container"
+                             then utils.envIP config env
+                             else "localhost";
+                        inherit port;
+                    }
+                ];
             };
-            backend.${hostname} = [{ 
-               ip=backend;
-               mode = "http";
-               port = port;
-            }];
+            secrets = if tls then utils.certToSecret cert else [];
+            sslCertificates = if tls then [cert] else [];
         };
     };
+
+    mkTCPProxy = 
+    env:
+    {hostname, port, extraConfig,...}:
+    if (env.type == "container") then
+        {
+            ${utils.envHost env}.proxy.tcp.${hostname} = {
+                frontend = {ip = "0.0.0.0"; inherit port;};
+                backends = [
+                    {ip = utils.envIP config env; inherit port;}
+                ];
+                inherit extraConfig;
+            };
+        }
+    else {};
+
+
 
 
 
     processUDP = throw "UDP not implemented yet";
-    processTCP = 
-        env:
-        tcp@{hostname, port, proto, needTLS, proxyExtraConfig}:
-        let
-          cfg = config.infra.deploy.systems;
-          envuid = utils.envUID env; 
-          ip = if env.type == "vm"
-                    then cfg.${envuid}.ip
-                    else cfg.${env.host.vm}.ip;
-          networkVM = if needTLS then {
-                ${utils.envUID env} = mkTLSProxy "localhost" tcp;
-          } else {};
-          containerVM = if needTLS 
-            then {
-               ${env.host.vm} = let containerip = config.infra.deploy.systems.${utils.envUID env}.ip;
-                                in mkTLSProxy containerip tcp;
-            }
-            else {
-               ${env.host.vm}.proxy = {
-                    frontend.${hostname} = {
-                        mode = if proto == "http" || proto == "https"
-                            then "http"
-                            else "tcp";
-                        port = port;
-                        extraConf = proxyExtraConfig;
-                        listen = "0.0.0.0";
-                    };
-                    backend.${hostname} = [{
-                        ip = utils.envIP config env;
-                        mode = if proto == "http" || proto == "https"
-                            then "http"
-                            else "tcp";
-                        port = port;
-                    }];
-               };
-            };
-
-        in
-           {
-
-                network.postgres = if proto == "postgres"
-                                   then [{inherit env port;} ]
-                                   else [];
-                network.s3 = if proto == "s3"
-                                   then [{inherit env port;}]
-                                   else [];
-                systems = if env.type == "vm" then networkVM else containerVM;
-           };        
     processService = 
         srv@{deployements, endpoints,...}:
         let allTCP =
                 lib.concatMap
-                    (env: map (processTCP env) endpoints.tcp)
+                    (env: map (mkTCPProxy env) endpoints.tcp)
                     deployements;
             allUDP =
                 lib.concatMap
                     (env: map (processUDP env) endpoints.udp)
                     deployements;
-        in utils.mergeAll allTCP; #(allTCP ++ allUDP);
+            allHTTP = lib.concatMap
+                        (env: map (mkHTTPProxy env) endpoints.http)
+                        deployements;
+        in utils.mergeAll (allTCP ++ allHTTP ++ allUDP);
 in {
-    config.infra.deploy = utils.mergeAll (lib.mapAttrsToList (srvname: srv: processService srv) config.infra.services);
+    config.infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList (srvname: srv: processService srv) config.infra.services);
 }
