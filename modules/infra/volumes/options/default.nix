@@ -27,7 +27,7 @@ let
                 description = "Environment requesting the directory. In containers, the directory will be bound within the container";
             };
             mode = types.dirmode;
-            inherit (types) owner;
+            inherit (types) owner reload;
 
        };   
     };

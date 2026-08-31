@@ -58,6 +58,8 @@ let
                 type = types.bool;
                 default = false;
             };
+            inherit (types) owner reload;
+            mode = types.dirmode;
 
         };
     };

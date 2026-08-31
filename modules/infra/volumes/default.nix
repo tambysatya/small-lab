@@ -47,7 +47,7 @@ let
                        then "${mount}/${serviceUID}/${lib.removePrefix "/" path}"
                        else mount;
                 bindTo = path; #should be ignored if path == bindTo TODO
-                inherit (persistent) owner mode;
+                inherit (persistent) owner mode reload;
                 inherit env;
              
             };

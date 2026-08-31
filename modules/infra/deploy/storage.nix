@@ -16,10 +16,28 @@ let
                 };
         in utils.mergeAll (lib.zipListsWith (f: x: f x) (lib.mapAttrsToList generateMapping disks) allLetters);
 
+    generateBinds = 
+        diruid:
+        {env, path, bindTo, mode, owner, reload,...}:
+        {
+            ${utils.envHost env}.storage = {
+                binds = if path != bindTo && env.type == "vm"
+                        then [{what=path; where = bindTo; inherit mode owner reload;}]
+                        else [];
+                containers = if env.type == "container"
+                             then {
+                                    ${utils.envUID env}.${bindTo} = {hostPath=path; inherit mode owner reload;};
+                                  }
+                             else {};
+            };
+        };
+
 
 
 in 
 {
     imports = [./options];
-    infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList generateMappings config.infra.volumes.perVM);
+    infra.deploy.systems = utils.mergeAll 
+                                (lib.mapAttrsToList generateMappings config.infra.volumes.perVM
+                                ++ lib.mapAttrsToList generateBinds config.infra.volumes.perDirectory);
 }
