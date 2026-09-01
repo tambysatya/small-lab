@@ -53,6 +53,10 @@ let
                 type = types.bool;
                 default = false;
             };
+            fs = lib.mkOption {
+                description = "Filesystem type";
+                type = types.fsType;
+            };
 
         };
     };

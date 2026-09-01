@@ -7,6 +7,8 @@ fsType = lib.types.enum ["xfs" "ext4" "ntfs"];
 in
 {
 
+inherit fsType;
+
 volume = types.submodule { # Persistent volumes
     options = {
         owner = lib.mkOption {

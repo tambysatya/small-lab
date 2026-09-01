@@ -54,6 +54,7 @@ let
             perVM.${utils.envHost env}.${disk.path} = {
                 inherit mount;
                 type = disk.type;
+                fs = disk.fs;
                 resources = [diruid];
                 inherit shared;
             };

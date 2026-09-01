@@ -30,6 +30,10 @@ let
                 description = "Where to mount the disk";
                 type = types.str;
             };
+            fs = lib.mkOption {
+                description = "Filesystem type";
+                type = types.fsType;
+            };
         };  
     };
 
