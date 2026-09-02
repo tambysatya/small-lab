@@ -1,6 +1,6 @@
 {lib, inputs,...}:
 let
-types = lib.types;
+types = lib.types // import ./files.nix {inherit lib;};
 fsType = lib.types.enum ["xfs" "ext4" "ntfs"];
 
 
@@ -74,6 +74,14 @@ disk = types.submodule {
             type = types.listOf types.str;
             default = ["nofail"];
         };
+    };
+};
+
+directory = types.submodule {
+    options = {
+        path = types.filename;
+        mode = types.dirmode;
+        inherit (types) owner reload;
     };
 };
 

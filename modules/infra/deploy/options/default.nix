@@ -85,6 +85,12 @@ let
                 type = types.attrsOf (types.attrsOf containerMount);
                 default = {};
             };
+            ensureDirs = lib.mkOption {
+                description = "Directory that need to be created if they don't exist";
+                type = types.listOf types.directory;
+                default = [];
+
+            };
         };
     };
 

@@ -29,6 +29,7 @@ let
                                     ${utils.envUID env}.${bindTo} = {hostPath=path; inherit mode owner reload;};
                                   }
                              else {};
+                ensureDirs = if path != bindTo then [{inherit path mode owner reload;}] else [];
             };
         };
 

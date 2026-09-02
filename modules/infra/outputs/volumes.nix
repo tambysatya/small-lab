@@ -34,11 +34,6 @@ let
                     type = "none";
                 };           
 
-            genInitDir = {
-                systemd.services."init-persistent-volumes" = {
-                    before = 
-                };
-            };
             fileSystems = utils.mergeAll (map genFS deploy.storage.mappings);
             env = deploy.env;
         in {
