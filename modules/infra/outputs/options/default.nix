@@ -35,6 +35,12 @@ let
                 type = types.listOf types.attrs;
                 default = [];
             };
+            config.systemd.services= lib.mkOption {
+                internal = true;
+                type = types.attrs;
+                default = [];
+            };
+
         };
     };
 

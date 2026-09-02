@@ -18,7 +18,7 @@ let
 
     generateBinds = 
         diruid:
-        {env, path, bindTo, mode, owner, reload,...}:
+        {env, path, bindTo, mode, owner, reload, mount,...}:
         {
             ${utils.envHost env}.storage = {
                 binds = if path != bindTo && env.type == "vm"
@@ -29,7 +29,7 @@ let
                                     ${utils.envUID env}.${bindTo} = {hostPath=path; inherit mode owner reload;};
                                   }
                              else {};
-                ensureDirs = if path != bindTo then [{inherit path mode owner reload;}] else [];
+                ensureDirs = if path != bindTo then [{inherit path mode owner reload mount;}] else [];
             };
         };
 

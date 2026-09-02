@@ -2,7 +2,7 @@
 let
     utils = import ./lib {inherit lib inputs;};
     initDir = 
-        path: mode: owner: 
+        {path, mode, owner,...}: 
         ''
             if [[ ! -d ${path} ]]; then
                 mkdir -p ${path}
@@ -10,14 +10,26 @@ let
                 chmod ${mode} ${path}
             fi
         '';
-    allContainerFile =
-        ctinfo: map (builtins.getAttr "hostPath") (builtins.attrValues ctinfo);
-    allContainersFile =
-        deploy: lib.concatMap allContainerFile (builtins.attrValues deploy.storage.containers);
+    
+    mkInitDirServices = ensuredirs:
+        let reload = lib.unique (map (builtins.getAttr "reload") ensuredirs);
+            script = lib.concatMapStringsSep "\n" initDir ensuredirs;
+            mntservices = lib.unique (map ({mount,...}: utils.pathToMountUnit mount) ensuredirs);
+        in {
+            "init-persistent-dirs" = {
+                description = "Ensures that bind-mounted and container-mounted directories exist";
+                before = reload;
+                requiredBy = reload;
+                after = mntservices;
+                requires = mntservices;
+
+                inherit script;
+            };
+        };
+
     generateFileSystem = 
         vmname: deploy:
-        let allBoundFiles = map (builtins.getAttr "hostPath") deploy.storage.binds;
-            allFiles = allContainerFile deploy ++ allBoundFiles;
+        let 
             genFS = {letter, mount,fs,...}: {
                             ${mount} = {
                                 fsType = fs;
@@ -40,6 +52,7 @@ let
             ${vmname}.config = {
                 fileSystems = utils.mergeAll (map genFS deploy.storage.mappings); 
                 systemd.mounts = map genMountService deploy.storage.binds;
+                systemd.services = mkInitDirServices deploy.storage.ensureDirs;
             };
         };
 in{

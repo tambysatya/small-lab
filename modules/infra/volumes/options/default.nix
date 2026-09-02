@@ -28,6 +28,10 @@ let
             };
             mode = types.dirmode;
             inherit (types) owner reload;
+            mount = lib.mkOption {
+                description = "Path to the mount point";
+                type = types.str;
+            };
 
        };   
     };

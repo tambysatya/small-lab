@@ -48,7 +48,7 @@ let
                        else mount;
                 bindTo = path; #should be ignored if path == bindTo TODO
                 inherit (persistent) owner mode reload;
-                inherit env;
+                inherit env mount;
              
             };
             perVM.${utils.envHost env}.${disk.path} = {

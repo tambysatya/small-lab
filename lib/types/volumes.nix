@@ -82,6 +82,10 @@ directory = types.submodule {
         path = types.filename;
         mode = types.dirmode;
         inherit (types) owner reload;
+        mount = lib.mkOption {
+            description = "Mountpoint where the directory is supposed to exists";
+            type = types.str;
+        };
     };
 };
 
