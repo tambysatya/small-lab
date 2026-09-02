@@ -49,6 +49,27 @@ let
     compileRegistry = args: (compileConfig args).registry;
 
     nixos-generator = args@{inventory, extraArgs ?{}}: 
+        let infra = compileInfra args; 
+            vmconfs = lib.filterAttrs 
+                            (name: value: infra.deploy.systems.${name}.env.type == "vm")
+                            infra.outputs;
+            configs = lib.mapAttrs
+                            (vmname: vmconf:
+                                lib.nixosSystem {
+                                    inherit system; 
+                                    specialArgs = {
+                                        inherit inputs;
+                                    };
+                                    modules = [
+
+                                        ];
+                                })
+                            vmconfs;
+        in configs;
+
+
+    /*
+    nixos-generator = args@{inventory, extraArgs ?{}}: 
         let conf = compileConfig args; 
             configs = lib.mapAttrs
                             (vmname: vmconf:
@@ -77,6 +98,7 @@ let
                             conf.infra.vms;
 
         in configs;
+        */
 
 
 
@@ -102,6 +124,7 @@ let
                 in {
                     packages.${system}.visualization = script;
                     apps.${system}.visualization = {
+                        description = "Visualize your infrastructure using graphviz";
                         type = "app";
                         program = lib.getExe script;
                     };
@@ -172,7 +195,7 @@ let
       */
 
       infra = compileInfra args;
-      registry = compileRegistry args;
+      #registry = compileRegistry args;
       #infra = gen-infra args;
       #registry = gen-registry args;
       terranix = compileTerranix args;
@@ -185,7 +208,7 @@ let
         in (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
                    
 
-      #nixosConfigurations = configs;
+      nixosConfigurations = nixos-generator args;
       #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);
 
 #        terranix.lib.terranixConfiguration {inherit system; 

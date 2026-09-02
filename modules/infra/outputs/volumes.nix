@@ -22,7 +22,7 @@ let
                 requiredBy = reload;
                 after = mntservices;
                 requires = mntservices;
-
+                serviceConfig.Type = "oneshot";
                 inherit script;
             };
         };
