@@ -41,6 +41,9 @@ let
 in
 
 {
-    imports = [./options ./step.nix];
+    imports = [./options
+               ./step.nix
+               ./volumes.nix
+              ];
     #infra.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.deploy.systems);
 }
