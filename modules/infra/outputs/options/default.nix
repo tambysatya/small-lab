@@ -2,9 +2,13 @@
 let
     types = lib.types;
 
+    utils = import "${inputs.self.outPath}/lib" {inherit inputs lib;};
+
+
     /* We need to manually reimplement some options, otherwise the conflict resolution won't allow
        us to define infra.outputs.<name>.config from multiple different places */
 
+/*
     config = types.submodule {
         options ={
             config.imports = lib.mkOption {
@@ -38,16 +42,32 @@ let
             config.systemd.services= lib.mkOption {
                 internal = true;
                 type = types.attrs;
-                default = [];
+                default = {};
             };
+            config.networking = lib.mkOption {
+                internal = true;
+                type = types.attrs;
+                default = {};
+            };
+
+
 
         };
     };
-
+*/
+    extraConfigType = lib.types.mkOptionType {
+        name = "extraConfig";
+        description = "An attrset merged recursively with utils.mergeAll";
+        check = lib.isAttrs;
+        merge = loc: defs:
+          utils.mergeAll (map (def: def.value) defs);
+    };
     
 in
 {
     options.infra.outputs = lib.mkOption {
         description = "Generated configurations";
-        type = types.attrsOf config;
+        #type = types.attrsOf config;
+        type = extraConfigType;
+        default = {};
     };}
