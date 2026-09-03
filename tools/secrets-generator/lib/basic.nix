@@ -15,9 +15,22 @@ let
                      then ".secrets/provisioner/${env.host}/${filename}"
                      else ".secrets/provisioner/${env.host.vm}/${env.host.container}/${filename}";
         in ''cp ${filepath} ${target}'';
+
+    ship = 
+        name:
+        let 
+            path = ".secrets/provisioner";
+        in ''
+            tar -cvf ${path}/${name}.tar ${path}/*
+            ${lib.getExe pkgs.gzip} ${path}/${name}.tar
+
+            TOKEN=$(${lib.getExe pkgs.openssl} rand -hex 64)
+            mv ${path}/${name}.tar.gz "${path}/$TOKEN.tar.gz"
+            echo "$TOKEN" > ".secrets/${name}.token"
+        '';
         
 
 in
 {
-    inherit give generateIdentity;
+    inherit give generateIdentity ship;
 }

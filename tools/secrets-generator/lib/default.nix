@@ -105,6 +105,8 @@ in {
             ${lib.concatMapStringsSep "\n" basic.generateIdentity infra.secrets.allEnvs}
             ${ssl.generateCA infra.topology.domain}
             ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
+            ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
+            ${lib.concatMapStringsSep "\n" basic.ship (builtins.attrNames infra.topology.vms)}
         '';
 
     inherit (install) mkInstaller;

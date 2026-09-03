@@ -74,7 +74,7 @@ let
             args:
                 let infra = compileInfra args;
                     script =(import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs infra;}).generator;
+                                {inherit inputs lib pkgs infra flakeRoot;}).generator;
                 in {
                     packages.${system}.gen-secrets = script;
                     apps.${system}.gen-secrets = {

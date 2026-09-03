@@ -14,6 +14,7 @@ let
                 pkgs.openldap
                 pkgs.sops
                 pkgs.step-cli
+                pkgs.gzip
             ];
             text = gen.processSecrets;
            };
