@@ -1,6 +1,6 @@
 {flakeRoot, lib, inputs, config, ...}:
 let
-    utils = import ./lib {inherit lib inputs flakeRoot;};
+    utils = import ../lib {inherit lib inputs flakeRoot;};
     topo = config.infra.topology;
     domain = topo.domain;
     iface = "enp1s0";
@@ -80,5 +80,5 @@ let
         };
 
 in {
-    infra.outputs = utils.mergeAll (lib.mapAttrsToList generateNetworking config.infra.deploy.systems);
+    infra.outputs.systems = utils.mergeAll (lib.mapAttrsToList generateNetworking config.infra.deploy.systems);
 }

@@ -1,20 +1,11 @@
-{lib,inputs, infra, registry, ...}:
+{flakeRoot, lib,inputs, config, ...}:
 
 let
-  utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
-  vols = import ./volumes.nix {inherit lib inputs infra registry;};
-
-  generateVMDomains = infra: utils.mergeAll
-    (lib.mapAttrsToList 
-      (vmName: vmConf: 
-        generateVMDomain vmName vmConf)
-      infra.vms);
-
+  utils = import "${flakeRoot}/lib" {inherit lib inputs;};
   generateVMDomain = vmname: vmconf:
-      let token = builtins.readFile "/tmp/${vmname}.token";
+      let token = builtins.readFile ".secrets/tokens/${vmname}.token";
           host = vmconf.host;
-      in utils.mergeAll [
-        (vols.compileVMVolumes vmname vmconf) #Disks generations
+      in 
         {
              resource.libvirt_domain."${vmname}" = {
                 provider = "libvirt.${host}";
@@ -23,7 +14,7 @@ let
                 sys_info = [
                   {smbios = {
                     system = {entry = [{name = "serial"; value = vmname;}];};
-                    chassis = {entry = [{name = "serial"; value = token;}];};
+                    #chassis = {entry = [{name = "serial"; value = token;}];}; #need to be added purely (maybe using an app)
                     };
                   }
                 ];
@@ -65,8 +56,7 @@ let
                   ];
                 };
               };
-          }
-      ];
+          };
 in {
-  inherit generateVMDomains;
+    infra.outputs.domains = utils.mergeAll (lib.mapAttrsToList generateVMDomain config.infra.topology.vms);
 }

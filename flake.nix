@@ -54,7 +54,7 @@ let
         let infra = compileInfra args; 
             vmconfs = lib.filterAttrs 
                             (name: value: infra.deploy.systems.${name}.env.type == "vm")
-                            infra.outputs;
+                            infra.outputs.systems;
             configs = lib.mapAttrs
                             (vmname: vmconf:
                                 lib.nixosSystem {

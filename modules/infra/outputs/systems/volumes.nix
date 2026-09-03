@@ -1,6 +1,6 @@
 {flakeRoot, lib, inputs, config, pkgs,...}:
 let
-    utils = import ./lib {inherit lib inputs flakeRoot;};
+    utils = import ../lib {inherit lib inputs flakeRoot;};
     initDir = 
         {path, mode, owner,...}: 
         ''
@@ -73,5 +73,5 @@ let
             };
         };
 in{
-    config.infra.outputs = utils.mergeAll (lib.mapAttrsToList generateFileSystem config.infra.deploy.systems);
+    config.infra.outputs.systems = utils.mergeAll (lib.mapAttrsToList generateFileSystem config.infra.deploy.systems);
 }

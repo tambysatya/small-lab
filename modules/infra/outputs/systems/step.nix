@@ -1,7 +1,7 @@
 {flakeRoot, lib, inputs, config, pkgs,path,...}:
 
 let
-    utils = import ./lib {inherit lib inputs;};
+    utils = import ../lib {inherit lib inputs;};
 
     processVM = 
         vmname: {sslCertificates,...}:{
@@ -20,5 +20,5 @@ let
 
 
 in {
-    infra.outputs = lib.mapAttrs processVM config.infra.deploy.systems;
+    infra.outputs.systems = lib.mapAttrs processVM config.infra.deploy.systems;
 }

@@ -65,9 +65,16 @@ let
     
 in
 {
-    options.infra.outputs = lib.mkOption {
-        description = "Generated configurations";
+    options.infra.outputs.systems = lib.mkOption {
+        description = "Generated NixOS configurations";
         #type = types.attrsOf config;
         type = extraConfigType;
         default = {};
-    };}
+    };
+    options.infra.outputs.domains= lib.mkOption {
+        description = "Generated Terranix configurations";
+        #type = types.attrsOf config;
+        type = extraConfigType;
+        default = {};
+    };
+}

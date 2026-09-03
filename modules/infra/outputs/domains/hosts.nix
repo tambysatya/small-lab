@@ -1,11 +1,10 @@
-{lib, inputs, ...}:
+{flakeRoot, lib, inputs, config, ...}:
 
 let
-  utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
-  generateHosts = infra: lib.foldl' utils.merge {} (lib.mapAttrsToList generateHost infra.hosts); # generates the list of pools/resources for each host
-  generateHost = hostName: host: { # generates a single host
+  utils = import "${flakeRoot}/lib" {inherit inputs lib;};
+  generateHost = hostName: hostconf: { # generates a single host
       provider.libvirt = [{
-        uri = "qemu+ssh://root@${host.ipAddress}/system"; 
+        uri = "qemu+ssh://root@${hostconf.ipAddress}/system"; 
         alias = hostName;
       }];
       resource.libvirt_pool = {
@@ -31,7 +30,9 @@ let
 
 
   };
-in {generateHosts = generateHosts;}
+in {
+    infra.outputs.domains = utils.mergeAll (lib.mapAttrsToList generateHost config.infra.topology.hosts);
+}
 
 
 
