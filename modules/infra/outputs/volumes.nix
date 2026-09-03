@@ -1,6 +1,6 @@
-{lib, inputs, config, pkgs,...}:
+{flakeRoot, lib, inputs, config, pkgs,...}:
 let
-    utils = import ./lib {inherit lib inputs;};
+    utils = import ./lib {inherit lib inputs flakeRoot;};
     initDir = 
         {path, mode, owner,...}: 
         ''

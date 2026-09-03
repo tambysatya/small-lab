@@ -1,7 +1,7 @@
-{lib, inputs,...}:
+{flakeRoot, lib, inputs,...}:
 
 let
-    utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
     installdir = "/mnt/var/lib/secrets";
 
     installFile = 

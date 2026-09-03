@@ -1,10 +1,10 @@
-{lib,inputs, pkgs, infra, ...}:
+{flakeRoot, lib,inputs, pkgs, infra, ...}:
 
 let
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
     ssl = import ./ssl.nix {inherit lib inputs pkgs;};
     basic = import ./basic.nix {inherit lib inputs pkgs;};
-    install = import ./installer.nix {inherit lib inputs;};
+    install = import ./installer.nix {inherit lib inputs flakeRoot;};
 
     plain = ".secrets/plain";
     dstPath = filename: "${plain}/${filename}";

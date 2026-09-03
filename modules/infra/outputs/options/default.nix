@@ -1,8 +1,8 @@
-{lib, inputs, pkgs, config,...}:
+{flakeRoot, lib, inputs, pkgs, config,...}:
 let
     types = lib.types;
 
-    utils = import "${inputs.self.outPath}/lib" {inherit inputs lib;};
+    utils = import "${flakeRoot}/lib" {inherit inputs lib;};
 
 
     /* We need to manually reimplement some options, otherwise the conflict resolution won't allow

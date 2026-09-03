@@ -1,7 +1,7 @@
 /* Exposed API to register modules informations */
-{lib,inputs, ...}:
+{flakeRoot, lib,inputs, ...}:
 let libtypes = lib.types;
-    infratypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
+    infratypes = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     types = libtypes // infratypes;
     service = types.submodule {
             options = {

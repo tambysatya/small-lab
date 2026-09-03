@@ -1,10 +1,10 @@
-{lib, inputs, config,...}:
+{flakeRoot, lib, inputs, config,...}:
 
 let
-    infratypes= import "${inputs.self.outPath}/lib/types" {inherit inputs lib;};
+    infratypes= import "${flakeRoot}/lib/types" {inherit inputs lib;};
     types = infratypes;
 
-    serviceModules = map (name: "${inputs.self.outPath}/services/${name}/register.nix") types.serviceNames;
+    serviceModules = map (name: "${flakeRoot}/services/${name}/register.nix") types.serviceNames;
 
 in {
   imports = [./topology # Inventory of the deployement (which service on which vm on which host)

@@ -1,7 +1,7 @@
-{lib, inputs, config, ...}:
+{flakeRoot, lib, inputs, config, ...}:
 
 let
-    utils = import ./lib.nix {inherit lib inputs;};
+    utils = import ./lib.nix {inherit lib inputs flakeRoot;};
     allLetters = lib.stringToCharacters "bcdefghijklmnopqrstuvwxyz"; #starting from b since /dev/vda is reserved for the root file system;
 
     

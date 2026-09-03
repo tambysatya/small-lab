@@ -1,7 +1,7 @@
-{lib, inputs, config,...}:
+{flakeRoot, lib, inputs, config,...}:
 
 let
-    utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
     computeHosts = 
         vmname: vmconf:

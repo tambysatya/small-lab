@@ -1,7 +1,7 @@
-{lib, inputs, config,...}:
+{flakeRoot, lib, inputs, config,...}:
 
 let
-    libtypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
+    libtypes = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     types = lib.types // libtypes;
 
     resourceUID = types.str;

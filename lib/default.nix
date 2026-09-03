@@ -1,7 +1,7 @@
 {lib, inputs, ...}:
 
 let 
-    types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
+    types = lib.types // (import ./lib/types {inherit lib inputs;});
 
     vars = import ./vars.nix {inherit lib inputs;};
 

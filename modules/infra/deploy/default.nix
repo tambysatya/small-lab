@@ -1,8 +1,8 @@
-{lib, inputs, pkgs, config,...}:
+{flakeRoot, lib, inputs, pkgs, config,...}:
 
 let
 
-    utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
+    utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
 
     processVM =

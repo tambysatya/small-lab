@@ -1,6 +1,6 @@
-{lib, inputs,...}:
+{flakeRoot, lib, inputs,...}:
 
-let utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
+let utils = import "${flakeRoot}/lib" {inherit lib inputs;};
 
 in utils // {
 

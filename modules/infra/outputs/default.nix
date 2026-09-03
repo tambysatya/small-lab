@@ -1,8 +1,8 @@
-{lib, inputs, pkgs, config, path, ...}:
+{flakeRoot, lib, inputs, pkgs, config, path, ...}:
 
 let
 
-    utils = import ../deploy/lib.nix {inherit inputs lib;};
+    utils = import ../deploy/lib.nix {inherit inputs lib flakeRoot;};
 
     mkUser = {name, uid}:
         {

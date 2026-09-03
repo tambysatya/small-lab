@@ -1,7 +1,7 @@
-{lib, inputs, config, ...}:
+{flakeRoot, lib, inputs, config, ...}:
 
 let
-    utils = import ./lib.nix {inherit lib inputs;};
+    utils = import ./lib.nix {inherit lib inputs flakeRoot;};
 
 
     mkHTTPProxy = 

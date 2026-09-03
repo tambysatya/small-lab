@@ -1,9 +1,9 @@
-{inputs, lib, ... }:
+{flakeRoot, inputs, lib, ... }:
 
 let
     libtypes = lib.types;
-    vmtypes = import ./vms.nix {inherit lib inputs;};
-    mytypes = import "${inputs.self.outPath}/lib/types" { inherit lib inputs;};
+    vmtypes = import ./vms.nix {inherit flakeRoot lib inputs;};
+    mytypes = import "${flakeRoot}/lib/types" { inherit lib inputs;};
     types = libtypes // vmtypes // mytypes;
      /* Options definitions */
     serviceIdentity = types.submodule {

@@ -1,8 +1,7 @@
-{lib, inputs, config,...}:
+{flakeRoot, lib, inputs, config,...}:
 let
 
-    infralib = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
-    mkInstaller = (import ./installer.nix {inherit lib inputs;}).mkInstaller;
+    infralib = import "${flakeRoot}/lib" {inherit lib inputs;};
     processSecret = 
         deployementsAttr: 
         secrettype:
@@ -62,6 +61,5 @@ in {
         allEnvs = allEnvs;
         inherit allSecrets;
         perVM = vmSecrets;
-        installers = lib.mapAttrs (key: vmsecrets: mkInstaller vmsecrets) vmSecrets;
     };
 }

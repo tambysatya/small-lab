@@ -1,6 +1,6 @@
-{lib, inputs, config, ...}:
+{flakeRoot, lib, inputs, config, ...}:
 
-let utils = import ./lib.nix {inherit lib inputs;};
+let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
 
     processStore = 
         store@{passwords, sslCertificates,...}:

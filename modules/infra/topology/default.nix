@@ -1,4 +1,4 @@
-{lib, inputs,...}:
+{flakeRoot, lib, inputs,...}:
 
 {
     imports = [./options];

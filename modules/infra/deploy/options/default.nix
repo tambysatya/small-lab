@@ -1,8 +1,8 @@
-{lib, inputs, pkgs, config, ...}:
+{flakeRoot, lib, inputs, pkgs, config, ...}:
 
 let
     libtypes = lib.types;
-    infratypes = import "${inputs.self.outPath}/lib/types" {inherit lib inputs;};
+    infratypes = import "${flakeRoot}/lib/types" {inherit lib inputs;};
     types = libtypes // infratypes;
 
     secretFile = types.submodule {

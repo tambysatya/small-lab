@@ -28,6 +28,8 @@ let
     utils = import ./lib {inherit lib inputs;};
     pkgs = nixpkgs.legacyPackages.${system};
 
+    flakeRoot = ./.;
+
     terranix-generator_fun = args:
         let conf = compileModule args;
         in (import ./lib/terranix {inherit lib inputs; inherit (conf) infra registry; }).generator;
@@ -35,7 +37,7 @@ let
     compileModule = # A SINGLE FUNCTION TO RULE THEM ALL
         {inventory, extraArgs ? {path = "${inputs.self.outPath}/.secrets";}}:
            (lib.evalModules {
-               specialArgs = {inherit inputs lib;} // extraArgs;
+               specialArgs = {inherit inputs lib flakeRoot;} // extraArgs;
                modules = [
                   "${nixpkgs}/nixos/modules/misc/assertions.nix"
                   ./modules/infra
@@ -78,6 +80,7 @@ let
                     apps.${system}.gen-secrets = {
                         type = "app";
                         program = lib.getExe script;
+                        meta.description = "Generates all the secrets";
                     };
                 };
 
@@ -85,20 +88,18 @@ let
             args:
             let infra = compileInfra args;
                 build = 
-                    name: script: 
-                    let prog = pkgs.writeShellApplication 
-                        {
-                            name = "${name}-install-secrets";
-                            text = script;
-                        };
+                    name: secrets: 
+                    let script =(import tools/secrets-generator/main.nix 
+                                {inherit inputs lib pkgs infra flakeRoot;}).mkInstaller secrets;
                     in {
-                        packages.${system}."${name}-install-secrets" = prog;
-                        apps.${system}."${name}-install-secrets" = {
+                        packages.${system}."install-secrets-${name}" = script;
+                        apps.${system}."install-secrets-${name}" = {
                             type = "app";
-                            program = lib.getExe prog;
+                            program = lib.getExe script;
+                            meta.description = "Install secrets for ${name}";
                         };
                     };
-            in utils.mergeAll (lib.mapAttrsToList build infra.secrets.installers);
+            in utils.mergeAll (lib.mapAttrsToList build infra.secrets.perVM);
                
 
 
@@ -111,7 +112,7 @@ let
                 in {
                     packages.${system}.visualization = script;
                     apps.${system}.visualization = {
-                        description = "Visualize your infrastructure using graphviz";
+                        meta.description = "Visualize your infrastructure using graphviz";
                         type = "app";
                         program = lib.getExe script;
                     };

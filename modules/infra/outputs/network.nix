@@ -1,6 +1,6 @@
-{lib, inputs, config, ...}:
+{flakeRoot, lib, inputs, config, ...}:
 let
-    utils = import ./lib {inherit lib inputs;};
+    utils = import ./lib {inherit lib inputs flakeRoot;};
     topo = config.infra.topology;
     domain = topo.domain;
     iface = "enp1s0";

@@ -35,7 +35,7 @@ let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra input
                 cd /tmp/
                 tar -xvf ${TOKEN}.tar.gz
                 cd $HOST
-                installer="$(nix eval --raw /etc/nixos#infra.secrets.installer.$HOST)"
+                nix run /etc/nixos#install-secrets-${HOST}
                 
 
 				mkdir -p /mnt/var/lib/step-ca/certs/

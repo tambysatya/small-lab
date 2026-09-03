@@ -1,7 +1,7 @@
-{lib, inputs, config, ...}:
+{flakeRoot, lib, inputs, config, ...}:
 
 let
-    utils = import ./lib.nix {inherit lib inputs;};
+    utils = import ./lib.nix {inherit lib inputs flakeRoot;};
     users = lib.concatMap (builtins.getAttr "users") (builtins.attrValues config.infra.services);
     assertUsers =
         let dupUser = utils.getFirstDupplicate (map (builtins.getAttr "name" (lib.unique users)));

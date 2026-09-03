@@ -1,4 +1,4 @@
-{lib, inputs, config, pkgs,path,...}:
+{flakeRoot, lib, inputs, config, pkgs,path,...}:
 
 let
     utils = import ./lib {inherit lib inputs;};
@@ -6,7 +6,7 @@ let
     processVM = 
         vmname: {sslCertificates,...}:{
             config = {
-                imports = ["${inputs.self.outPath}/services/step-renew"];
+                imports = ["${flakeRoot}/services/step-renew"];
                 services.step-renew = {
                     caURL = "ca.${config.infra.topology.domain}";
                     caFingerprint = "${path}/.secrets/git/fingerprint";
