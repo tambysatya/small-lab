@@ -14,12 +14,12 @@ let
                    builtins.attrValues config.infra.services.garage.deployements 
                 else [];
         in
-        lib.mkIf (deployements != [])
+        if (deployements != []) then
         {
             type=secrettype;
             content=secret;
             recipients = lib.unique (additionalRecipients ++ deployements);
-        };
+        } else {};
 
     serviceSecrets = 
         srvname: {deployements, links, store, endpoints, ...}: 
@@ -40,14 +40,22 @@ let
         ++  (if srvname == "step-ca"
                 then [(processSecret deployements "step-ca" null)] 
                 else []);
-    allSecrets= lib.mapAttrsToList serviceSecrets config.infra.services;
+    allSecrets= lib.unique (lib.concatLists (lib.mapAttrsToList serviceSecrets config.infra.services));
     allEnvs = lib.unique (lib.concatMap (srv: builtins.attrValues srv.deployements) (builtins.attrValues config.infra.services));
+
+    groupByVM =
+        secret@{recipients, ...}:
+        let process = env: {
+                ${infralib.envHost env} = [secret];
+            };
+        in infralib.mergeAll (map process recipients);
     
             
 in {
     imports = [./options];
     config.infra.secrets = { 
         allEnvs = allEnvs;
-        allSecrets = lib.unique (lib.concatLists allSecrets);
+        inherit allSecrets;
+        perVM = infralib.mergeAll (map groupByVM allSecrets);
     };
 }

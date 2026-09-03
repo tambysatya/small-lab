@@ -29,11 +29,10 @@ let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra input
 				#disko --mode destroy,format,mount --yes-wipe-all-disks --flake "/etc/nixos#$HOST"
 				set +x
 
-				echo "Downloading the age key"
+				echo "Downloading the secrets"
 				set -x
 				umask 077
-				mkdir -p /var/lib/sops-nix
-				mkdir -p /mnt/var/lib/sops-nix
+				mkdir -p /mnt/var/lib/secrets
 				curl --cacert /etc/nixos/${vars.git}/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$TOKEN" > /var/lib/sops-nix/key.txt
 				cp /var/lib/sops-nix/key.txt /mnt/var/lib/sops-nix
 				set +x
