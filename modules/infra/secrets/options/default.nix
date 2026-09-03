@@ -1,7 +1,7 @@
 {lib, inputs, ...}:
 let
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
-    secretType = types.enum ["plain" "password" "ldapssha" "sslCertificates" "postgres" "s3" "step-ca" "age"];
+    secretType = types.enum ["plain" "password" "ldapssha" "sslCertificates" "postgres" "s3" "step-ca"];
 
     secret = types.submodule {
         options = {
@@ -42,6 +42,11 @@ in
                 perVM = lib.mkOption {
                     description = "List of the secrets per virtual machine";
                     type = types.attrsOf (types.listOf secret);
+                    default = {};
+                };
+                installers = lib.mkOption {
+                    description = "Install scripts to copy secrets and sets the proper permissions.";
+                    type = types.attrsOf types.str;
                     default = {};
                 };
             };

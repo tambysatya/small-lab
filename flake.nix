@@ -68,46 +68,11 @@ let
         in configs;
 
 
-    /*
-    nixos-generator = args@{inventory, extraArgs ?{}}: 
-        let conf = compileConfig args; 
-            configs = lib.mapAttrs
-                            (vmname: vmconf:
-                                lib.nixosSystem {
-                                    inherit system; 
-                                    specialArgs = {
-                                        inherit inputs vmname vmconf;
-                                        inherit (conf) infra registry;
-                                    };
-                                    modules = [
-                                            ./profiles/vm.nix
-
-                                            ./modules/compiler
-
-                                            ./services/disko-vm.nix
-                                            ./services/step-renew
-                                            ./services/step-ca
-                                            ./services/openldap
-                                            ./services/keycloak
-                                            ./services/garage
-                                            ./services/postgres
-                                            ./services/nextcloud
-
-                                        ];
-                                })
-                            conf.infra.vms;
-
-        in configs;
-        */
-
-
-
         compileGenSecrets = 
             args:
-                let conf = compileConfig args;
+                let infra = compileInfra args;
                     script =(import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs;
-                                 inherit (conf) infra registry;}).main;
+                                {inherit inputs lib pkgs infra;}).generator;
                 in {
                     packages.${system}.gen-secrets = script;
                     apps.${system}.gen-secrets = {
@@ -115,6 +80,23 @@ let
                         program = lib.getExe script;
                     };
                 };
+/*
+        compileInstallSecrets = 
+            args:
+                let infra = compileInfra args;
+                    script =(import tools/secrets-generator/main.nix 
+                                {inherit inputs lib pkgs infra;}).mkInstaller;
+                    mkInstallSecVM = vmname: vmsecrets: 
+                    {
+                        packages.${system}."${vmname}_install-secrets" = "coucou"; #script vmsecrets;
+                        apps.${system}."${vmname}_install-secrets" = {
+                            type = "app";
+                            program = "coucou"; #lib.getExe (script vmsecrets);
+                        };
+                    };
+                in lib.mapAttrsToList mkInstallSecVM (builtins.attrNames infra.outputs);
+*/
+
         compileVisualization = 
             args:
                 let conf = compileConfig args;
@@ -174,48 +156,41 @@ let
         args = {inventory = ./examples/example.nix; extraArgs = {path=inputs.self.outPath;};};
 
 
-    in utils.mergeAll [(compileGenSecrets args)  (compileVisualization args)] // {
-      
+    in utils.mergeAll [
+        (compileGenSecrets args) 
+        (compileVisualization args)
+        {
+          
 
-      lib = {
-        inherit compileInfra compileRegistry compileTerranix compileGenSecrets compileNixos compileIso;
-        inherit gen-config-checks;
-      };
+          lib = {
+            inherit compileInfra compileRegistry compileTerranix compileGenSecrets compileNixos compileIso;
+            inherit gen-config-checks;
+          };
 
-      /*
-      packages.${system} = {
-         gen-secrets = gen-secrets.main;
-      };
-      apps.${system} = {
-            gen-secrets = {
-                type = "app";
-                program = lib.getExe gen-secrets.main;
-            };
-      };
-      */
 
-      infra = compileInfra args;
-      #registry = compileRegistry args;
-      #infra = gen-infra args;
-      #registry = gen-registry args;
-      terranix = compileTerranix args;
-      #nixosConfigurations = compileNixos args // {iso = compileIso args;};
+          infra = compileInfra args;
+          #registry = compileRegistry args;
+          #infra = gen-infra args;
+          #registry = gen-registry args;
+          terranix = compileTerranix args;
+          #nixosConfigurations = compileNixos args // {iso = compileIso args;};
 
-      #checks.${system} = gen-config-checks inputs;
+          #checks.${system} = gen-config-checks inputs;
 
-      packages.${system}.options-doc = 
-        let module = compileModule args;
-        in (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
-                   
+          packages.${system}.options-doc = 
+            let module = compileModule args;
+            in (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
+                       
 
-      nixosConfigurations = nixos-generator args;
-      #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);
+          nixosConfigurations = nixos-generator args;
+          #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);
 
-#        terranix.lib.terranixConfiguration {inherit system; 
-#                                            modules = [{config = (terranix-generator infra-config.infra);}];};
-#
-  };
+    #        terranix.lib.terranixConfiguration {inherit system; 
+    #                                            modules = [{config = (terranix-generator infra-config.infra);}];};
+    #
+      }
 
+      ];
 
 }
 

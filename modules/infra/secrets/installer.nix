@@ -1,0 +1,70 @@
+{lib, inputs,...}:
+
+let
+    utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
+    installdir = "/mnt/var/lib/secrets";
+
+    installFile = 
+        filename: owner: mode:
+        let
+            tgt = "${installdir}/${filename}"; 
+        in ''
+           cp ${filename} ${tgt}
+           chown ${owner} ${tgt}
+           chmod ${mode} ${tgt}
+        '';
+
+    installPassword = 
+        {filename, owner, mode,...}: installFile filename owner mode;
+
+    installLDAP = installPassword;
+    installSSL = 
+        {hostname,owner,...}:
+        let 
+            key = "${hostname}.key";
+            crt = "${hostname}.crt";
+        in ''
+            ${installFile crt owner "0400"} 
+            ${installFile key owner "0400"} 
+        '';
+
+    installDB = 
+        access@{database, owner,...}:
+        installFile (utils.db_key access) owner "0400";
+
+    installS3 = 
+        access@{bucket, owner,...}:
+        ''
+            ${installFile (utils.s3_key_id access) owner "0400"}
+            ${installFile (utils.s3_key access) owner "0400"}
+        '';
+
+    installStep = 
+        _:
+        ''
+            ${installFile "ca-password.key" "step-ca" "0400"}
+            ${installFile "intermediate_ca_key" "step-ca" "0400"}
+        '';
+
+    installSecret = 
+        {type,content,...}:
+        {
+            "plain" = _: "";
+            "password" = installPassword;
+            "ldapssha" = installLDAP;
+            "sslCertificates" = installSSL;
+            "postgres" = installDB;
+            "s3" = installS3;
+            "step-ca" = installStep;
+        }.${type} content;
+
+    mkInstaller = vmsecrets:
+    ''
+        mkdir -p ${installdir}
+        ${lib.concatMapStringsSep "\n" installSecret vmsecrets}
+    '';
+        
+in
+{
+    inherit mkInstaller;
+}

@@ -4,6 +4,7 @@ let
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
     ssl = import ./ssl.nix {inherit lib inputs pkgs;};
     basic = import ./basic.nix {inherit lib inputs pkgs;};
+    install = import ./installer.nix {inherit lib inputs;};
 
     plain = ".secrets/plain";
     dstPath = filename: "${plain}/${filename}";
@@ -105,4 +106,6 @@ in {
             ${ssl.generateCA infra.topology.domain}
             ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
         '';
+
+    inherit (install) mkInstaller;
 }

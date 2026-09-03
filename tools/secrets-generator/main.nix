@@ -1,4 +1,4 @@
-{inputs, lib, infra, registry, pkgs, ...}:
+{inputs, lib, infra, pkgs, ...}:
 
 let
 
@@ -6,7 +6,7 @@ let
 
     in
 {
-    main = pkgs.writeShellApplication {
+    generator = pkgs.writeShellApplication {
             name = "gen-secrets";
             runtimeInputs = [
                 pkgs.age
@@ -16,5 +16,9 @@ let
                 pkgs.step-cli
             ];
             text = gen.processSecrets;
+           };
+    mkInstaller = vmsecrets: pkgs.writeShellApplication {
+            name = "install-secrets";
+            text = gen.mkInstaller vmsecrets;
            };
 }

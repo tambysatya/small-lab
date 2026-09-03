@@ -2,6 +2,7 @@
 let
 
     infralib = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
+    mkInstaller = (import ./installer.nix {inherit lib inputs;}).mkInstaller;
     processSecret = 
         deployementsAttr: 
         secrettype:
@@ -26,7 +27,9 @@ let
         let
             plain = store.plain;
             passwords = store.passwords;
-            certs = store.sslCertificates ++ lib.filter (builtins.getAttr "tls") endpoints.http;
+
+            revproxies = lib.filter (builtins.getAttr "tls") endpoints.http;
+            certs = store.sslCertificates ++ map (l: l // {owner="haproxy";}) revproxies;
 
             postgres = links.postgres;
             ldap = links.ldap;
@@ -49,6 +52,8 @@ let
                 ${infralib.envHost env} = [secret];
             };
         in infralib.mergeAll (map process recipients);
+
+    vmSecrets = infralib.mergeAll (map groupByVM allSecrets);
     
             
 in {
@@ -56,6 +61,7 @@ in {
     config.infra.secrets = { 
         allEnvs = allEnvs;
         inherit allSecrets;
-        perVM = infralib.mergeAll (map groupByVM allSecrets);
+        perVM = vmSecrets;
+        installers = lib.mapAttrs (key: vmsecrets: mkInstaller vmsecrets) vmSecrets;
     };
 }
