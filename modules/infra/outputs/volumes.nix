@@ -30,12 +30,27 @@ let
     generateFileSystem = 
         vmname: deploy:
         let 
-            genFS = {letter, mount,fs,...}: {
+            /*
+            genFS = {letter, mount,fs,options,...}: {
                             ${mount} = {
                                 fsType = fs;
                                 device = "/dev/vd${letter}";
+                                inherit options;
                             };
                     };
+            */
+            genDisko = {letter, mount, options, fs,...}:{
+                "vd${letter}" ={
+                    device = "/dev/vd${letter}";
+                    type = "disk";
+                    content = {
+                        type = "filesystem";
+                        format = fs;
+                        mountpoint = mount;
+                        mountOptions = options;
+                    };
+                };
+            };
             genMountService  = 
                 bind@{reload, ...}: 
                 {
@@ -46,11 +61,13 @@ let
                     type = "none";
                 };           
 
-            fileSystems = utils.mergeAll (map genFS deploy.storage.mappings);
+            #fileSystems = utils.mergeAll (map genFS deploy.storage.mappings);
             env = deploy.env;
         in {
             ${vmname}.config = {
-                fileSystems = utils.mergeAll (map genFS deploy.storage.mappings); 
+                #fileSystems = fileSystems;
+                imports = [inputs.disko.nixosModules.disko];
+                disko.devices.disk = utils.mergeAll (map genDisko deploy.storage.mappings);
                 systemd.mounts = map genMountService deploy.storage.binds;
                 systemd.services = mkInitDirServices deploy.storage.ensureDirs;
             };

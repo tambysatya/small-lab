@@ -34,6 +34,13 @@ let
                 description = "Filesystem type";
                 type = types.fsType;
             };
+            options = lib.mkOption {
+                description = "Mounting options";
+                type = types.listOf types.str;
+                default = [];
+                apply = lib.unique;
+            };
+
         };  
     };
 

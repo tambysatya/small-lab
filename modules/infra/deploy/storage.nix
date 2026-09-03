@@ -10,9 +10,9 @@ let
         let
             generateMapping = 
                 host:
-                {mount,type, fs, ...}:
+                {mount,type, fs, options, ...}:
                 letter: {
-                    ${vmname}.storage.mappings = [{inherit host mount type letter fs;}];
+                    ${vmname}.storage.mappings = [{inherit host mount type letter fs options;}];
                 };
         in utils.mergeAll (lib.zipListsWith (f: x: f x) (lib.mapAttrsToList generateMapping disks) allLetters);
 

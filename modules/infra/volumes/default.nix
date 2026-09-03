@@ -40,6 +40,7 @@ let
             diruid = utils.directory_id serviceUID path;
             disk = locatePathInEnv env path shared;
             mount = mkMountPoint disk;
+
         in {
             perDirectory.${diruid} = {
                 phys = disk.path; 
@@ -57,6 +58,7 @@ let
                 fs = disk.fs;
                 resources = [diruid];
                 inherit shared;
+                inherit (disk) options;
             };
         };
 

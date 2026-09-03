@@ -32,7 +32,6 @@ let
                 description = "Path to the mount point";
                 type = types.str;
             };
-
        };   
     };
 
@@ -61,6 +60,14 @@ let
                 description = "Filesystem type";
                 type = types.fsType;
             };
+            options = lib.mkOption {
+                description = "Mouting options";
+                type = types.listOf types.str;
+                default = [];
+                apply = lib.unique;
+            };
+
+
 
         };
     };
