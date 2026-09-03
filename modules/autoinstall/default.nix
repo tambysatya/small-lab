@@ -32,10 +32,8 @@ let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra input
 				echo "Downloading the secrets"
 				set -x
 				curl --cacert /etc/nixos/${vars.git}/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$TOKEN.tar.gz" > /tmp/
-                cd /tmp/
-                tar -xvf ${TOKEN}.tar.gz
-                cd $HOST
-                nix run /etc/nixos#install-secrets-${HOST}
+                tar -xvf /tmp/${TOKEN}.tar.gz
+                nix run /etc/nixos#install-secrets-${HOST} /tmp/${TOKEN}
                 
 
 				mkdir -p /mnt/var/lib/step-ca/certs/

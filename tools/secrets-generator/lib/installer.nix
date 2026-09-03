@@ -9,7 +9,7 @@ let
         let
             tgt = "${installdir}/${filename}"; 
         in ''
-           cp ${filename} ${tgt}
+           cp "$1/${filename}" ${tgt}
            chown ${owner} ${tgt}
            chmod ${mode} ${tgt}
         '';
