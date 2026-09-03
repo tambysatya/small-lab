@@ -9,7 +9,7 @@ let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra input
 			runtimeInputs = with pkgs; [
 						git nix util-linux nixos-install-tools
 						inputs.disko.packages.${pkgs.system}.disko
-						curl
+						curl gzip
 					];
 			text = ''
 				#!${pkgs.bash}/bin/bash
@@ -31,11 +31,12 @@ let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra input
 
 				echo "Downloading the secrets"
 				set -x
-				umask 077
-				mkdir -p /mnt/var/lib/secrets
-				curl --cacert /etc/nixos/${vars.git}/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$TOKEN" > /var/lib/sops-nix/key.txt
-				cp /var/lib/sops-nix/key.txt /mnt/var/lib/sops-nix
-				set +x
+				curl --cacert /etc/nixos/${vars.git}/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$TOKEN.tar.gz" > /tmp/
+                cd /tmp/
+                tar -xvf ${TOKEN}.tar.gz
+                cd $HOST
+                installer="$(nix eval --raw /etc/nixos#infra.secrets.installer.$HOST)"
+                
 
 				mkdir -p /mnt/var/lib/step-ca/certs/
 				chmod 0755 /mnt/var/lib/step-ca/

@@ -80,22 +80,27 @@ let
                         program = lib.getExe script;
                     };
                 };
-/*
+
         compileInstallSecrets = 
             args:
-                let infra = compileInfra args;
-                    script =(import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs infra;}).mkInstaller;
-                    mkInstallSecVM = vmname: vmsecrets: 
-                    {
-                        packages.${system}."${vmname}_install-secrets" = "coucou"; #script vmsecrets;
-                        apps.${system}."${vmname}_install-secrets" = {
+            let infra = compileInfra args;
+                build = 
+                    name: script: 
+                    let prog = pkgs.writeShellApplication 
+                        {
+                            name = "${name}-install-secrets";
+                            text = script;
+                        };
+                    in {
+                        packages.${system}."${name}-install-secrets" = prog;
+                        apps.${system}."${name}-install-secrets" = {
                             type = "app";
-                            program = "coucou"; #lib.getExe (script vmsecrets);
+                            program = lib.getExe prog;
                         };
                     };
-                in lib.mapAttrsToList mkInstallSecVM (builtins.attrNames infra.outputs);
-*/
+            in utils.mergeAll (lib.mapAttrsToList build infra.secrets.installers);
+               
+
 
         compileVisualization = 
             args:
@@ -158,6 +163,7 @@ let
 
     in utils.mergeAll [
         (compileGenSecrets args) 
+        (compileInstallSecrets args)
         (compileVisualization args)
         {
           
