@@ -245,5 +245,11 @@ in
         description = "Intermediate representation of the entire network.";
         type = network;
     };
+    options.infra.deploy.users = lib.mkOption {
+        internal = true;
+        description = "UserID mappings";
+        type = types.listOf types.user;
+        default = [];
+    };
 
 }

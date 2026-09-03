@@ -25,6 +25,15 @@ let
                      };
         in utils.mergeAll ([vmconf]  ++ ctconfs);
 
+    users = lib.concatMap (builtins.getAttr "users") (builtins.attrValues config.infra.services);
+    assertUsers =
+        let dupUser = utils.getFirstDupplicate (map (builtins.getAttr "name" (lib.unique users)));
+        in {
+            assertion = dupUser == null;
+            message = "Dupplicate users: ${dupUser} has two different userIDs";
+        };
+
+
 in {
     imports = [./options
                ./store.nix
@@ -32,6 +41,7 @@ in {
                ./storage.nix
                ./endpoints.nix
                ];
-    #imports = [./options ./store.nix ./links.nix ./endpoints.nix];
+    assertions = [assertUsers];
     infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList processVM config.infra.topology.vms);
+    infra.deploy.users = lib.unique users;
 }
