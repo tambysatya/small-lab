@@ -111,6 +111,7 @@ in {
             # Generate the terranix configuration
             nix build ${path}#terranix -o terraform.tf.json.tmp
             cp terraform.tf.json.tmp terraform.tf.json
+            chmod u+w terraform.tf.json
             rm terraform.tf.json.tmp
 
             #Replace the tokens with their value
