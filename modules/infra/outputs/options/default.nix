@@ -77,4 +77,10 @@ in
         type = extraConfigType;
         default = {};
     };
+    options.infra.outputs.iso= lib.mkOption {
+        description = "Bootstrap ISO config";
+        #type = types.attrsOf config;
+        type = extraConfigType;
+        default = {};
+    };
 }

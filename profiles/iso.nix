@@ -1,4 +1,4 @@
-{inputs, config, lib, pkgs, path, ...}:
+{inputs, config, lib, pkgs, path, deploy, ...}:
 
 let
 in

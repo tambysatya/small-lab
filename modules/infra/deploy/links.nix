@@ -20,9 +20,12 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
     dbhosts = builtins.attrValues config.infra.services.postgres.deployements;
 
 
-    mkSharedSecret = env: hosts: secret:
+    mkSharedSecret =
+        env: hosts: 
+        hostsOwner:  # service user running on the host (e.g. postgres, garage...) 
+        secret:
         let uid = utils.envUID env;
-            mkHostSecret = host: {${utils.envUID host}.secrets=[secret];};
+            mkHostSecret = host: {${utils.envUID host}.secrets=[(secret // {owner=hostsOwner;})];}; #replace the owner of the secret transmitted to the hosts
             dsts = lib.filter (name: name != uid) hosts;
         in utils.mergeAll 
                 ([{${uid}.secrets = [secret]; }] ++ map mkHostSecret dsts);
@@ -50,20 +53,20 @@ let utils = import ./lib.nix {inherit lib inputs flakeRoot;};
     processLdap =
         env: ldap:
         let secret = {inherit (ldap) filename owner reload mode;};
-        in mkSharedSecret env ldaphosts secret // mkProxy env "ldap.${domain}" 636 ldaphosts "tcp"; 
+        in mkSharedSecret env ldaphosts "openldap" secret // mkProxy env "ldap.${domain}" 636 ldaphosts "tcp"; 
     processS3 = 
         env: access:
         let id = {filename=utils.s3_key_id access; inherit (access) owner; mode="0400";};
             key = {filename=utils.s3_key access; inherit (access) owner; mode="0400";};
 
         in utils.mergeAll 
-                [(mkSharedSecret env s3hosts id)
-                 (mkSharedSecret env s3hosts key)
+                [(mkSharedSecret env s3hosts "garage" id)
+                 (mkSharedSecret env s3hosts "garage" key)
                  (mkProxy env "s3.${domain}" 443 s3hosts "http")];
     processPostgres = 
         env: access: 
         let secret = {filename = utils.db_key access; inherit (access) owner; mode="0400";};
-        in mkSharedSecret env dbhosts secret //
+        in mkSharedSecret env dbhosts "postgres" secret //
            mkProxy env "postgres.${domain}" 5432 dbhosts "tcp";
 in {
     infra.deploy.systems = utils.mergeAll (lib.mapAttrsToList processService config.infra.services);

@@ -138,17 +138,32 @@ let
                         };
         compileNixos =
             args: nixos-generator args;
+        /*
         compileIso = 
             args:
+                let
+                    infra = compileInfra args;
+                in
                 lib.nixosSystem {
                     inherit system;
-                    specialArgs = {inherit inputs lib;} // args.extraArgs;
+                    specialArgs = {inherit inputs lib; inherit (infra) deploy;} // args.extraArgs;
                     modules = [
                         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
                         ./profiles/iso.nix
                     ];
                 };
-                
+         */       
+         compileIso = args:
+            let infra = compileInfra args;
+            in lib.nixosSystem {
+                inherit system;
+                specialArgs = {inherit inputs lib;} // args.extraArgs;
+                modules = [
+                        "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+                        ./modules/autoinstall
+                        infra.outputs.iso
+                ];
+            };
          gen-config-checks =
             flake-inputs:
                     builtins.mapAttrs
