@@ -4,12 +4,12 @@ let
     utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
     
     clean = str: lib.replaceStrings ["/" "-"] ["_" "_"] str;
-    ageUID = env: clean (utils.ageUID env);
+    ageUID = env: clean (utils.envUID env);
     generateServiceDeployement =
         srvname:
         srv@{endpoints, links, persistent, store, ...}:
         env:
-        let uid = ageUID env;
+        let uid = utils.envUID env;
             processTCP = 
                 tcp@{hostname, port,...}:
                 ''
@@ -19,7 +19,7 @@ let
                 '';
         in ''
             subgraph cluster_${uid} {
-                label = "${utils.ageUID env}";
+                label = "${utils.envUID env}";
                ${lib.concatMapStringsSep "\n" processTCP endpoints.tcp} 
             };
         '';
@@ -28,7 +28,7 @@ let
         endpoints:
         links@{s3, postgres,...}:
         env:
-        let uid = ageUID env;
+        let uid = utils.envUID env;
             s3hosts = infra.deploy.network.s3;
             pghosts = infra.deploy.network.postgres;
 
@@ -46,12 +46,12 @@ let
     generateServiceNodes = 
         srvname:
         srv@{deployements,...}:
-        lib.concatMapStringsSep "\n" (generateServiceDeployement srvname srv) deployements;
+        lib.concatStringsSep "\n" (lib.mapAttrsToList (uid: env: generateServiceDeployement srvname srv env) deployements);
 
     generateServiceEdges =
         srvname:
         srv@{deployements,...}:
-        lib.concatMapStringsSep "\n" (generateLinks srvname srv.endpoints srv.links) deployements;
+        lib.concatStringsSep "\n" (lib.mapAttrsToList (uid: env: generateLinks srvname srv.endpoints srv.links env) deployements);
 
 in {
     inherit generateServiceNodes generateServiceEdges;
