@@ -1,4 +1,4 @@
-{lib, inputs, pkgs,...}:
+{lib, inputs, pkgs, path,...}:
 let
     utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
     generateIdentity = 
@@ -32,9 +32,17 @@ let
             mv ${path}/${name}.tar.gz "${provisioner}/$TOKEN.tar.gz"
             echo "$TOKEN" > "${tokens}/${name}.token"
         '';
+
+    applyToken = 
+        terraformConfPath: name:
+        let tokenpath = ".secrets/tokens/${name}.token";
+        in ''
+            TOKEN=$(cat ${tokenpath})
+            sed -i "s/${lib.toUpper name}_TOKEN/$TOKEN/" ${terraformConfPath}
+        '';
         
 
 in
 {
-    inherit give generateIdentity ship;
+    inherit give generateIdentity ship applyToken;
 }

@@ -15,7 +15,7 @@ let
                   {smbios = {
                     system = {entry = [{name = "serial"; value = vmname;}];};
                     #chassis = {entry = [{name = "serial"; value = token;}];}; #need to be added purely (maybe using an app)
-                    chassis = {entry = [{name = "serial"; value = "${lib.toUpper host}_TOKEN";}];};  # TO REPLACE WITH SED
+                    chassis = {entry = [{name = "serial"; value = "${lib.toUpper vmname}_TOKEN";}];};  # TO REPLACE WITH SED
                     };
                   }
                 ];

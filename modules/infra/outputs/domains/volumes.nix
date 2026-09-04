@@ -102,7 +102,7 @@ let
 
 in {
     infra.outputs.domains = {
-        libvirt_volume = utils.mergeAll (lib.mapAttrsToList createVMVolumes vms);
-        libvirt_domain = utils.mergeAll (lib.mapAttrsToList attachVMVolumes vms);
+        resource.libvirt_volume = utils.mergeAll (lib.mapAttrsToList createVMVolumes vms);
+        resource.libvirt_domain = utils.mergeAll (lib.mapAttrsToList attachVMVolumes vms);
     };
 }

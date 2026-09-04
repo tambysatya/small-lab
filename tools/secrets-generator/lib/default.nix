@@ -1,9 +1,9 @@
-{flakeRoot, lib,inputs, pkgs, infra, ...}:
+{flakeRoot, lib,inputs, pkgs, infra, path, ...}:
 
 let
     types = lib.types // (import "${inputs.self.outPath}/lib/types" {inherit lib inputs;});
     ssl = import ./ssl.nix {inherit lib inputs pkgs;};
-    basic = import ./basic.nix {inherit lib inputs pkgs;};
+    basic = import ./basic.nix {inherit lib inputs pkgs path;};
     install = import ./installer.nix {inherit lib inputs flakeRoot;};
 
     plain = ".secrets/plain";
@@ -107,6 +107,14 @@ in {
             ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
             ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
             ${lib.concatMapStringsSep "\n" basic.ship (builtins.attrNames infra.topology.vms)}
+
+            # Generate the terranix configuration
+            nix build ${path}#terranix -o terraform.tf.json.tmp
+            cp terraform.tf.json.tmp terraform.tf.json
+            rm terraform.tf.json.tmp
+
+            #Replace the tokens with their value
+            ${lib.concatMapStringsSep "\n" (basic.applyToken "terraform.tf.json") (builtins.attrNames infra.topology.vms)}
         '';
 
     inherit (install) mkInstaller;

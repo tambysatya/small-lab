@@ -77,7 +77,7 @@ let
             args:
                 let infra = compileInfra args;
                     script =(import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs infra flakeRoot;}).generator;
+                                {inherit inputs lib pkgs infra flakeRoot; inherit (args.extraArgs) path;}).generator;
                 in {
                     packages.${system}.gen-secrets = script;
                     apps.${system}.gen-secrets = {
@@ -93,7 +93,7 @@ let
                 build = 
                     name: secrets: 
                     let script =(import tools/secrets-generator/main.nix 
-                                {inherit inputs lib pkgs infra flakeRoot;}).mkInstaller secrets;
+                                {inherit inputs lib pkgs infra flakeRoot; inherit (args.extraArgs) path;}).mkInstaller secrets;
                     in {
                         packages.${system}."install-secrets-${name}" = script;
                         apps.${system}."install-secrets-${name}" = {
@@ -132,9 +132,9 @@ let
                 in terranix.lib.terranixConfiguration {
                             inherit system;
                             modules = [
-                               ./modules/compiler/terranix 
+                               conf.infra.outputs.domains
                             ];
-                            extraArgs = {inherit inputs lib; inherit (conf) infra registry;};
+                            extraArgs = {inherit inputs lib;};
                         };
         compileNixos =
             args: nixos-generator args;
