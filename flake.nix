@@ -164,15 +164,22 @@ let
         args = {inventory = ./examples/example.nix; extraArgs = {path=inputs.self.outPath;};};
 
 
+        exposeApps = 
+            args:
+            utils.mergeAll [
+                (compileGenSecrets args) 
+                (compileInstallSecrets args)
+                (compileVisualization args)
+            ];
+
+
     in utils.mergeAll [
-        (compileGenSecrets args) 
-        (compileInstallSecrets args)
-        (compileVisualization args)
+        (exposeApps args)
         {
           
 
           lib = {
-            inherit compileInfra compileRegistry compileTerranix compileGenSecrets compileInstallSecrets compileNixos compileIso;
+            inherit compileInfra compileRegistry compileTerranix exposeApps compileNixos compileIso;
             inherit gen-config-checks;
           };
 
