@@ -25,7 +25,7 @@ let
         in ''
             mkdir -p ${provisioner}
             mkdir -p ${tokens}
-            tar -cvf ${path}/${name}.tar ${path}/*
+            tar -cvf ${path}/${name}.tar -C ${path}/${name} .
             ${lib.getExe pkgs.gzip} ${path}/${name}.tar
 
             TOKEN=$(${lib.getExe pkgs.openssl} rand -hex 64)
