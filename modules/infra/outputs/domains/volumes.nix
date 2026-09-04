@@ -63,7 +63,7 @@ let
             { 
                 source = {
                   volume = {
-                    volume = "\${libvirt_volume.${host}.name}";	
+                    volume = "\${libvirt_volume.${vmname}_${host}.name}";	
                     pool = "\${libvirt_pool.default_${hostname}.name}";
                   };
                     
