@@ -1,9 +1,9 @@
-{inputs, config, lib, pkgs, infra, ...}:
+{inputs, config, lib, pkgs, path, ...}:
 
 /* Reads product_serial to identify which flakes to be deployed */
 
 
-let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra inputs;};
+let 
     installer = pkgs.writeShellApplication {
 			name = "autoinstall";
 			runtimeInputs = with pkgs; [
@@ -31,9 +31,9 @@ let vars = import "${inputs.self.outPath}/lib/vars.nix" {inherit lib infra input
 
 				echo "Downloading the secrets"
 				set -x
-				curl --cacert /etc/nixos/${vars.git}/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$TOKEN.tar.gz" > /tmp/
-                tar -xvf /tmp/${TOKEN}.tar.gz
-                nix run /etc/nixos#install-secrets-${HOST} /tmp/${TOKEN}
+				curl --cacert /etc/nixos/.secrets/git/intermediate_ca.crt "https://vm-provisioning.local.lphi.umontpellier.fr:8080/$TOKEN.tar.gz" > /tmp/
+                tar -xvf /tmp/"$TOKEN".tar.gz
+                nix run /etc/nixos#install-secrets-"$HOST" /tmp/"$TOKEN"
                 
 
 				mkdir -p /mnt/var/lib/step-ca/certs/

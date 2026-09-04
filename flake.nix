@@ -137,10 +137,9 @@ let
             args: nixos-generator args;
         compileIso = 
             args:
-                let conf = compileConfig args;
-                in lib.nixosSystem {
+                lib.nixosSystem {
                     inherit system;
-                    specialArgs = {inherit inputs lib; inherit (conf) infra registry;};
+                    specialArgs = {inherit inputs lib;} // args.extraArgs;
                     modules = [
                         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
                         ./profiles/iso.nix
@@ -189,7 +188,10 @@ let
             in (pkgs.nixosOptionsDoc {options = module.options;}).optionsJSON;
                        
 
-          nixosConfigurations = nixos-generator args;
+          nixosConfigurations = utils.mergeAll [
+                                    (nixos-generator args)
+                                    ({iso = compileIso args;})
+                                ];
           #terranixConfigurations = terranix.lib.terranixConfiguration (terranix-generator ./example.nix);
 
     #        terranix.lib.terranixConfiguration {inherit system; 

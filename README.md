@@ -88,6 +88,11 @@ Migration:
 
 - Assume that there is only one shared volume per VM: therefore there is no need to declare it in the inventory, except maybe to change the default size
 
+- TODO: stores the TLS certificates rootca + interùmediate ca in the nix store to ensure a pure reproducible behavior
+- EXTEND: put the secrets in the store of the provisioning machine ?
+
+- TODO:  the iso should use the network config of the vm it tries to install (to avoid requiring a dhcp)
+
 
 CHECKS:
 - check that each disk is declared once
