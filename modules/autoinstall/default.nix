@@ -9,7 +9,7 @@ let
 			runtimeInputs = with pkgs; [
 						git nix util-linux nixos-install-tools
 						inputs.disko.packages.${pkgs.system}.disko
-						curl gzip
+						curl gzip gnutar
 					];
 			text = ''
 				#!${pkgs.bash}/bin/bash
