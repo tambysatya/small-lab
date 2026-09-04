@@ -172,7 +172,7 @@ let
           
 
           lib = {
-            inherit compileInfra compileRegistry compileTerranix compileGenSecrets compileNixos compileIso;
+            inherit compileInfra compileRegistry compileTerranix compileGenSecrets compileInstallSecrets compileNixos compileIso;
             inherit gen-config-checks;
           };
 
