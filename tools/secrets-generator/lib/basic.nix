@@ -20,7 +20,7 @@ let
         name:
         let 
             path = ".secrets/perVM";
-            provisioner = ".secrets/provisioner";
+            provisioner = ".secrets/provisioner/secrets";
             tokens = ".secrets/tokens";
         in ''
             mkdir -p ${provisioner}

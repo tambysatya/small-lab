@@ -105,8 +105,14 @@ in {
             ${lib.concatMapStringsSep "\n" basic.generateIdentity infra.secrets.allEnvs}
             ${ssl.generateCA infra.topology.domain}
             ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
-            ${lib.concatMapStringsSep "\n" processSecret infra.secrets.allSecrets}
             ${lib.concatMapStringsSep "\n" basic.ship (builtins.attrNames infra.topology.vms)}
+
+            # Generate a certificate for the provisioning server
+            ${ssl.gen_ssl_certificate infra.topology.provisionerAddr}
+            mkdir -p .secrets/provisioner/ssl
+            cp .secrets/plain/${infra.topology.provisionerAddr}.crt .secrets/provisioner/ssl
+            cp .secrets/plain/${infra.topology.provisionerAddr}.key .secrets/provisioner/ssl
+
 
             # Generate the terranix configuration
             nix build ${path}#terranix -o terraform.tf.json.tmp

@@ -27,6 +27,11 @@ let
 
     topology = types.submodule {
         options = {
+            provisionerAddr = lib.mkOption {
+                description = "Address of the provisioning server. It will be used to reach the secrets.";
+                type = types.str;
+                example = "provisioner.local";
+            };
             domain = lib.mkOption {
                 description = "Domain of the infrastructure";
                 type = types.str;
