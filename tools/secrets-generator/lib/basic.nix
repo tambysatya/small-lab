@@ -1,19 +1,21 @@
 {lib, inputs, pkgs, path,...}:
 let
     utils = import "${inputs.self.outPath}/lib" {inherit lib inputs;};
-    generateIdentity = 
-        env:
-        if env.type == "vm" then ''
-            mkdir -p ".secrets/perVM/${utils.envUID env}"
-        ''
-        else ''
-            mkdir -p ".secrets/perVM/${env.host.vm}/${env.host.container}"
-        '';
+    generateIdentity = env: ''mkdir -p .secrets/perVM/${utils.envHost env}'';
+#    generateIdentity = 
+#        env:
+#        if env.type == "vm" then ''
+#            mkdir -p ".secrets/perVM/${utils.envUID env}"
+#        ''
+#        else ''
+#            mkdir -p ".secrets/perVM/${env.host.vm}/${env.host.container}"
+#        '';
     give = filename: env: 
         let filepath = ".secrets/plain/${filename}";
-            target = if env.type == "vm"
-                     then ".secrets/perVM/${env.host}/${filename}"
-                     else ".secrets/perVM/${env.host.vm}/${env.host.container}/${filename}";
+           # target = if env.type == "vm"
+           #          then ".secrets/perVM/${env.host}/${filename}"
+           #          else ".secrets/perVM/${env.host.vm}/${env.host.container}/${filename}";
+            target = ".secrets/perVM/${utils.envHost env}/${filename}";
         in ''cp ${filepath} ${target}'';
 
     ship = 

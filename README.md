@@ -94,6 +94,12 @@ Migration:
 - TODO:  the iso should use the network config of the vm it tries to install (to avoid requiring a dhcp)
 
 
+### Prio
+
+- container mounts: pass directly the secret dir
+- proxy conf
+
+
 CHECKS:
 - check that each disk is declared once
 - each disk is mounted on ONE mountpoint
