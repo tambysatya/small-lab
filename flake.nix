@@ -64,7 +64,7 @@ let
                                     };
                                     modules = [
                                         inputs.disko.nixosModules.disko    
-                                        ./profiles/vm.nix
+                                        #./profiles/vm.nix
                                         ./services/step-renew
                                         vmconf
                                     ];
@@ -176,7 +176,7 @@ let
 
         
         #args = {file=./examples/example.nix; flake-path=inputs.self.outPath;};
-        args = {inventory = ./examples/example.nix; extraArgs = {path=inputs.self.outPath;};};
+        args = {inventory = ./examples/example.nix; extraArgs = {path=flakeRoot;};};
 
 
         exposeApps = 
