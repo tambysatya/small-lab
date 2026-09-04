@@ -20,6 +20,10 @@ let
         {
             config.users = utils.mergeAll (map mkUser deploy.users);
         };
+
+    mkRoot = vmname: _: {
+        config.users.users.root.openssh.authorizedKeys.keys = config.infra.topology.rootSSHPublicKeys;
+    };
 in
 
 {
@@ -28,5 +32,5 @@ in
                ./network.nix
               ];
     #infra.outputs = utils.mergeAll (lib.mapAttrsToList processSystem config.infra.deploy.systems);
-    infra.outputs.systems = lib.mapAttrs processUsers config.infra.deploy.systems;
+    infra.outputs.systems = lib.mapAttrs processUsers config.infra.deploy.systems // lib.mapAttrs mkRoot config.infra.deploy.systems;
 }

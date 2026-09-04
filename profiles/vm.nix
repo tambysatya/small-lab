@@ -1,8 +1,6 @@
-{lib, infra, registry, vmname, vmconf, inputs, config, ...}:
+{lib, inputs, config, ...}:
 
 let
-    path = "${inputs.self.outPath}";
-    utils = import "${inputs.self.outPath}/lib/utils.nix" {inherit lib;};
  
 
 in 
@@ -10,8 +8,7 @@ in
 
 imports = let path = inputs.self.outPath;
             in [
-                inputs.sops-nix.nixosModules.sops
-                "${path}/profiles/base.nix"
+                ./base.nix
 
              ];
 
@@ -19,7 +16,6 @@ imports = let path = inputs.self.outPath;
 config = {
      
               boot.kernelParams = ["console=tty1" "console=ttyS0,115200"];
-
               boot.loader.systemd-boot.enable = true;
               boot.loader.efi.canTouchEfiVariables = true;
               time.timeZone = "Europe/Paris";
@@ -27,24 +23,7 @@ config = {
 
 
 
-              networking = {
-                hostName = vmname;
-                interfaces.enp1s0 = {
-                  useDHCP = false;
-                  ipv4 = {
-                    addresses = [
-                      {address = vmconf.ipAddress; prefixLength = 24;}
-                    ];
-                    routes = [
-                      {address = "0.0.0.0"; via = infra.gateway; prefixLength = 0;}
-                    ];
-                  };
-                };
-                nameservers = infra.dns;
-              };
-
               services.openssh.enable = true;
-              users.users.root.openssh.authorizedKeys.keys = infra.rootSSHPublicKeys;
 
 
               networking.firewall = { #TODO

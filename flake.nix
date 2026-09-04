@@ -63,8 +63,11 @@ let
                                         inherit inputs;
                                     };
                                     modules = [
-
-                                        ];
+                                        inputs.disko.nixosModules.disko    
+                                        ./profiles/vm.nix
+                                        ./services/step-renew
+                                        vmconf
+                                    ];
                                 })
                             vmconfs;
         in configs;
